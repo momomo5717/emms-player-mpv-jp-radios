@@ -1,0 +1,80 @@
+* emms-player-mpv-jp-radio-settings
+** What is it ?
+
+   This provides EMMS ( [[https://www.gnu.org/software/emms/][The Emacs Multimedia System]] ) settings to play internet radio services.
+
+   + Radiko
+   + らじる★らじる
+   + 超!A&G+
+   + インターネットラジオステーション〈音泉〉
+   + 響 - HiBiKi Radio Station -
+
+** Requirements
+
+   + mpv v0.7 or later ( [[https://github.com/mpv-player/mpv]] )
+   + emms-palyer-simple-mpv ( [[https://github.com/momomo5717/emms-player-simple-mpv]] )
+   + wget (for Radiko)
+   + swftools (for Radiko)
+
+   Tested with GNU Emacs 24.4 (emacs-mac-app @5.4_0), EMMS 4.0, mpv @0.8.2_1.
+
+** Setup
+
+   + Radiko
+
+     #+BEGIN_SRC emacs-lisp
+       (add-to-list 'load-path "/path/to/emms-player-mpv-jp-radio-settings/radiko")
+       (require 'emms-player-mpv-radiko)
+       (require 'emms-stream-radiko)
+
+       (add-to-list 'emms-player-list 'emms-player-mpv-radiko)
+     #+END_SRC
+
+   + らじる★らじる
+
+     #+BEGIN_SRC emacs-lisp
+       (add-to-list 'load-path "/path/to/emms-player-mpv-jp-radio-settings/radiru")
+       (require 'emms-player-mpv-radiru)
+       (require 'emms-stream-radiru)
+
+       (add-to-list 'emms-player-list 'emms-player-mpv-radiru)
+     #+END_SRC
+
+   + 超!A&G+
+
+     #+BEGIN_SRC emacs-lisp
+       (add-to-list 'load-path "/path/to/emms-player-mpv-jp-radio-settings/agqr")
+       (require 'emms-player-mpv-agqr)
+       (require 'emms-stream-agqr)
+
+       (add-to-list 'emms-player-list 'emms-player-mpv-agqr)
+     #+END_SRC
+
+   + インターネットラジオステーション〈音泉〉
+
+     #+BEGIN_SRC emacs-lisp
+       (add-to-list 'load-path "/path/to/emms-player-mpv-jp-radio-settings/onsen")
+       (require 'emms-player-mpv-onsen)
+       (require 'emms-stream-onsen)
+
+       (add-to-list 'emms-player-list 'emms-player-mpv-onsen)
+     #+END_SRC
+
+   + 響 - HiBiKi Radio Station -
+
+     #+BEGIN_SRC emacs-lisp
+       (add-to-list 'load-path "/path/to/emms-player-mpv-jp-radio-settings/hibiki")
+       (require 'emms-player-mpv-hibiki)
+       (require 'emms-stream-hibiki)
+
+       (add-to-list 'emms-player-list 'emms-player-mpv-hibiki)
+     #+END_SRC
+
+** Usage
+
+   Each package provides a function to add streams to =*EMMS Streams*= buffer.
+
+   #+BEGIN_SRC
+   M-x emms-streams
+   M-x emms-stream-serviceName-add-bookmark
+   #+END_SRC
