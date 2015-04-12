@@ -27,7 +27,7 @@
 (require 'emms-player-simple-mpv)
 
 (define-emms-simple-player-mpv mpv-radiru '(streamlist)
-  "\\`radiru://" 
+  "\\`radiru://"
   "mpv" "--no-terminal" "--force-window=no" "--audio-display=no")
 
 (emms-player-simple-mpv-add-to-converters

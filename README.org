@@ -3,11 +3,11 @@
 
    This provides EMMS ( [[https://www.gnu.org/software/emms/][The Emacs Multimedia System]] ) settings to play internet radio services.
 
-   + Radiko
-   + らじる★らじる
-   + 超!A&G+
-   + インターネットラジオステーション〈音泉〉
-   + 響 - HiBiKi Radio Station -
+   + Radiko ( [[http://radiko.jp/]] )
+   + らじる★らじる ( [[http://www3.nhk.or.jp/netradio/]] )
+   + 超!A&G+ ( [[http://www.agqr.jp/]] )
+   + インターネットラジオステーション〈音泉〉( [[http://www.onsen.ag/]] )
+   + 響 - HiBiKi Radio Station - ( [[http://hibiki-radio.jp/]] )
 
 ** Requirements
 
@@ -16,16 +16,19 @@
    + wget (for Radiko)
    + swftools (for Radiko)
 
-   Tested with GNU Emacs 24.4 (emacs-mac-app @5.4_0), EMMS 4.0, mpv @0.8.2_1.
+   Tested with GNU Emacs 24.4 (emacs-mac-app @5.4_0), EMMS 4.0, mpv @0.8.3_0.
 
 ** Setup
+
+   #+BEGIN_SRC emacs-lisp
+     (add-to-list 'load-path "/path/to/emms-player-mpv-jp-radio-settings")
+   #+END_SRC
 
    + Radiko
 
      #+BEGIN_SRC emacs-lisp
-       (add-to-list 'load-path "/path/to/emms-player-mpv-jp-radio-settings/radiko")
        (require 'emms-player-mpv-radiko)
-       (require 'emms-stream-radiko)
+       (require 'emms-streams-radiko)
 
        (add-to-list 'emms-player-list 'emms-player-mpv-radiko)
      #+END_SRC
@@ -33,9 +36,8 @@
    + らじる★らじる
 
      #+BEGIN_SRC emacs-lisp
-       (add-to-list 'load-path "/path/to/emms-player-mpv-jp-radio-settings/radiru")
        (require 'emms-player-mpv-radiru)
-       (require 'emms-stream-radiru)
+       (require 'emms-streams-radiru)
 
        (add-to-list 'emms-player-list 'emms-player-mpv-radiru)
      #+END_SRC
@@ -43,9 +45,8 @@
    + 超!A&G+
 
      #+BEGIN_SRC emacs-lisp
-       (add-to-list 'load-path "/path/to/emms-player-mpv-jp-radio-settings/agqr")
        (require 'emms-player-mpv-agqr)
-       (require 'emms-stream-agqr)
+       (require 'emms-streams-agqr)
 
        (add-to-list 'emms-player-list 'emms-player-mpv-agqr)
      #+END_SRC
@@ -53,9 +54,8 @@
    + インターネットラジオステーション〈音泉〉
 
      #+BEGIN_SRC emacs-lisp
-       (add-to-list 'load-path "/path/to/emms-player-mpv-jp-radio-settings/onsen")
        (require 'emms-player-mpv-onsen)
-       (require 'emms-stream-onsen)
+       (require 'emms-streams-onsen)
 
        (add-to-list 'emms-player-list 'emms-player-mpv-onsen)
      #+END_SRC
@@ -63,16 +63,15 @@
    + 響 - HiBiKi Radio Station -
 
      #+BEGIN_SRC emacs-lisp
-       (add-to-list 'load-path "/path/to/emms-player-mpv-jp-radio-settings/hibiki")
        (require 'emms-player-mpv-hibiki)
-       (require 'emms-stream-hibiki)
+       (require 'emms-streams-hibiki)
 
        (add-to-list 'emms-player-list 'emms-player-mpv-hibiki)
      #+END_SRC
 
 ** Usage
 
-   Each package provides a function to add streams to =*EMMS Streams*= buffer.
+   Each emms streams package provides a function to add streams to =*EMMS Streams*= buffer.
 
    #+BEGIN_SRC
    M-x emms-streams
