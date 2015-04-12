@@ -1,4 +1,4 @@
-;;; emms-stream-onsen.el --- emms stream list for 音泉 -*- lexical-binding: t -*-
+;;; emms-streams-onsen.el --- emms stream list for 音泉 -*- lexical-binding: t -*-
 
 ;; Copyright (C) 2015 momomo5717
 
@@ -106,5 +106,5 @@ If save,run `emms-stream-save-bookmarks-file' after."
     (goto-char (point-min))
     (forward-line (1- line))))
 
-(provide 'emms-stream-onsen)
-;;; emms-stream-onsen.el ends here
+(provide 'emms-streams-onsen)
+;;; emms-streams-onsen.el ends here

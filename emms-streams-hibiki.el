@@ -1,4 +1,4 @@
-;;; emms-stream-hibiki.el --- emms stream list for HiBiKi Radio Station  -*- lexical-binding: t -*-
+;;; emms-streams-hibiki.el --- emms stream list for HiBiKi Radio Station  -*- lexical-binding: t -*-
 ;; Copyright (C) 2015 momomo5717
 
 ;; This program is free software; you can redistribute it and/or modify
@@ -95,5 +95,5 @@ If save,run `emms-stream-save-bookmarks-file' after."
     (goto-char (point-min))
     (forward-line (1- line))))
 
-(provide 'emms-stream-hibiki)
-;;; emms-stream-hibiki.el ends here
+(provide 'emms-streams-hibiki)
+;;; emms-streams-hibiki.el ends here

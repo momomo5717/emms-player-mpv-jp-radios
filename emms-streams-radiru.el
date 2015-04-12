@@ -1,4 +1,4 @@
-;;; emms-stream-radiru.el --- emms stream list for らじる★らじる -*- lexical-binding: t -*-
+;;; emms-streams-radiru.el --- emms stream list for らじる★らじる -*- lexical-binding: t -*-
 
 ;; Copyright (C) 2015 momomo5717
 
@@ -105,5 +105,5 @@ If save ,run `emms-stream-save-bookmarks-file' after."
     (goto-char (point-min))
     (forward-line (1- line))))
 
-(provide 'emms-stream-radiru)
-;;; emms-stream-radiru.el ends here
+(provide 'emms-streams-radiru)
+;;; emms-streams-radiru.el ends here

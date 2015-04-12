@@ -1,4 +1,4 @@
-;;; emms-stream-agqr.el --- emms stream list for 超!A&G+ -*- lexical-binding: t -*-
+;;; emms-streams-agqr.el --- emms stream list for 超!A&G+ -*- lexical-binding: t -*-
 
 ;; Copyright (C) 2015 momomo5717
 
@@ -50,5 +50,5 @@ If save,run `emms-stream-save-bookmarks-file' after."
     (goto-char (point-min))
     (forward-line (1- line))))
 
-(provide 'emms-stream-agqr)
-;;; emms-stream-agqr.el ends here
+(provide 'emms-streams-agqr)
+;;; emms-streams-agqr.el ends here

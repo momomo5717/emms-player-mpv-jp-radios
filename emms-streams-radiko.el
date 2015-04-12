@@ -1,4 +1,4 @@
-;;; emms-stream-radiko.el --- emms stream list for Radiko -*- lexical-binding: t -*-
+;;; emms-streams-radiko.el --- emms stream list for Radiko -*- lexical-binding: t -*-
 
 ;; Copyright (C) 2015 momomo5717
 
@@ -78,5 +78,5 @@ If save,run `emms-stream-save-bookmarks-file' after."
     (goto-char (point-min))
     (forward-line (1- line))))
 
-(provide 'emms-stream-radiko)
-;;; emms-stream-radiko.el ends here
+(provide 'emms-streams-radiko)
+;;; emms-streams-radiko.el ends here
