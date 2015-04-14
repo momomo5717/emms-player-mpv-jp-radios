@@ -150,6 +150,10 @@
       (if (stringp stream-url) stream-url
         (error "Failed to parce stream url")))))
 
+(defun emms-player-mpv-radiko--loading-message ()
+  "Loading message."
+  (message "Loading Radiko ... It takes a few seconds."))
+
 (defun emms-player-mpv-radiko--track-name-to-input-form (track-name)
   "Retrun \"rtmpe://...\" ffplay format from TRACK-NAME."
   (emms-player-mpv-radiko--wget-playerfile)
@@ -159,6 +163,7 @@
          (auth1 (emms-player-mpv-radiko--access-auth1-fms))
          (authtoken (emms-player-mpv-radiko--get-authtoken auth1)))
     (emms-player-mpv-radiko--access-auth2-fms auth1)
+    (later-do 'emms-player-mpv-radiko--loading-message)
     (format "%s swfUrl=%s swfVfy=1 conn=S:  conn=S:  conn=S:  conn=S:%s live=1"
             rtmpe-url emms-player-mpv-radiko--playerurl authtoken)))
 

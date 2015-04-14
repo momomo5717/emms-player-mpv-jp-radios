@@ -37,8 +37,13 @@
 (emms-player-set 'emms-player-mpv-radiru 'get-media-title
                  'emms-player-mpv-radiru--get-media-title)
 
+(defun emms-player-mpv-radiru--loading-message ()
+  "Loading message."
+  (message "Loding らじる★らじる ... It takes a few seconds."))
+
 (defun emms-player-mpv-radiru--track-name-to-input-form (track-name)
   "Retrun \"rtmp://fms-base2.mitene.ad.jp/radiru/aandg22 live=1\" from TRACK-NAME."
+  (later-do #'emms-player-mpv-radiru--loading-message)
   (replace-regexp-in-string "\\`radiru" "mms" track-name))
 
 (defun emms-player-mpv-radiru--get-media-title (track)

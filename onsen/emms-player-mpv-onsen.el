@@ -51,11 +51,16 @@
           (json-read))
       (kill-buffer buf))))
 
+(defun emms-player-mpv-onsen--loading-message ()
+  "Loading message."
+  (message "Loading 音泉 ... "))
+
 (defun emms-player-mpv-onsen--track-name-to-input-form (track-name)
   "Return url from TRACK-NAME."
   (let* ((json-obj (emms-player-mpv-onsen--track-name-to-json-obj track-name))
          (url (cdr (assq 'pc (cdr (assq 'moviePath json-obj))))))
     (unless url (error "Failed to fetch url"))
+    (later-do 'emms-player-mpv-onsen--loading-message)
     url))
 
 (defun emms-player-mpv-onsen--get-media-title (track)

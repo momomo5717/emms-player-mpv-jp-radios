@@ -37,8 +37,13 @@
 (emms-player-set 'emms-player-mpv-agqr 'get-media-title
                  'emms-player-mpv-agqr--get-media-title)
 
+(defun emms-player-mpv-agqr--loading-message ()
+  "Loading message."
+  (message "Loading 超!A&G+ ... It takes a few seconds."))
+
 (defun emms-player-mpv-agqr--track-name-to-input-form (track-name)
   "Retrun \"rtmp://fms-base2.mitene.ad.jp/agqr/aandg22 live=1\" from TRACK-NAME."
+  (later-do #'emms-player-mpv-agqr--loading-message)
   (format "%s live=1" (replace-regexp-in-string "\\`agqr" "rtmp" track-name)))
 
 (defun emms-player-mpv-agqr--get-media-title (track)

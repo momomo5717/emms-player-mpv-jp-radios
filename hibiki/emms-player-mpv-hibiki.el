@@ -50,11 +50,16 @@
     (unless mp4 (error "Failed to parce DATA XML"))
     (format "%s://%s/%s/%s" protocol domain dir mp4)))
 
+(defun emms-player-mpv-hibiki--loading-message ()
+  "Loading message."
+  (message "Loding 響 ... "))
+
 (defun emms-player-mpv-hibiki--track-name-to-input-form (track-name)
   "Return url from TRACK-NAME."
   (let ((buf (url-retrieve-synchronously
               (format "http://image.hibiki-radio.jp/uploads/data/channel/%s.xml"
                       (replace-regexp-in-string "hibiki://" "" track-name)))))
+    (later-do 'emms-player-mpv-hibiki--loading-message)
     (prog1
         (with-current-buffer buf
           (goto-char (point-min))
