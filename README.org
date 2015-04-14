@@ -1,13 +1,16 @@
-* emms-player-mpv-jp-radio-settings
+* emms-player-mpv-jp-radios
+
 ** What is it ?
 
-   This provides EMMS ( [[https://www.gnu.org/software/emms/][The Emacs Multimedia System]] ) settings to play internet radio services.
+   This provides EMMS ( [[https://www.gnu.org/software/emms/][The Emacs Multimedia System]] ) simple players for Japan radio stations.
 
    + Radiko ( [[http://radiko.jp/]] )
    + らじる★らじる ( [[http://www3.nhk.or.jp/netradio/]] )
    + 超!A&G+ ( [[http://www.agqr.jp/]] )
    + インターネットラジオステーション〈音泉〉( [[http://www.onsen.ag/]] )
    + 響 - HiBiKi Radio Station - ( [[http://hibiki-radio.jp/]] )
+
+   All programs are available only in Japan.     
 
 ** Requirements
 
@@ -21,53 +24,46 @@
 ** Setup
 
    #+BEGIN_SRC emacs-lisp
-     (add-to-list 'load-path "/path/to/emms-player-mpv-jp-radio-settings")
+     (add-to-list 'load-path "/path/to/emms-player-mpv-jp-radios")
    #+END_SRC
+   
+   + Adding all EMMS jp radio players
 
-   + Radiko
+     #+BEGIN_EXAMPLE emacs-lisp
+       (emms-player-mpv-jp-radios-add-all)     
+     #+END_EXAMPLE
 
-     #+BEGIN_SRC emacs-lisp
-       (require 'emms-player-mpv-radiko)
-       (require 'emms-streams-radiko)
+   + Adding separetely
 
-       (add-to-list 'emms-player-list 'emms-player-mpv-radiko)
-     #+END_SRC
+     + Radiko
 
-   + らじる★らじる
+       #+BEGIN_SRC emacs-lisp
+         (emms-player-mpv-jp-radios-add-radiko)       
+       #+END_SRC
 
-     #+BEGIN_SRC emacs-lisp
-       (require 'emms-player-mpv-radiru)
-       (require 'emms-streams-radiru)
+     + らじる★らじる
+       
+       #+BEGIN_SRC emacs-lisp
+         (emms-player-mpv-jp-radios-add-radiru)       
+       #+END_SRC
 
-       (add-to-list 'emms-player-list 'emms-player-mpv-radiru)
-     #+END_SRC
+     + 超!A&G+
 
-   + 超!A&G+
+       #+BEGIN_SRC emacs-lisp
+         (emms-player-mpv-jp-radios-add-agqr)       
+       #+END_SRC
 
-     #+BEGIN_SRC emacs-lisp
-       (require 'emms-player-mpv-agqr)
-       (require 'emms-streams-agqr)
+     + インターネットラジオステーション〈音泉〉
 
-       (add-to-list 'emms-player-list 'emms-player-mpv-agqr)
-     #+END_SRC
+       #+BEGIN_SRC emacs-lisp
+         (emms-player-mpv-jp-radios-add-onsen)       
+       #+END_SRC
 
-   + インターネットラジオステーション〈音泉〉
+     + 響 - HiBiKi Radio Station -
 
-     #+BEGIN_SRC emacs-lisp
-       (require 'emms-player-mpv-onsen)
-       (require 'emms-streams-onsen)
-
-       (add-to-list 'emms-player-list 'emms-player-mpv-onsen)
-     #+END_SRC
-
-   + 響 - HiBiKi Radio Station -
-
-     #+BEGIN_SRC emacs-lisp
-       (require 'emms-player-mpv-hibiki)
-       (require 'emms-streams-hibiki)
-
-       (add-to-list 'emms-player-list 'emms-player-mpv-hibiki)
-     #+END_SRC
+       #+BEGIN_SRC emacs-lisp
+         (emms-player-mpv-jp-radios-add-hibiki)       
+       #+END_SRC
 
 ** Usage
 
