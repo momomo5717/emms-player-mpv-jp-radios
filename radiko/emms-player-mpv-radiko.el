@@ -1,4 +1,4 @@
-;;; emms-player-mpv-radiko.el --- a emms simple mpv player for radiko via EMMS -*- lexical-binding: t -*-
+;;; emms-player-mpv-radiko.el --- a emms simple mpv player for radiko -*- lexical-binding: t -*-
 
 ;; Copyright (C) 2015 momomo5717
 

@@ -1,4 +1,4 @@
-;;; emms-player-mpv-radiru.el --- a emms simple mpv player for らじる★らじる via EMMS -*- lexical-binding: t -*-
+;;; emms-player-mpv-radiru.el --- a emms simple mpv player for らじる★らじる -*- lexical-binding: t -*-
 
 ;; Copyright (C) 2015 momomo5717
 

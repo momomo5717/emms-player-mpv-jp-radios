@@ -1,4 +1,4 @@
-;;; emms-player-mpv-hibiki.el --- a emms simple mpv player for HiBiKi Radio Station via EMMS -*- lexical-binding: t -*-
+;;; emms-player-mpv-hibiki.el --- a emms simple mpv player for HiBiKi Radio Station -*- lexical-binding: t -*-
 
 ;; Copyright (C) 2015 momomo5717
 
