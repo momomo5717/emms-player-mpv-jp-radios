@@ -159,7 +159,7 @@
          (auth1 (emms-player-mpv-radiko--access-auth1-fms))
          (authtoken (emms-player-mpv-radiko--get-authtoken auth1)))
     (emms-player-mpv-radiko--access-auth2-fms auth1)
-    (format "\"%s swfUrl=%s swfVfy=1 conn=S:  conn=S:  conn=S:  conn=S:%s live=1\""
+    (format "%s swfUrl=%s swfVfy=1 conn=S:  conn=S:  conn=S:  conn=S:%s live=1"
             rtmpe-url emms-player-mpv-radiko--playerurl authtoken)))
 
 (defun emms-player-mpv-radiko--get-media-title (track)

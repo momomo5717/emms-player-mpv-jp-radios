@@ -39,7 +39,7 @@
 
 (defun emms-player-mpv-agqr--track-name-to-input-form (track-name)
   "Retrun \"rtmp://fms-base2.mitene.ad.jp/agqr/aandg22 live=1\" from TRACK-NAME."
-  (format "\"%s live=1\"" (replace-regexp-in-string "\\`agqr" "rtmp" track-name)))
+  (format "%s live=1" (replace-regexp-in-string "\\`agqr" "rtmp" track-name)))
 
 (defun emms-player-mpv-agqr--get-media-title (track)
   (if (eq (emms-track-type track) 'streamlist)
