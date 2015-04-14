@@ -4,7 +4,7 @@
 
 ;; Keywords: emms, mpv, radio
 ;; Version: 0.1.0
-;; Package-Requires: ((emacs "24") (cl-lib "0.5") (emms-player-simple-mpv "0.1.0"))
+;; Package-Requires: ((emacs "24") (cl-lib "0.5") (emms-player-simple-mpv "0.1.2"))
 ;; URL: https://github.com/momomo5717/emms-player-mpv-jp-radios
 
 ;; This program is free software; you can redistribute it and/or modify
@@ -53,7 +53,7 @@
         `(defun ,(intern (concat "emms-player-mpv-jp-radios-add-" name)) ()
            ,(format "Add `%s' to `emms-player-list'." player)
            (let ((jp-radios-dir
-                  (cl-find "/emms-player-mpv-jp-radios\[/\]?$" load-path
+                  (cl-find "/emms-player-mpv-jp-radios/?$" load-path
                            :test #'string-match-p)))
              (unless jp-radios-dir
                (error "Not added to load-path : emms-player-mpv-jp-radios"))
