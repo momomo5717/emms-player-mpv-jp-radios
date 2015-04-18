@@ -25,6 +25,7 @@
 
    #+BEGIN_SRC emacs-lisp
      (add-to-list 'load-path "/path/to/emms-player-mpv-jp-radios")
+     (require 'emms-player-mpv-jp-radios)
    #+END_SRC
    
    + Adding all EMMS jp radio players
