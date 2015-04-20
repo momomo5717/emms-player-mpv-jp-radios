@@ -37,6 +37,10 @@
 (emms-player-set 'emms-player-mpv-radiko 'get-media-title
                  'emms-player-mpv-radiko--get-media-title)
 
+;; mpv cannot seek while playing Radiko.
+(emms-player-set emms-player-mpv-radiko 'seek nil)
+(emms-player-set emms-player-mpv-radiko 'seek-to nil)
+
 (defvar emms-player-mpv-radiko--playerurl
   "http://radiko.jp/player/swf/player_4.1.0.00.swf")
 
