@@ -3,8 +3,7 @@
 ;; Copyright (C) 2015 momomo5717
 
 ;; Keywords: emms, mpv, radio
-;; Version: 0.1.0
-;; Package-Requires: ((emacs "24") (cl-lib "0.5") (emms-player-simple-mpv "0.1.2"))
+;; Package-Requires: ((emacs "24") (cl-lib "0.5") (EMMS "4.0") (emms-player-simple-mpv "0.1.2"))
 ;; URL: https://github.com/momomo5717/emms-player-mpv-jp-radios
 
 ;; This program is free software; you can redistribute it and/or modify
@@ -31,46 +30,57 @@
 (require 'cl-lib)
 (require 'emms-player-simple-mpv)
 
-(defconst emms-player-mpv-jp-radios-version "0.1.0")
+(defvar emms-player-mpv-jp-radios-list
+  '("radiko"
+    "radiru"
+    "agqr"
+    "onsen"
+    "hibiki")
+  "List of radio servece names.")
 
-(eval-and-compile
- (defvar emms-player-mpv-jp-radios-list
-   '("radiko"
-     "radiru"
-     "agqr"
-     "onsen"
-     "hibiki")
-   "Alist of radio serveces' name."))
+(defun emms-player-mpv-jp-radios--add-service-1 (name)
+  "Helper function for emms-player-mpv-jp-radios-add-serviceNAME."
+  (let ((player  (intern (concat "emms-player-mpv-" name)))
+        (streams (intern (concat "emms-streams-"    name))))
+    (let ((jp-radios-dir
+           (cl-find "/emms-player-mpv-jp-radios/?$" load-path
+                    :test #'string-match-p)))
+      (unless jp-radios-dir
+        (error "Not added to load-path : emms-player-mpv-jp-radios"))
+      (unless (file-exists-p jp-radios-dir)
+        (error "Not found : %s" jp-radios-dir))
+      (add-to-list 'load-path
+                   (expand-file-name name jp-radios-dir))
+      (require player)
+      (require streams)
+      (add-to-list 'emms-player-list player))))
 
-(defmacro emms-player-mpv-jp-radios--define-add-fns ()
-  "Define emms-player-mpv-jp-radios-add-serviceName."
-  `(progn
-     ,@(cl-loop
-        for name in emms-player-mpv-jp-radios-list
-        for player =  (intern (concat "emms-player-mpv-" name))
-        for streams = (intern (concat "emms-streams-"    name))
-        collect
-        `(defun ,(intern (concat "emms-player-mpv-jp-radios-add-" name)) ()
-           ,(format "Add `%s' to `emms-player-list'." player)
-           (let ((jp-radios-dir
-                  (cl-find "/emms-player-mpv-jp-radios/?$" load-path
-                           :test #'string-match-p)))
-             (unless jp-radios-dir
-               (error "Not added to load-path : emms-player-mpv-jp-radios"))
-             (unless (file-exists-p jp-radios-dir)
-               (error "Not found : %s" jp-radios-dir))
-             (add-to-list 'load-path
-                          (expand-file-name ,name jp-radios-dir))
-             (require ',player)
-             (require ',streams)
-             (add-to-list 'emms-player-list ',player))))))
+;;;###autoload
+(defun emms-player-mpv-jp-radios-add-radiko ()
+  "Add `emms-mpv-radiko' to `emms-player-list'."
+  (emms-player-mpv-jp-radios--add-service-1 "radiko"))
+;;;###autoload
+(defun emms-player-mpv-jp-radios-add-radiru ()
+  "Add `emms-mpv-radiru' to `emms-player-list'."
+  (emms-player-mpv-jp-radios--add-service-1 "radiru"))
+;;;###autoload
+(defun emms-player-mpv-jp-radios-add-agqr ()
+  "Add `emms-mpv-agqr' to `emms-player-list'."
+  (emms-player-mpv-jp-radios--add-service-1 "agqr"))
+;;;###autoload
+(defun emms-player-mpv-jp-radios-add-onsen ()
+  "Add `emms-mpv-onsen' to `emms-player-list'."
+  (emms-player-mpv-jp-radios--add-service-1 "onsen"))
+;;;###autoload
+(defun emms-player-mpv-jp-radios-add-hibiki ()
+  "Add `emms-mpv-hibiki' to `emms-player-list'."
+  (emms-player-mpv-jp-radios--add-service-1 "hibiki"))
 
-(emms-player-mpv-jp-radios--define-add-fns)
-
+;;;###autoload
 (defun emms-player-mpv-jp-radios-add-all ()
   "Add all EMMS jp radio players to `emms-player-list'."
-  (cl-loop for name in emms-player-mpv-jp-radios-list do
-           (funcall (intern (concat "emms-player-mpv-jp-radios-add-" name)))))
+  (dolist (name emms-player-mpv-jp-radios-list)
+    (funcall (intern (concat "emms-player-mpv-jp-radios-add-" name)))))
 
 (provide 'emms-player-mpv-jp-radios)
 ;;; emms-player-mpv-jp-radios.el ends here
