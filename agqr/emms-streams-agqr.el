@@ -25,6 +25,7 @@
 
 ;;; Code:
 (require 'emms-streams)
+(require 'cl-lib)
 (require 'emms-player-mpv-agqr)
 
 (defvar emms-stream-agqr-streamlist

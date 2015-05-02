@@ -25,6 +25,8 @@
 
 ;;; Code:
 (require 'emms-player-simple-mpv)
+(require 'emms-streams)
+(require 'later-do)
 
 (define-emms-simple-player-mpv mpv-radiru '(streamlist)
   "\\`radiru://"
@@ -49,7 +51,7 @@
 (defun emms-player-mpv-radiru--get-media-title (track)
   (if (eq (emms-track-type track) 'streamlist)
       (emms-stream-name (emms-track-get track 'metadata))
-    (file-name-nondirectory (emms-track-name track-name))))
+    (file-name-nondirectory (emms-track-name track))))
 
 (provide 'emms-player-mpv-radiru)
 ;;; emms-player-mpv-radiru.el ends here

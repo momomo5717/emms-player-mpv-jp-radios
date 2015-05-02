@@ -26,7 +26,9 @@
 
 ;;; Code:
 (require 'emms-player-simple-mpv)
+(require 'emms-streams)
 (require 'json)
+(require 'later-do)
 
 (define-emms-simple-player-mpv mpv-onsen '(streamlist)
   "\\`onsen://"
@@ -68,7 +70,7 @@
   (if (eq (emms-track-type track) 'streamlist)
       (car (split-string
             (emms-stream-name(emms-track-get track 'metadata)) " : "))
-    (file-name-nondirectory (emms-track-name track-name))))
+    (file-name-nondirectory (emms-track-name track))))
 
 (provide 'emms-player-mpv-onsen)
 ;;; emms-player-mpv-onsen.el ends here

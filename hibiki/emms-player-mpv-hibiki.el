@@ -24,9 +24,12 @@
 ;; (add-to-list 'emms-player-list 'emms-player-mpv-hibiki)
 
 ;;; Code:
+(require 'cl-lib)
 (require 'emms-player-simple-mpv)
+(require 'emms-streams)
 (require 'xml)
 (require 'url)
+(require 'later-do)
 
 (define-emms-simple-player-mpv mpv-hibiki '(streamlist)
   "\\`hibiki://"
@@ -75,7 +78,7 @@
   "Return media title from TRACK."
   (if (eq (emms-track-type track) 'streamlist)
       (emms-stream-name(emms-track-get track 'metadata))
-    (file-name-nondirectory (emms-track-name track-name))))
+    (file-name-nondirectory (emms-track-name track))))
 
 (provide 'emms-player-mpv-hibiki)
 ;;; emms-player-mpv-hibiki.el ends here
