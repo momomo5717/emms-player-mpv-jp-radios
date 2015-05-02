@@ -14,12 +14,15 @@
 
 ** Requirements
 
+   + GNU Emacs 24 or later
+   + EMMS 4.0
    + mpv v0.7 or later ( [[https://github.com/mpv-player/mpv]] )
+     + ffmpeg (the build with –enable-librtmp (for Radiko))
    + emms-palyer-simple-mpv ( [[https://github.com/momomo5717/emms-player-simple-mpv]] )
    + wget (for Radiko)
    + swftools (for Radiko)
 
-   Tested with GNU Emacs 24.4 (emacs-mac-app @5.4_0), EMMS 4.0, mpv @0.8.3_0.
+   Tested with GNU Emacs 24.5 (emacs-mac-app @5.7_0), EMMS 4.0, mpv @0.8.3_2.
 
 ** Setup
 
@@ -41,6 +44,9 @@
        #+BEGIN_SRC emacs-lisp
          (emms-player-mpv-jp-radios-add-radiko)       
        #+END_SRC
+
+       =emms-player-mpv-radiko= cannot use =emms-seek= and =emms-seek-to=,
+       because mpv cannot seek while playing Radiko.
 
      + らじる★らじる
        
@@ -74,3 +80,11 @@
    M-x emms-streams
    M-x emms-stream-serviceName-add-bookmark
    #+END_SRC
+
+** References
+
+   + How to play Radiko
+     + rec_radiko.sh ( [[https://gist.github.com/saiten/875864]] )
+   + How to play 響 - HiBiKi Radio Station -
+     + [[http://vector.hateblo.jp/entry/2015/01/03/193556]]
+
