@@ -17,7 +17,7 @@
    + GNU Emacs 24 or later
    + EMMS 4.0
    + mpv v0.7 or later ( [[https://github.com/mpv-player/mpv]] )
-     + ffmpeg (the build with –enable-librtmp (for Radiko))
+     + ffmpeg ( the build with –enable-librtmp (for Radiko) )
    + emms-palyer-simple-mpv ( [[https://github.com/momomo5717/emms-player-simple-mpv]] )
    + wget (for Radiko)
    + swftools (for Radiko)
@@ -30,47 +30,29 @@
      (add-to-list 'load-path "/path/to/emms-player-mpv-jp-radios")
      (require 'emms-player-mpv-jp-radios)
    #+END_SRC
-   
+
    + Adding all EMMS jp radio players
 
      #+BEGIN_EXAMPLE emacs-lisp
-       (emms-player-mpv-jp-radios-add-all)     
+       (emms-player-mpv-jp-radios-add-all)
      #+END_EXAMPLE
 
-   + Adding separetely
+   + Adding separately
 
-     + Radiko
+     Function: =emms-player-mpv-jp-radios-add &rest names=
 
-       #+BEGIN_SRC emacs-lisp
-         (emms-player-mpv-jp-radios-add-radiko)       
-       #+END_SRC
+     =names= is as follows.
 
-       =emms-player-mpv-radiko= cannot use =emms-seek= and =emms-seek-to=,
-       because mpv cannot seek while playing Radiko.
+     + "radiko" (Radiko)
+     + "radiru" (らじる★らじる)
+     + "agqr"   (超!A&G+)
+     + "onsen"  (インターネットラジオステーション〈音泉〉)
+     + "hibiki" (響 - HiBiKi Radio Station -)
 
-     + らじる★らじる
-       
-       #+BEGIN_SRC emacs-lisp
-         (emms-player-mpv-jp-radios-add-radiru)       
-       #+END_SRC
-
-     + 超!A&G+
-
-       #+BEGIN_SRC emacs-lisp
-         (emms-player-mpv-jp-radios-add-agqr)       
-       #+END_SRC
-
-     + インターネットラジオステーション〈音泉〉
-
-       #+BEGIN_SRC emacs-lisp
-         (emms-player-mpv-jp-radios-add-onsen)       
-       #+END_SRC
-
-     + 響 - HiBiKi Radio Station -
-
-       #+BEGIN_SRC emacs-lisp
-         (emms-player-mpv-jp-radios-add-hibiki)       
-       #+END_SRC
+     #+BEGIN_SRC emacs-lisp
+       ;; An example of setting only for Radiko and らじる★らじる
+       (emms-player-mpv-jp-radios-add "radiko" "radiru")
+     #+END_SRC
 
 ** Usage
 
@@ -78,6 +60,7 @@
 
    #+BEGIN_SRC
    M-x emms-streams
+   ;; serviceName is radiko, radiru, etc.
    M-x emms-stream-serviceName-add-bookmark
    #+END_SRC
 
@@ -87,4 +70,3 @@
      + rec_radiko.sh ( [[https://gist.github.com/saiten/875864]] )
    + How to play 響 - HiBiKi Radio Station -
      + [[http://vector.hateblo.jp/entry/2015/01/03/193556]]
-
