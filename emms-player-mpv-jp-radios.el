@@ -3,7 +3,7 @@
 ;; Copyright (C) 2015 momomo5717
 
 ;; Keywords: emms, mpv, radio
-;; Package-Requires: ((emacs "24") (cl-lib "0.5") (EMMS "4.0") (emms-player-simple-mpv "0.1.6"))
+;; Package-Requires: ((emacs "24") (cl-lib "0.5") (emms "4.0") (emms-player-simple-mpv "0.1.6"))
 ;; URL: https://github.com/momomo5717/emms-player-mpv-jp-radios
 
 ;; This program is free software; you can redistribute it and/or modify
