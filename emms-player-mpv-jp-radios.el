@@ -41,20 +41,12 @@
 ;;;###autoload
 (defun emms-player-mpv-jp-radios-add (&rest names)
   "Add emms simple players for NAMES to `emms-player-list'."
-  (let ((jp-radios-dir
-         (cl-find "/emms-player-mpv-jp-radios/?$" load-path
-                  :test #'string-match-p)))
-    (unless jp-radios-dir
-      (error "Not added to load-path : emms-player-mpv-jp-radios"))
-    (unless (file-exists-p jp-radios-dir)
-      (error "Not found : %s" jp-radios-dir))
-    (dolist (name names)
-      (let ((player  (intern (concat "emms-player-mpv-" name)))
-            (streams (intern (concat "emms-streams-"    name))))
-        (add-to-list 'load-path (expand-file-name name jp-radios-dir))
-        (require player)
-        (require streams)
-        (add-to-list 'emms-player-list player)))))
+  (dolist (name names)
+    (let ((player  (intern (concat "emms-player-mpv-" name)))
+          (streams (intern (concat "emms-streams-"    name))))
+      (require player)
+      (require streams)
+      (add-to-list 'emms-player-list player))))
 
 ;;;###autoload
 (defun emms-player-mpv-jp-radios-add-all ()
