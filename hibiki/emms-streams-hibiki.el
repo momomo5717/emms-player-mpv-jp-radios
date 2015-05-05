@@ -32,12 +32,12 @@
 (defun emms-stream-hibiki--div-hbkPrograms-to-streamlist (div-hbkPrograms)
   "Return stream from DIV-HBKPROGRAMS."
   (let* ((a (car (xml-get-children div-hbkPrograms 'a)))
-        (AttachVideo
-         (split-string
-          (replace-regexp-in-string "AttachVideo\\|\(\\|'\\|\)" ""
-                                    (xml-get-attribute a 'onclick)) ","))
-        (name-comment (mapcar (lambda (div) (car (xml-node-children div)))
-                              (xml-get-children a 'div))))
+         (AttachVideo
+          (split-string
+           (replace-regexp-in-string "AttachVideo\\|\(\\|'\\|\)" ""
+                                     (xml-get-attribute a 'onclick)) ","))
+         (name-comment (mapcar (lambda (div) (car (xml-node-children div)))
+                               (xml-get-children a 'div))))
     (list (format "%s : %s" (cl-first name-comment) (cl-second name-comment))
           (format "hibiki://%s/%s" (cl-first AttachVideo) (cl-second AttachVideo))
           1 'streamlist)))
@@ -64,7 +64,7 @@
                (lambda (div) (equal (xml-get-attribute div 'class) "hbkProgram"))
                (xml-get-children div-hbkTabsMain 'div))))
         (prog1
-          (mapcar #'emms-stream-hibiki--div-hbkPrograms-to-streamlist div-hbkPrograms)
+            (mapcar #'emms-stream-hibiki--div-hbkPrograms-to-streamlist div-hbkPrograms)
           (kill-buffer buf))))))
 
 (defun emms-stream-hibiki-fetch-streamlist (&optional updatep)
