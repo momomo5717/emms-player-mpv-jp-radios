@@ -29,7 +29,10 @@
 ** Setup
 
    #+BEGIN_SRC emacs-lisp
-     (add-to-list 'load-path "/path/to/emms-player-mpv-jp-radios")
+     (let ((default-directory "/path/to/emms-player-mpv-jp-radios"))
+       (add-to-list 'load-path default-directory)
+       (normal-top-level-add-subdirs-to-load-path))
+
      (require 'emms-player-mpv-jp-radios)
    #+END_SRC
 
