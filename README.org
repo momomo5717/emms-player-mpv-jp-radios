@@ -1,3 +1,5 @@
+[[http://melpa.org/#/emms-player-mpv-jp-radios][file:http://melpa.org/packages/emms-player-mpv-jp-radios-badge.svg]]
+
 * emms-player-mpv-jp-radios
 
 ** What is it ?
