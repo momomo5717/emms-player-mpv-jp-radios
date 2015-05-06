@@ -26,6 +26,27 @@
 
 ;; All programs are available only in Japan.
 
+;; Setup:
+;;
+;; (let ((default-directory "/path/to/emms-player-mpv-jp-radios"))
+;;   (add-to-list 'load-path default-directory)
+;;   (normal-top-level-add-subdirs-to-load-path))
+;;
+;; (require 'emms-player-mpv-jp-radios)
+;;
+;; ;; Adding all emms jp radio players
+;; (emms-player-mpv-jp-radios-add-all)
+;;
+;; ;; Adding separetely
+;; ;; e.g. Only for Radiko and らじる★らじる
+;; (emms-player-mpv-jp-radios-add "radiko" "radiru")
+
+;; Usage:
+;;
+;; M-x emms-streams
+;; ;; serviceName is radiko, radiru, etc.
+;; M-x emms-stream-serviceName-add-bookmark
+
 ;;; Code:
 (require 'cl-lib)
 (require 'emms-player-simple-mpv)
