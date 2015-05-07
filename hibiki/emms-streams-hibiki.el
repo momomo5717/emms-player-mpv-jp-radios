@@ -29,6 +29,72 @@
 
 (defvar emms-stream-hibiki-streamlist-cache nil)
 
+(defvar emms-stream-hibiki--full-title-list nil)
+
+(cl-defun emms-stream-hibiki--xml-collect-node
+    (name html-ls &optional (pred #'identity) (getter #'identity))
+  "Collect node of NAME from HTML-LS.
+PRED and GETTER takes a node of NAME as an argument.
+PRED is a predicate function.
+Node returned by GETTER is collected."
+  (cl-labels ((collect-name-node (html-ls ls)
+                (cond
+                 ((atom html-ls) ls)
+                 ((consp (car html-ls))
+                  (collect-name-node (car html-ls)
+                                     (collect-name-node (cdr html-ls) ls)))
+
+                 ((and (eq (car html-ls) name)
+                       (funcall pred html-ls))
+                  (cons (funcall getter html-ls) ls))
+                 ((symbolp (car html-ls))
+                  (collect-name-node (xml-node-children html-ls) ls ))
+                 ((stringp (car html-ls))
+                  (collect-name-node (cdr html-ls) ls))
+                 (t ls))))
+    (collect-name-node html-ls nil)))
+
+(defun emms-stream-hibiki--fetch-full-title-list ()
+  "Return full-title-list."
+  (let ((buf (url-retrieve-synchronously
+              (format "http://hibiki-radio.jp/program"))))
+    (with-current-buffer buf
+      (goto-char (point-min))
+      (while (and (not (eobp)) (not (eolp))) (forward-line 1))
+      (unless (eobp) (forward-line 1))
+      (let ((body (car (xml-get-children
+                        (libxml-parse-html-region (point) (point-max)) 'body))))
+        (prog1
+            (emms-stream-hibiki--xml-collect-node
+             'div body
+             (lambda (node) (let ((class (xml-get-attribute-or-nil node 'class)))
+                          (and (stringp class)
+                               (or (string= class "hbkProgramTitle")
+                                   (string= class "hbkProgramTitleNew")))))
+             (lambda (node) (car (xml-node-children node))))
+          (kill-buffer buf))))))
+
+(defun emms-stream-hibiki--abbr-to-full-title (abbr-title)
+  "Return a full title of ABBR-TITLE in `emms-stream-hibiki--full-title-list'.
+Return ABBR-TITLE, if a full title isn't in the list.
+
+
+This causes a side effect of deleting a returned object in `emms-stream-hibiki--full-title-list'."
+  (if (null emms-stream-hibiki--full-title-list) abbr-title
+    (let ((pre-head emms-stream-hibiki--full-title-list)
+          (current-head (cdr emms-stream-hibiki--full-title-list))
+          full-title)
+      (when (string-match-p abbr-title (car pre-head))
+        (setq full-title (car pre-head))
+        (pop emms-stream-hibiki--full-title-list))
+      (while (and (null full-title) current-head)
+        (when (string-match-p abbr-title (car current-head))
+          (setq full-title (car current-head))
+          (setcdr pre-head (cdr current-head)))
+        (setq pre-head current-head)
+        (pop current-head))
+      (if full-title full-title abbr-title))))
+
 (defun emms-stream-hibiki--div-hbkPrograms-to-streamlist (div-hbkPrograms)
   "Return stream from DIV-HBKPROGRAMS."
   (let* ((a (car (xml-get-children div-hbkPrograms 'a)))
@@ -38,7 +104,10 @@
                                      (xml-get-attribute a 'onclick)) ","))
          (name-comment (mapcar (lambda (div) (car (xml-node-children div)))
                                (xml-get-children a 'div))))
-    (list (format "%s : %s" (cl-first name-comment) (cl-second name-comment))
+    (list (format "%s : %s"
+                  (emms-stream-hibiki--abbr-to-full-title
+                   (replace-regexp-in-string "…" ""(cl-first name-comment)))
+                  (cl-second name-comment))
           (format "hibiki://%s/%s" (cl-first AttachVideo) (cl-second AttachVideo))
           1 'streamlist)))
 
@@ -53,16 +122,12 @@
       (unless (eobp) (forward-line 1))
       (let* ((body (car (xml-get-children
                          (libxml-parse-html-region (point) (point-max)) 'body)))
-             (hbkTabsMain (format "hbkTabsMain%d" n))
-             (div-hbkTabsMain
-              (cl-find hbkTabsMain
-                       (xml-get-children (car (xml-get-children body 'div)) 'div)
-                       :key (lambda (div) (xml-get-attribute div 'id))
-                       :test #'equal))
              (div-hbkPrograms
-              (cl-delete-if-not
-               (lambda (div) (equal (xml-get-attribute div 'class) "hbkProgram"))
-               (xml-get-children div-hbkTabsMain 'div))))
+              (emms-stream-hibiki--xml-collect-node
+               'div body
+               (lambda (node) (let ((class (xml-get-attribute-or-nil node 'class)))
+                            (and (stringp class)
+                                 (string= class "hbkProgram")))))))
         (prog1
             (mapcar #'emms-stream-hibiki--div-hbkPrograms-to-streamlist div-hbkPrograms)
           (kill-buffer buf))))))
@@ -72,6 +137,8 @@
 If UPDATEP is no-nil, cache is updated."
   (if (and (null updatep) (consp emms-stream-hibiki-streamlist-cache))
       emms-stream-hibiki-streamlist-cache
+    (setq emms-stream-hibiki--full-title-list
+          (emms-stream-hibiki--fetch-full-title-list))
     (setq emms-stream-hibiki-streamlist-cache
           (cl-loop for i from 1 below 7
                    nconc (emms-stream-hibiki--fetch-streamlist-dow i)))))
