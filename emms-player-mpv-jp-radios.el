@@ -56,7 +56,8 @@
     "radiru"
     "agqr"
     "onsen"
-    "hibiki")
+    "hibiki"
+    "anitama")
   "List of radio servece names.")
 
 ;;;###autoload

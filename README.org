@@ -11,6 +11,7 @@
    + 超!A&G+ ( [[http://www.agqr.jp/]] )
    + インターネットラジオステーション〈音泉〉( [[http://www.onsen.ag/]] )
    + 響 - HiBiKi Radio Station - ( [[http://hibiki-radio.jp/]] )
+   + アニたまどっとコム インターネットラジオ ( [[http://www.weeeef.com/weeeefww1/Transition?command=top&group=G0000049]] )
 
    The above radio stations are available only in Japan.
 
@@ -21,7 +22,7 @@
    + mpv v0.7 or later ( [[https://github.com/mpv-player/mpv]] )
      + ffmpeg ( the build with –enable-librtmp (for Radiko) )
    + emms-palyer-simple-mpv ( [[https://github.com/momomo5717/emms-player-simple-mpv]] )
-   + wget (for Radiko)
+   + wget (for Radiko, アニたまどっとコム)
    + swftools (for Radiko)
 
    Tested with GNU Emacs 24.5 (emacs-mac-app @5.7_0), EMMS 4.0, mpv @0.8.3_2.
@@ -48,15 +49,16 @@
 
      =names= is as follows.
 
-     + "radiko" (Radiko)
-     + "radiru" (らじる★らじる)
-     + "agqr"   (超!A&G+)
-     + "onsen"  (インターネットラジオステーション〈音泉〉)
-     + "hibiki" (響 - HiBiKi Radio Station -)
+     + "radiko"  (Radiko)
+     + "radiru"  (らじる★らじる)
+     + "agqr"    (超!A&G+)
+     + "onsen"   (インターネットラジオステーション〈音泉〉)
+     + "hibiki"  (響 - HiBiKi Radio Station -)
+     + "anitama" (アニたまどっとコム)
 
      #+BEGIN_SRC emacs-lisp
-       ;; An example of setting only for Radiko and らじる★らじる
-       (emms-player-mpv-jp-radios-add "radiko" "radiru")
+     ;; An example of setting only for Radiko and らじる★らじる
+     (emms-player-mpv-jp-radios-add "radiko" "radiru")
      #+END_SRC
 
 ** Usage
