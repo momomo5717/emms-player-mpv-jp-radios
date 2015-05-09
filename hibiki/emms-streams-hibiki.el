@@ -32,27 +32,27 @@
 (defvar emms-stream-hibiki--full-title-list nil)
 
 (cl-defun emms-stream-hibiki--xml-collect-node
-    (name html-ls &optional (pred #'identity) (getter #'identity))
+    (name xml-ls &key (test #'identity) (getter #'identity))
   "Collect node of NAME from HTML-LS.
-PRED and GETTER takes a node of NAME as an argument.
-PRED is a predicate function.
-Node returned by GETTER is collected."
-  (cl-labels ((collect-name-node (html-ls ls)
+TEST and GETTER takes a node of NAME as an argument.
+TEST is a predicate function.
+Object returned by GETTER is collected."
+  (cl-labels ((collect-name-node (xml-ls ls)
                 (cond
-                 ((atom html-ls) ls)
-                 ((consp (car html-ls))
-                  (collect-name-node (car html-ls)
-                                     (collect-name-node (cdr html-ls) ls)))
+                 ((atom xml-ls) ls)
+                 ((consp (car xml-ls))
+                  (collect-name-node (car xml-ls)
+                                     (collect-name-node (cdr xml-ls) ls)))
 
-                 ((and (eq (car html-ls) name)
-                       (funcall pred html-ls))
-                  (cons (funcall getter html-ls) ls))
-                 ((symbolp (car html-ls))
-                  (collect-name-node (xml-node-children html-ls) ls ))
-                 ((stringp (car html-ls))
-                  (collect-name-node (cdr html-ls) ls))
+                 ((and (eq (car xml-ls) name)
+                       (funcall test xml-ls))
+                  (cons (funcall getter xml-ls) ls))
+                 ((symbolp (car xml-ls))
+                  (collect-name-node (xml-node-children xml-ls) ls ))
+                 ((stringp (car xml-ls))
+                  (collect-name-node (cdr xml-ls) ls))
                  (t ls))))
-    (collect-name-node html-ls nil)))
+    (collect-name-node xml-ls nil)))
 
 (defun emms-stream-hibiki--fetch-full-title-list ()
   "Return full-title-list."
@@ -67,10 +67,12 @@ Node returned by GETTER is collected."
         (prog1
             (emms-stream-hibiki--xml-collect-node
              'div body
+             :test
              (lambda (node) (let ((class (xml-get-attribute-or-nil node 'class)))
                           (and (stringp class)
                                (or (string= class "hbkProgramTitle")
                                    (string= class "hbkProgramTitleNew")))))
+             :getter
              (lambda (node) (car (xml-node-children node))))
           (kill-buffer buf))))))
 
@@ -125,6 +127,7 @@ This causes a side effect of deleting a returned object in `emms-stream-hibiki--
              (div-hbkPrograms
               (emms-stream-hibiki--xml-collect-node
                'div body
+               :test
                (lambda (node) (let ((class (xml-get-attribute-or-nil node 'class)))
                             (and (stringp class)
                                  (string= class "hbkProgram")))))))
