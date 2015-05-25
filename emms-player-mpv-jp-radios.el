@@ -23,8 +23,12 @@
 ;;; Commentary:
 
 ;; This provides EMMS players and stream lists of Japan radio stations.
-
-;; All programs are available only in Japan.
+;;
+;; * Available only in Japan due to access restriction
+;;     Radiko, らじる★らじる, 超！A&G+, 音泉, 響, アニたまどっとコム
+;;
+;; * Available anywhere
+;;     SaimaruRadio, ListenRadio
 
 ;; Setup:
 ;;
@@ -57,7 +61,9 @@
     "agqr"
     "onsen"
     "hibiki"
-    "anitama")
+    "anitama"
+    "saimaru"
+    "listen")
   "List of radio servece names.")
 
 ;;;###autoload

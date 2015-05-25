@@ -6,14 +6,19 @@
 
    This provides EMMS ( [[https://www.gnu.org/software/emms/][The Emacs Multimedia System]] ) simple players for Japan radio stations.
 
-   + Radiko ( [[http://radiko.jp/]] )
-   + らじる★らじる ( [[http://www3.nhk.or.jp/netradio/]] )
-   + 超!A&G+ ( [[http://www.agqr.jp/]] )
-   + インターネットラジオステーション〈音泉〉( [[http://www.onsen.ag/]] )
-   + 響 - HiBiKi Radio Station - ( [[http://hibiki-radio.jp/]] )
-   + アニたまどっとコム インターネットラジオ ( [[http://www.weeeef.com/weeeefww1/Transition?command=top&group=G0000049]] )
+   + Available only in Japan due to access restriction
 
-   The above radio stations are available only in Japan.
+     + [[http://radiko.jp/][Radiko]]
+     + [[http://www3.nhk.or.jp/netradio/][らじる★らじる]]
+     + [[http://www.agqr.jp/][超!A&G+]]
+     + [[http://www.onsen.ag/][インターネットラジオステーション〈音泉〉]]
+     + [[http://hibiki-radio.jp/][響 - HiBiKi Radio Station -]]
+     + [[http://www.weeeef.com/weeeefww1/Transition?command=top&group=G0000049][アニたまどっとコム インターネットラジオ]]
+
+   + Available anywhere
+
+     + [[http://www.simulradio.info/][SaimaruRadio]]
+     + [[http://listenradio.jp/][ListenRadio]]
 
 ** Requirements
 
@@ -55,6 +60,8 @@
      + "onsen"   (インターネットラジオステーション〈音泉〉)
      + "hibiki"  (響 - HiBiKi Radio Station -)
      + "anitama" (アニたまどっとコム)
+     + "saimaru" (SaimaruRadio)
+     + "listen"  (ListenRadio)
 
      #+BEGIN_SRC emacs-lisp
      ;; An example of setting only for Radiko and らじる★らじる
@@ -77,3 +84,5 @@
      + rec_radiko.sh ( [[https://gist.github.com/saiten/875864]] )
    + How to play 響 - HiBiKi Radio Station -
      + [[http://vector.hateblo.jp/entry/2015/01/03/193556]]
+   + How to play ListenRadio
+     + [[http://actinium.org/devel/tips/listenradio-recording]]
