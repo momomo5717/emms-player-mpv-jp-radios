@@ -1,4 +1,4 @@
-;;; emms-player-mpv-onsen.el --- a emms simple mpv player for 音泉 -*- lexical-binding: t -*-
+;;; emms-player-mpv-onsen.el --- An emms simple mpv player for 音泉 -*- lexical-binding: t -*-
 
 ;; Copyright (C) 2015 momomo5717
 

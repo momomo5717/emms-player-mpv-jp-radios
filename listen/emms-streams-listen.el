@@ -1,4 +1,4 @@
-;;; emms-streams-listen.el --- emms stream list for ListhenRadio -*- lexical-binding: t -*-
+;;; emms-streams-listen.el --- emms stream list for ListenRadio -*- lexical-binding: t -*-
 
 ;; Copyright (C) 2015 momomo5717
 
@@ -18,7 +18,7 @@
 
 ;;; Commentary:
 
-;; This provides emms stream list for ListhenRadio.
+;; This provides emms stream list for ListenRadio.
 
 ;;; Code:
 (require 'emms-streams)

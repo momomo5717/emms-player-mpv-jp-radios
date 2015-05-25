@@ -1,4 +1,4 @@
-;;; emms-player-mpv-listen.el --- An emms simple mpv player for ListhenRadio -*- lexical-binding: t -*-
+;;; emms-player-mpv-listen.el --- An emms simple mpv player for ListenRadio -*- lexical-binding: t -*-
 
 ;; Copyright (C) 2015 momomo5717
 
@@ -42,7 +42,7 @@
 
 (defun emms-player-mpv-listen--loading-message ()
   "Loading message."
-  (message "Loading ListhenRadio ... "))
+  (message "Loading ListenRadio ... "))
 
 (defun emms-player-mpv-listen--track-name-to-input-form (track-name)
   "Return url from TRACK-NAME."
