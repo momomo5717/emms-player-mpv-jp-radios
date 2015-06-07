@@ -1,4 +1,4 @@
-;;; emms-player-mpv-agqr.el --- a emms simple mpv player for 超!A&G+ -*- lexical-binding: t -*-
+;;; emms-player-mpv-agqr.el --- An emms simple mpv player for 超!A&G+ -*- lexical-binding: t -*-
 
 ;; Copyright (C) 2015 momomo5717
 
