@@ -50,8 +50,8 @@
 (emms-player-set emms-player-mpv-anitama 'seek nil)
 (emms-player-set emms-player-mpv-anitama 'seek-to nil)
 
-(emms-player-set 'emms-player-mpv-anitama 'start
-                 'emms-player-mpv-anitama-start-wget-pipe-mpv)
+(emms-player-set 'emms-player-mpv-anitama 'mpv-start-process-function
+                 'emms-player-mpv-anitama--start-process)
 
 (defun emms-player-mpv-anitama--access-weeeef ()
   "Access www.weeeef.com to get cookes."
@@ -137,10 +137,8 @@ If FORCEP is non-nil, force to access and write."
       (emms-stream-name (emms-track-get track 'metadata))
     (file-name-nondirectory (emms-track-name track))))
 
-(defun emms-player-mpv-anitama--shell-command-format
-    (nodeId input-socket media-title params)
-  "Start process to play NODEID with INPUT-SOCKET.
-MEDIA-TITLE, PARAMS are mpv parameters."
+(defun emms-player-mpv-anitama--shell-command-format (params nodeId)
+  "Shell command  for PARAMS, NODEID."
   (emms-player-mpv-anitama--write-unless-cookies)
   (concat
    "wget "
@@ -152,51 +150,14 @@ MEDIA-TITLE, PARAMS are mpv parameters."
           "http://www.weeeef.com/weeeefww1/OriginalGet")
     " ")
    " | mpv "
-   (mapconcat
-    #'shell-quote-argument
-    `(,input-socket ,media-title ,@params "-")
-    " ")))
+   (mapconcat #'shell-quote-argument `(,@params "-") " ")))
 
-(defun emms-player-mpv-anitama-start-wget-pipe-mpv (track)
-  "Start mpv from TRACK via wget."
-  (emms-player-simple-mpv--tq-close)
-  (let* ((player emms-player-mpv-anitama)
-         (params emms-player-mpv-anitama-parameters)
-         (input-socket
-          (format "--input-unix-socket=%s" (emms-player-simple-mpv--socket)))
-         (nodeId
-          (emms-player-simple-mpv--track-to-input-form
-           track (emms-player-get player 'mpv-track-name-converters)))
-         (get-media-title (emms-player-get player 'get-media-title))
-         (media-title
-          (if get-media-title
-              (format "--media-title=%s"
-                      (funcall get-media-title track))
-            ""))
-         (process
-          (start-process-shell-command
-           emms-player-simple-process-name
-           nil
-           (emms-player-mpv-anitama--shell-command-format
-            nodeId input-socket media-title params))))
-    (set-process-sentinel process 'emms-player-simple-sentinel)
-    (emms-player-started player)
-    (setq emms-player-paused-p t)
-    (run-hooks 'emms-player-paused-hook)
-    (while (and (eq (process-status process) 'run)
-                (not (file-exists-p emms-player-simple-mpv--socket)))
-      (sit-for 0.05))
-    (condition-case err
-        (setq emms-player-simple-mpv--tq (emms-player-simple-mpv--tq-create))
-      (error (message "%s" (error-message-string err))
-             (when emms-player-simple-mpv-use-start-tq-error-message-p
-               (later-do 'emms-player-simple-mpv--start-tq-error-message
-                         params nodeId))))
-    (when (tq-process emms-player-simple-mpv--tq)
-      (set-process-filter (tq-process emms-player-simple-mpv--tq)
-                          'emms-player-simple-mpv--socket-filter)
-      (when emms-player-simple-mpv-use-volume-change-function-p
-        (emms-player-simple-mpv--set-volume-change-function)))))
+(defun emms-player-mpv-anitama--start-process (_cmdname params nodeId _track)
+  "Function for mpv-start-process-function."
+  (start-process-shell-command
+   emms-player-simple-process-name
+   nil
+   (emms-player-mpv-anitama--shell-command-format params nodeId)))
 
 (provide 'emms-player-mpv-anitama)
 ;;; emms-player-mpv-anitama.el ends here
