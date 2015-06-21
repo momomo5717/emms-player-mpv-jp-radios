@@ -85,10 +85,15 @@
 
 (defun emms-player-mpv-anitama--write-unless-cookies (&optional forcep)
   "Access and write if `url-cookie-storage' doesn't have cookies.
-Access and write if `emms-player-mpv-anitama--cookie-file' doesn't exist.
+Access and write if `emms-player-mpv-anitama--cookie-file' doesn't exist
+or the time of last acces is more than 1800 sec.
 If FORCEP is non-nil, force to access and write."
   (unless (and (emms-player-mpv-anitama--have-cookies-p)
-               (file-executable-p emms-player-mpv-anitama--cookie-file)
+               (file-exists-p emms-player-mpv-anitama--cookie-file)
+               (< (- (float-time (current-time))
+                     (float-time (nth 5 (file-attributes
+                                         emms-player-mpv-anitama--cookie-file))))
+                  1800)
                (not forcep))
     (emms-player-mpv-anitama--access-weeeef)
     (unless (emms-player-mpv-anitama--have-cookies-p)
