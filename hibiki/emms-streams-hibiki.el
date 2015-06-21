@@ -33,7 +33,7 @@
 
 (cl-defun emms-stream-hibiki--xml-collect-node
     (name xml-ls &key (test #'identity) (getter #'identity))
-  "Collect node of NAME from HTML-LS.
+  "Collect nodes of NAME from XML-LS.
 TEST and GETTER takes a node of NAME as an argument.
 TEST is a predicate function.
 Object returned by GETTER is collected."
@@ -47,10 +47,11 @@ Object returned by GETTER is collected."
                  ((and (eq (car xml-ls) name)
                        (funcall test xml-ls))
                   (cons (funcall getter xml-ls) ls))
+                 ((or (null (car xml-ls))
+                      (not (symbolp (car xml-ls))))
+                  (collect-name-node (cdr xml-ls) ls))
                  ((symbolp (car xml-ls))
                   (collect-name-node (xml-node-children xml-ls) ls ))
-                 ((stringp (car xml-ls))
-                  (collect-name-node (cdr xml-ls) ls))
                  (t ls))))
     (collect-name-node xml-ls nil)))
 
