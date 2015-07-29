@@ -55,7 +55,7 @@
 
 (defun emms-player-mpv-hibiki--loading-message ()
   "Loading message."
-  (message "Loding 響 ... "))
+  (message "Loading 響 ... "))
 
 (defun emms-player-mpv-hibiki--track-name-to-input-form (track-name)
   "Return url from TRACK-NAME."

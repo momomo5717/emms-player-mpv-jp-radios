@@ -73,7 +73,7 @@ Object returned by GETTER is collected."
 
 (defun emms-player-mpv-seaside--loading-message ()
   "Loading message."
-  (message "Loding Sea Side Communications ... "))
+  (message "Loading Sea Side Communications ... "))
 
 (defun emms-player-mpv-seaside--url-to-body (url)
   "Return body html list fron URL."

@@ -41,7 +41,7 @@
 
 (defun emms-player-mpv-radiru--loading-message ()
   "Loading message."
-  (message "Loding らじる★らじる ... It takes a few seconds."))
+  (message "Loading らじる★らじる ... It takes a few seconds."))
 
 (defun emms-player-mpv-radiru--track-name-to-input-form (track-name)
   "Retrun \"rtmp://fms-base2.mitene.ad.jp/radiru/aandg22 live=1\" from TRACK-NAME."

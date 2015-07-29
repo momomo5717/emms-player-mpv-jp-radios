@@ -84,7 +84,7 @@ Object returned by GETTER is collected."
 
 (defun emms-player-mpv-saimaru--loading-message ()
   "Loading message."
-  (message "Loding SaimaruRadio ... "))
+  (message "Loading SaimaruRadio ... "))
 
 (defun emms-player-mpv-saimaru--track-name-to-input-form (track-name)
   "Return url from TRACK-NAME."
