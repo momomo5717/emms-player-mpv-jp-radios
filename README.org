@@ -2,9 +2,7 @@
 
 * emms-player-mpv-jp-radios
 
-** What is it?
-
-   This provides EMMS ( [[https://www.gnu.org/software/emms/][The Emacs Multimedia System]] ) simple players for Japan radio stations.
+   This provides EMMS ( [[https://www.gnu.org/software/emms/][The Emacs Multimedia System]] ) simple players for Japan radio stations:
 
    + Available only in Japan due to access restriction
 
@@ -31,14 +29,12 @@
    + wget (for Radiko, アニたまどっとコム)
    + swftools (for Radiko)
 
-   Tested with GNU Emacs 24.5 (emacs-mac-app @5.7_0), EMMS 4.0, mpv @0.8.3_3.
+   Tested with GNU Emacs 24.5 (emacs-mac-app @5.7_0), EMMS 4.0, mpv @0.9.2_0
 
 ** Setup
 
    #+BEGIN_SRC emacs-lisp
-     (let ((default-directory "/path/to/emms-player-mpv-jp-radios"))
-       (add-to-list 'load-path default-directory)
-       (normal-top-level-add-subdirs-to-load-path))
+     (add-to-list 'load-path "/path/to/emms-player-mpv-jp-radios")
 
      (require 'emms-player-mpv-jp-radios)
    #+END_SRC
