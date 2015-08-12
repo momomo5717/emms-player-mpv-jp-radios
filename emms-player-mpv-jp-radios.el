@@ -30,12 +30,16 @@
 ;; * Available anywhere
 ;;     SaimaruRadio, ListenRadio, Sea Side Communications
 
+;; Other Requirements:
+;;
+;; + mpv v0.7 or later
+;;   + ffmpeg ( the build with –enable-librtmp (for Radiko) )
+;; + wget (for Radiko, アニたまどっとコム)
+;; + swftools (for Radiko)
+
 ;; Setup:
 ;;
-;; (let ((default-directory "/path/to/emms-player-mpv-jp-radios"))
-;;   (add-to-list 'load-path default-directory)
-;;   (normal-top-level-add-subdirs-to-load-path))
-;;
+;; (add-to-list 'load-path "/path/to/emms-player-mpv-jp-radios")
 ;; (require 'emms-player-mpv-jp-radios)
 ;;
 ;; ;; Adding all emms jp radio players
