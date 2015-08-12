@@ -67,12 +67,17 @@
     "seaside")
   "List of radio servece names.")
 
+(defvar emms-player-mpv-jp-radios--dir
+  (file-name-directory (or load-file-name (buffer-file-name))))
+
 ;;;###autoload
 (defun emms-player-mpv-jp-radios-add (&rest names)
   "Add emms simple players for NAMES to `emms-player-list'."
   (dolist (name names)
-    (let ((player  (intern (concat "emms-player-mpv-" name)))
-          (streams (intern (concat "emms-streams-"    name))))
+    (let ((player   (intern (concat "emms-player-mpv-" name)))
+          (streams  (intern (concat "emms-streams-"    name)))
+          (dir-name (expand-file-name name emms-player-mpv-jp-radios--dir)))
+      (add-to-list 'load-path dir-name)
       (require player)
       (require streams)
       (add-to-list 'emms-player-list player))))
