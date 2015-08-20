@@ -195,7 +195,7 @@
 
 ;;;###autoload
 (defun emms-stream-saimaru-add-bookmark ()
-  "Create agqr bookmark, and insert it at point position.
+  "Create saimaru bookmark, and insert it at point position.
 
 If save,run `emms-stream-save-bookmarks-file' after."
   (interactive )

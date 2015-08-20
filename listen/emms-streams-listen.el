@@ -259,7 +259,7 @@
 
 ;;;###autoload
 (defun emms-stream-listen-add-bookmark ()
-  "Create agqr bookmark, and insert it at point position.
+  "Create listen bookmark, and insert it at point position.
 
 If save,run `emms-stream-save-bookmarks-file' after."
   (interactive)

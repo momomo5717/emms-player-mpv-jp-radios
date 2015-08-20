@@ -149,7 +149,7 @@ If UPDATEP is no-nil, cache is updated."
 
 ;;;###autoload
 (defun emms-stream-hibiki-add-bookmark (&optional updatep)
-  "Create agqr bookmark, and insert it at point position.
+  "Create hibiki bookmark, and insert it at point position.
 If UPDATEP is no-nil, cache is updated.
 
 If save,run `emms-stream-save-bookmarks-file' after."
