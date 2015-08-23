@@ -20,7 +20,7 @@
 
 ;; This provides emms stream list for Radiko.
 
-;; (require 'emms-stream-radiko)
+;; (require 'emms-streams-radiko)
 
 ;;; Code:
 (require 'emms-streams)

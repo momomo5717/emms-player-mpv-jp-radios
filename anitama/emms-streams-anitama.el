@@ -20,7 +20,7 @@
 
 ;; This provides emms stream list for アニたまどっとコム インターネットラジオ.
 
-;; (require 'emms-stream-radiko)
+;; (require 'emms-streams-anitama)
 
 ;;; Code:
 (require 'emms-streams)

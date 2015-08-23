@@ -20,7 +20,7 @@
 
 ;; This provides emms stream list for らじる★らじる.
 
-;; (require 'emms-stream-radiru)
+;; (require 'emms-streams-radiru)
 
 ;;; Code:
 (require 'emms-streams)

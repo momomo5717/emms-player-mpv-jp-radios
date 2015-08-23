@@ -20,7 +20,7 @@
 
 ;; This provides emms stream list for 音泉.
 
-;; (require 'emms-stream-onsen)
+;; (require 'emms-streams-onsen)
 
 ;;; Code:
 (require 'emms-streams)

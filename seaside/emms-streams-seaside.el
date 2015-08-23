@@ -19,7 +19,7 @@
 
 ;; This provides emms stream list for Sea Side Communications.
 
-;; (require 'emms-stream-seaside)
+;; (require 'emms-streams-seaside)
 
 ;;; Code:
 (require 'emms-streams)

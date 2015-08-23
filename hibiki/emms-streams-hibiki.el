@@ -19,7 +19,7 @@
 
 ;; This provides emms stream list for 響 - HiBiKi Radio Station -.
 
-;; (require 'emms-stream-hibiki)
+;; (require 'emms-streams-hibiki)
 
 ;;; Code:
 (require 'emms-streams)

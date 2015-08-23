@@ -20,7 +20,7 @@
 
 ;; This provides emms stream list for Radiko.
 
-;; (require 'emms-stream-agqr)
+;; (require 'emms-streams-agqr)
 
 
 ;;; Code:
