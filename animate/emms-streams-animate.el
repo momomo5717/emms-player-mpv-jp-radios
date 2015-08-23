@@ -20,6 +20,8 @@
 
 ;; This provides emms stream list for animate.tv.
 
+;; (require 'emms-streams-animate)
+
 ;;; Code:
 (require 'emms-streams)
 (require 'cl-lib)
