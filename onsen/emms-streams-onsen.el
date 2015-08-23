@@ -25,67 +25,118 @@
 ;;; Code:
 (require 'emms-streams)
 (require 'cl-lib)
-(require 'emms-player-mpv-radiko)
 (require 'xml)
 (require 'url)
 
-(defvar emms-stream-onsen-streamlist-cache nil)
+(defvar emms-stream-onsen--stream-alist-cache nil
+  "Cache for stream alist.")
 
-(defun emms-stream-onsen--li-to-stream (li)
-  "Retrun stream from LI."
+(cl-defun emms-stream-onsen--xml-collect-node
+        (name xml-ls &key (test #'identity) (getter #'identity))
+  "Collect nodes of NAME from XML-LS.
+TEST and GETTER takes a node of NAME as an argument.
+TEST is a predicate function.
+Object returned by GETTER is collected."
+  (cl-labels ((collect-name-node (xml-ls ls)
+                (cond
+                 ((atom xml-ls) ls)
+                 ((consp (car xml-ls))
+                  (collect-name-node (car xml-ls)
+                                     (collect-name-node (cdr xml-ls) ls)))
+
+                 ((and (eq (car xml-ls) name)
+                       (funcall test xml-ls))
+                  (cons (funcall getter xml-ls) ls))
+                 ((or (null (car xml-ls))
+                      (not (symbolp (car xml-ls))))
+                  (collect-name-node (cdr xml-ls) ls))
+                 ((symbolp (car xml-ls))
+                  (collect-name-node (xml-node-children xml-ls) ls ))
+                 (t ls))))
+    (collect-name-node xml-ls nil)))
+
+(defun emms-stream-onsen--url-to-html (url &optional xml-p)
+  (let ((buf (url-retrieve-synchronously url)))
+    (with-current-buffer buf
+      (goto-char (point-min))
+      (while (and (not (eobp)) (not (eolp))) (forward-line 1))
+      (unless (eobp) (forward-line 1))
+      (unwind-protect (funcall (if xml-p #'libxml-parse-xml-region
+                                 #'libxml-parse-html-region) (point) (point-max))
+        (kill-buffer buf)))))
+
+(defun emms-stream-onsen--li-to-day-stream (li)
+  "Retrun a day of the week and stream from LI."
   (let* ((id (xml-get-attribute li 'id))
          (week (xml-get-attribute li 'data-week))
          (update (xml-get-attribute li 'data-update))
-         (h4 (car (xml-get-children li 'h4)))
          (title
-          (car (xml-node-children
-                (car (xml-get-children h4 'span)))))
-         (p (cl-find "navigator listItem" (xml-get-children li 'p)
-                             :key (lambda (p) (xml-get-attribute p 'class))
-                             :test #'equal))
-         (navigator (car (xml-node-children (car (xml-get-children p 'span))))))
-    (list (format "%s : %s : update %s(%s)" title navigator update week)
-          (format "onsen://%s" id) 1 'streamlist)))
+          (car (emms-stream-onsen--xml-collect-node
+                'h4 li
+                :test (lambda (node) (equal (xml-get-attribute node 'class)
+                                        "listItem"))
+                :getter (lambda (node)
+                          (car (xml-node-children
+                                (car (xml-get-children node 'span))))))))
+         (navigator
+          (car (emms-stream-onsen--xml-collect-node
+                'p li
+                :test (lambda (node) (equal (xml-get-attribute node 'class)
+                                        "navigator listItem"))
+                :getter (lambda (node)
+                          (car (xml-node-children
+                                (car (xml-get-children node 'span)))))))))
+    (list week
+         (list (format "%s : %s : update %s (%s)" title navigator update week)
+                (format "onsen://%s" id) 1 'streamlist))))
 
-(defun emms-stream-onsen--onsen-top-html-to-streamlist (html)
-  "Return onsen stream list from HTML."
-  (let* ((body (car (xml-get-children html 'body)))
-         (div-moveListWrap
-          (cl-loop with div = body
-                   for i from 0 to 10 do
-                   (setq div (car (xml-get-children div 'div)))
-                   when (equal (xml-get-attribute-or-nil div 'class)
-                               "movieListWrap")
-                   return div
-                   when (= i 10) do (error "Failed to parse onsen top html")))
+(defun emms-stream-onsen--top-html-to-stream-alist (html)
+  "Return onsen stream alist from HTML."
+  (let* (stream-alist
          (section-movieList
-          (cl-find "movieList" (xml-get-children div-moveListWrap 'section)
-                   :key (lambda (section) (xml-get-attribute section 'id))
-                   :test #'equal))
+          (car (emms-stream-onsen--xml-collect-node
+                'section html
+                :test (lambda (node) (equal (xml-get-attribute-or-nil node 'id)
+                                        "movieList")))))
          (div-listWrap
-          (cl-find "listWrap" (xml-get-children section-movieList 'div)
-                      :key #'(lambda (div) (xml-get-attribute-or-nil div 'class))
-                      :test #'equal))
+          (car (emms-stream-onsen--xml-collect-node
+                'div section-movieList
+                :test (lambda (node) (equal (xml-get-attribute-or-nil node 'class)
+                                        "listWrap")))))
          (li-ls (xml-get-children
                  (car (xml-get-children div-listWrap 'ul)) 'li)))
-    (mapcar #'emms-stream-onsen--li-to-stream li-ls)))
+    (dolist (li li-ls)
+      (let* ((day-stream (emms-stream-onsen--li-to-day-stream li))
+             (day-streams (assoc (car day-stream) stream-alist)))
+        (if day-streams (nconc (cdr day-streams) (list (cl-second day-stream)))
+          (push day-stream stream-alist))))
+    stream-alist))
 
-(defun emms-stream-onsen-fetch-streamlist (&optional updatep)
-  "Return onsen stream list.
+(defun emms-stream-onsen--fetch-stream-alist (&optional updatep)
+  "Return onsen stream alist.
 If UPDATEP is no-nil, cache is updated."
-  (if  (and (null updatep)
-            (consp emms-stream-onsen-streamlist-cache))
-      emms-stream-onsen-streamlist-cache
-    (setq emms-stream-onsen-streamlist-cache
-          (let ((buf (url-retrieve-synchronously "http://www.onsen.ag")))
-            (with-current-buffer buf
-              (goto-char (point-min))
-              (while (and (not (eobp)) (not (eolp))) (forward-line 1))
-              (unless (eobp) (forward-line 1))
-             (prog1
-                 (emms-stream-onsen--onsen-top-html-to-streamlist
-                  (libxml-parse-html-region (point-min) (point-max)))
-               (kill-buffer buf)))))))
+  (if (or updatep (null emms-stream-onsen--stream-alist-cache))
+      (setq emms-stream-onsen--stream-alist-cache
+            (emms-stream-onsen--top-html-to-stream-alist
+             (emms-stream-onsen--url-to-html "http://www.onsen.ag")))
+    emms-stream-onsen--stream-alist-cache))
+
+(defun emms-stream-onsen--add-bookmark-dows (days &optional updatep)
+  "Helper function for `emms-stream-onsen-add-bookmark', etc.
+Add stream list of DAYS.
+If UPDATEP is non-nil, cache is updated."
+  (set-buffer (get-buffer-create emms-stream-buffer-name))
+  (let* ((stream-alist (emms-stream-onsen--fetch-stream-alist updatep))
+         (line         (emms-line-number-at-pos (point)))
+         (index        (+ (/ line 2) 1)))
+    (dolist (day days)
+     (dolist (stream (assoc-default day stream-alist))
+       (setq emms-stream-list (emms-stream-insert-at index stream
+                                                     emms-stream-list))
+       (cl-incf index)))
+    (emms-stream-redisplay)
+    (goto-char (point-min))
+    (forward-line (1- line))))
 
 ;;;###autoload
 (defun emms-stream-onsen-add-bookmark (&optional updatep)
@@ -94,17 +145,62 @@ If UPDATEP is no-nil, cache is updated.
 
 If save,run `emms-stream-save-bookmarks-file' after."
   (interactive "P")
-  (set-buffer (get-buffer-create emms-stream-buffer-name))
-  (let* ((streamlist (emms-stream-onsen-fetch-streamlist updatep))
-         (line       (emms-line-number-at-pos (point)))
-         (index      (+ (/ line 2) 1)))
-    (dolist (stream streamlist)
-      (setq emms-stream-list (emms-stream-insert-at index stream
-                                                    emms-stream-list))
-      (cl-incf index))
-    (emms-stream-redisplay)
-    (goto-char (point-min))
-    (forward-line (1- line))))
+  (emms-stream-onsen--add-bookmark-dows
+   '("mon" "tue" "wed" "thu" "fri" "sat" "sun") updatep))
+
+;;;###autoload
+(defun emms-stream-onsen-add-bookmark-mon (&optional updatep)
+  "Create onsen bookmark, and insert it at point position.
+If UPDATEP is no-nil, cache is updated.
+
+If save,run `emms-stream-save-bookmarks-file' after."
+  (interactive "P")
+  (emms-stream-onsen--add-bookmark-dows '("mon") updatep))
+
+;;;###autoload
+(defun emms-stream-onsen-add-bookmark-tue (&optional updatep)
+  "Create onsen bookmark, and insert it at point position.
+If UPDATEP is no-nil, cache is updated.
+
+If save,run `emms-stream-save-bookmarks-file' after."
+  (interactive "P")
+  (emms-stream-onsen--add-bookmark-dows '("tue") updatep))
+
+;;;###autoload
+(defun emms-stream-onsen-add-bookmark-wed (&optional updatep)
+  "Create onsen bookmark, and insert it at point position.
+If UPDATEP is no-nil, cache is updated.
+
+If save,run `emms-stream-save-bookmarks-file' after."
+  (interactive "P")
+  (emms-stream-onsen--add-bookmark-dows '("wed") updatep))
+
+;;;###autoload
+(defun emms-stream-onsen-add-bookmark-thu (&optional updatep)
+  "Create onsen bookmark, and insert it at point position.
+If UPDATEP is no-nil, cache is updated.
+
+If save,run `emms-stream-save-bookmarks-file' after."
+  (interactive "P")
+  (emms-stream-onsen--add-bookmark-dows '("thu") updatep))
+
+;;;###autoload
+(defun emms-stream-onsen-add-bookmark-fri (&optional updatep)
+  "Create onsen bookmark, and insert it at point position.
+If UPDATEP is no-nil, cache is updated.
+
+If save,run `emms-stream-save-bookmarks-file' after."
+  (interactive "P")
+  (emms-stream-onsen--add-bookmark-dows '("fri") updatep))
+
+;;;###autoload
+(defun emms-stream-onsen-add-bookmark-sat-sun (&optional updatep)
+  "Create onsen bookmark, and insert it at point position.
+If UPDATEP is no-nil, cache is updated.
+
+If save,run `emms-stream-save-bookmarks-file' after."
+  (interactive "P")
+  (emms-stream-onsen--add-bookmark-dows '("sat" "sun") updatep))
 
 (provide 'emms-streams-onsen)
 ;;; emms-streams-onsen.el ends here
