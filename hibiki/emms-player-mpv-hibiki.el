@@ -48,8 +48,7 @@
          (domain (cl-third (assq 'domain data)))
          (dir (cl-third (assq 'dir data)))
          (flv (cl-third (assq 'flv (assq 'channel data))))
-         (mp4 (when (string-match  "\[.\]mp4" flv 4)
-                (substring flv 4 (match-end 0)))))
+         (mp4 (cl-second (split-string flv ":"))))
     (unless mp4 (error "Failed to parce DATA XML"))
     (format "%s://%s/%s/%s" protocol domain dir mp4)))
 
