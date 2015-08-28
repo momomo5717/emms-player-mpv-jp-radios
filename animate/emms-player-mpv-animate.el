@@ -79,7 +79,7 @@ Object returned by GETTER is collected."
   (let* ((wmp (car (emms-player-mpv-animate--xml-collect-node
                     'li (emms-player-mpv-animate--url-to-html url)
                     :test
-                    (lambda (node) (equal (xml-get-attribute-or-nil node 'class) "wmp"))
+                    (lambda (node) (equal (xml-get-attribute-or-nil node 'class) "wmp clearfix"))
                     :getter
                     (lambda (node) (let ((a (car (xml-get-children node 'a))))
                                  (xml-get-attribute-or-nil a 'href)))))))
