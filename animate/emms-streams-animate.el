@@ -48,7 +48,6 @@ Object returned by GETTER is collected."
                  ((consp (car xml-ls))
                   (collect-name-node (car xml-ls)
                                      (collect-name-node (cdr xml-ls) ls)))
-
                  ((and (eq (car xml-ls) name)
                        (funcall test xml-ls))
                   (cons (funcall getter xml-ls) ls))
@@ -89,9 +88,10 @@ Object returned by GETTER is collected."
           (href  (car (emms-stream-animate--xml-collect-node
                        'a box :test (lambda (node) (xml-get-attribute-or-nil node 'href))
                        :getter (lambda (node) (xml-get-attribute node 'href))))))
-      (list (format "%s : %s : %s" title (mapconcat #'identity (split-string main) " ") date)
-            (concat "animate://" (url-expand-file-name href emms-stream-animate--url))
-            1 'streamlist))))
+      (when (string< "2015" date)
+       (list (format "%s : %s : %s" title (mapconcat #'identity (split-string main) " ") date)
+             (concat "animate://" (url-expand-file-name href emms-stream-animate--url))
+             1 'streamlist)))))
 
 (defun emms-stream-animate--html-to-stream-list (day html)
   "Retrun stream list of DAY from HTML."
@@ -109,8 +109,9 @@ Object returned by GETTER is collected."
                            :test
                            (lambda (node) (equal (xml-get-attribute node 'class)
                                              "box"))))))))
-    (cl-loop for box in boxes collect
-             (emms-stream-animate--box-to-stream box))))
+    (cl-loop for box in boxes
+             for stream = (emms-stream-animate--box-to-stream box)
+             when stream collect stream)))
 
 (defun emms-stream-animate--fetch-stream-alist (&optional updatep)
   "Fetch stream alist.
