@@ -55,13 +55,13 @@ Object returned by GETTER is collected."
                  (t ls))))
     (collect-name-node xml-ls nil)))
 
-(defun emms-stream-hibiki--url-to-html (url &optional xml-p)
-  (let ((buf (url-retrieve-synchronously url)))
+(defun emms-stream-hibiki--url-to-html (url &optional xmlp buf)
+  (let ((buf (or buf (url-retrieve-synchronously url))))
     (with-current-buffer buf
       (goto-char (point-min))
       (while (and (not (eobp)) (not (eolp))) (forward-line 1))
       (unless (eobp) (forward-line 1))
-      (unwind-protect (funcall (if xml-p #'libxml-parse-xml-region
+      (unwind-protect (funcall (if xmlp #'libxml-parse-xml-region
                                  #'libxml-parse-html-region) (point) (point-max))
         (kill-buffer buf)))))
 
@@ -72,9 +72,9 @@ Object returned by GETTER is collected."
            program-id)
    'xml))
 
-(defun emms-stream-hibiki--div-hbkPrograms-to-streamlist (div-hbkPrograms)
+(defun emms-stream-hibiki--div-hbkProgram-to-streamlist (div-hbkProgram)
     "Return stream from DIV-HBKPROGRAMS."
-    (let* ((a (car (xml-get-children div-hbkPrograms 'a)))
+    (let* ((a (car (xml-get-children div-hbkProgram 'a)))
            (AttachVideo
             (cdr (split-string (xml-get-attribute a 'onclick) "[()',]" t)))
            (program-id  (cl-first AttachVideo))
@@ -96,32 +96,102 @@ Object returned by GETTER is collected."
             (format "hibiki://%s/%s" program-id program-key)
             1 'streamlist)))
 
+(defun emms-stream-hibiki--html-to-stream-list (n html)
+  "Return stream list of HTML."
+  (let ((div-hbkPrograms
+         (emms-stream-hibiki--xml-collect-node
+          'div html
+          :test
+          (lambda (node) (equal (xml-get-attribute-or-nil node 'class)
+                            "hbkProgram")))))
+    (setcdr (assq n emms-stream-hibiki--stream-alist-cache)
+            (mapcar #'emms-stream-hibiki--div-hbkProgram-to-streamlist
+                    div-hbkPrograms))))
+
 (defun emms-stream-hibiki--fetch-stream-list-dow (n &optional updatep)
   "Retrun streamlist of N\(DOW\).
 If UPDATEP is non-nil, cache is updated."
-  (unless (< 0 n 7) (error "N should be an integer from 1 to 6"))
+  (unless (< 0 n 7) (error "N requires an integer of 1-6"))
   (let (stream-list-dow)
     (if (or updatep
             (null (setq stream-list-dow
                         (cdr (assq n emms-stream-hibiki--stream-alist-cache)))))
-       (let* ((html (emms-stream-hibiki--url-to-html
-                     (format "http://hibiki-radio.jp/get_program/%d" n)))
-              (div-hbkPrograms
-               (emms-stream-hibiki--xml-collect-node
-                'div html
-                :test
-                (lambda (node) (equal (xml-get-attribute-or-nil node 'class)
-                                  "hbkProgram")))))
-         (setcdr (assq n emms-stream-hibiki--stream-alist-cache)
-                 (mapcar #'emms-stream-hibiki--div-hbkPrograms-to-streamlist
-                         div-hbkPrograms)))
+        (emms-stream-hibiki--html-to-stream-list n
+         (emms-stream-hibiki--url-to-html
+          (format "http://hibiki-radio.jp/get_program/%d" n)))
       stream-list-dow)))
+
+(defun emms-stream-hibiki--update-cache-async-1 (n)
+  "Helper function for `emms-stream-hibiki-update-cache-async'"
+  (if (< 0 n 7)
+      (url-retrieve
+       (format "http://hibiki-radio.jp/get_program/%d" n)
+       (lambda (_status)
+         (let* ((html (emms-stream-hibiki--url-to-html
+                       nil nil (current-buffer)))
+                (div-hbkPrograms
+                 (emms-stream-hibiki--xml-collect-node
+                  'div html
+                  :test
+                  (lambda (node) (equal (xml-get-attribute-or-nil node 'class)
+                                    "hbkProgram")))))
+           (emms-stream-hibiki--div-hbkPrograms-to-stream-list-async n div-hbkPrograms)))
+       nil (if (eq n 1) nil t))
+    (message "Updated hibiki stream list cache")))
+
+(defun emms-stream-hibiki--div-hbkPrograms-to-stream-list-async (n div-hbkPrograms)
+  "Update Nth cache of DIV-HBKPROGRAMS asynchronously."
+  (cl-labels
+      ((update-nth-list (div-hbkPrograms streams)
+        (if div-hbkPrograms
+            (let* ((div-hbkProgram (car div-hbkPrograms))
+                   (a (car (xml-get-children div-hbkProgram 'a)))
+                   (AttachVideo
+                    (cdr (split-string (xml-get-attribute a 'onclick) "[()',]" t)))
+                   (program-id  (cl-first AttachVideo))
+                   (program-key (cl-second AttachVideo))
+                   (program-comment
+                    (car (emms-stream-hibiki--xml-collect-node
+                          'div a
+                          :test (lambda (node) (equal (xml-get-attribute-or-nil node 'class)
+                                                  "hbkProgramComment"))
+                          :getter (lambda (node) (car (xml-node-children node)))))))
+              (url-retrieve
+               (format "http://image.hibiki-radio.jp/uploads/data/channel/%s/description.xml"
+                       program-id)
+               (lambda (_status)
+                 (let* ((data (emms-stream-hibiki--url-to-html nil 'xml
+                                                               (current-buffer)))
+                        (title
+                         (car (xml-node-children (car (xml-get-children data 'title)))))
+                        (cast
+                         (mapcar (lambda (node) (car (xml-node-children node)))
+                                 (xml-get-children (car (xml-get-children data 'cast)) 'name)))
+                        (cast-names (if cast (concat " : " (mapconcat #'identity cast ", ")) "")))
+                   (update-nth-list
+                    (cdr div-hbkPrograms)
+                    (cons (list (format "%s%s : %s" title cast-names program-comment)
+                                (format "hibiki://%s/%s" program-id program-key)
+                                1 'streamlist)
+                          streams))))
+               nil t))
+          (setcdr (assq n emms-stream-hibiki--stream-alist-cache)
+                  (nreverse streams))
+          (emms-stream-hibiki--update-cache-async-1 (1+ n)))))
+    (update-nth-list div-hbkPrograms nil)))
+
+(defun emms-stream-hibiki-update-cache-async ()
+  "Update cache asynchronously."
+  (emms-stream-hibiki--update-cache-async-1 1))
 
 (defun emms-stream-hibiki--add-bookmark-dows (nums &optional updatep)
   "Helper function for `emms-stream-hibiki-add-bookmark', etc.
 Add stream list of NUMS.
 If UPDATEP is non-nil, cache is updated."
-  (set-buffer (get-buffer-create emms-stream-buffer-name))
+  (let ((buf (get-buffer emms-stream-buffer-name)))
+    (unless (buffer-live-p buf)
+      (error "%s is not a live buffer" emms-stream-buffer-name))
+    (set-buffer buf))
   (let* ((line  (emms-line-number-at-pos (point)))
          (index (+ (/ line 2) 1)))
     (dolist (n nums)
@@ -134,67 +204,24 @@ If UPDATEP is non-nil, cache is updated."
     (forward-line (1- line))))
 
 ;;;###autoload
-(defun emms-stream-hibiki-add-bookmark (&optional updatep)
+(defun emms-stream-hibiki-add-bookmark (&optional updatep dow)
   "Create hibiki bookmark, and insert it at point position.
 If UPDATEP is no-nil, cache is updated.
+DOW is a number of 0-6 or -1.
 
 If save,run `emms-stream-save-bookmarks-file' after."
   (interactive "P")
-  (emms-stream-hibiki--add-bookmark-dows '(1 2 3 4 5 6) updatep))
-
-;;;###autoload
-(defun emms-stream-hibiki-add-bookmark-mon (&optional updatep)
-  "Create hibiki bookmark, and insert it at point position.
-If UPDATEP is no-nil, cache is updated.
-
-If save,run `emms-stream-save-bookmarks-file' after."
-  (interactive "P")
-  (emms-stream-hibiki--add-bookmark-dows '(1) updatep))
-
-;;;###autoload
-(defun emms-stream-hibiki-add-bookmark-tue (&optional updatep)
-  "Create hibiki bookmark, and insert it at point position.
-If UPDATEP is no-nil, cache is updated.
-
-If save,run `emms-stream-save-bookmarks-file' after."
-  (interactive "P")
-  (emms-stream-hibiki--add-bookmark-dows '(2) updatep))
-
-;;;###autoload
-(defun emms-stream-hibiki-add-bookmark-wed (&optional updatep)
-  "Create hibiki bookmark, and insert it at point position.
-If UPDATEP is no-nil, cache is updated.
-
-If save,run `emms-stream-save-bookmarks-file' after."
-  (interactive "P")
-  (emms-stream-hibiki--add-bookmark-dows '(3) updatep))
-
-;;;###autoload
-(defun emms-stream-hibiki-add-bookmark-thu (&optional updatep)
-  "Create hibiki bookmark, and insert it at point position.
-If UPDATEP is no-nil, cache is updated.
-
-If save,run `emms-stream-save-bookmarks-file' after."
-  (interactive "P")
-  (emms-stream-hibiki--add-bookmark-dows '(4) updatep))
-
-;;;###autoload
-(defun emms-stream-hibiki-add-bookmark-fri (&optional updatep)
-  "Create hibiki bookmark, and insert it at point position.
-If UPDATEP is no-nil, cache is updated.
-
-If save,run `emms-stream-save-bookmarks-file' after."
-  (interactive "P")
-  (emms-stream-hibiki--add-bookmark-dows '(5) updatep))
-
-;;;###autoload
-(defun emms-stream-hibiki-add-bookmark-sta-sun (&optional updatep)
-  "Create hibiki bookmark, and insert it at point position.
-If UPDATEP is no-nil, cache is updated.
-
-If save,run `emms-stream-save-bookmarks-file' after."
-  (interactive "P")
-  (emms-stream-hibiki--add-bookmark-dows '(6) updatep))
+  (unless (integerp dow)
+    (let ((msg (concat
+                "[0] All  [1] Mon  [2] Tue  [3] Wed  [4] Thu\n"
+                "         [5] Fri  [6] Sat/San\n"
+                "[-1] Update stream list cache asynchronously\n\n"
+                "Input a number of 0-6 or -1: ")))
+      (while (not (and (integerp (setq dow (read-number msg))) (<= -1 dow 6))))))
+  (cond
+   ((= dow -1) (emms-stream-hibiki-update-cache-async))
+   ((zerop dow) (emms-stream-hibiki--add-bookmark-dows '(1 2 3 4 5 6) updatep))
+   (t (emms-stream-hibiki--add-bookmark-dows (list dow) updatep))))
 
 (provide 'emms-streams-hibiki)
 ;;; emms-streams-hibiki.el ends here

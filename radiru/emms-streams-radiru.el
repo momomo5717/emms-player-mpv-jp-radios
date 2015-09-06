@@ -93,7 +93,10 @@ Replace radiru:// with mms:// when use it.")
 
 If save ,run `emms-stream-save-bookmarks-file' after."
   (interactive "SInput area (sendai, tokyo, nagoya, osaka) : ")
-  (set-buffer (get-buffer-create emms-stream-buffer-name))
+  (let ((buf (get-buffer emms-stream-buffer-name)))
+    (unless (buffer-live-p buf)
+      (error "%s is not a live buffer" emms-stream-buffer-name))
+    (set-buffer buf))
   (let* ((streamlist (emms-stream-rajiru-get-streamlist area))
          (line       (emms-line-number-at-pos (point)))
          (index      (+ (/ line 2) 1)))

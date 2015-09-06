@@ -55,13 +55,13 @@ Object returned by GETTER is collected."
                  (t ls))))
     (collect-name-node xml-ls nil)))
 
-(defun emms-stream-onsen--url-to-html (url &optional xml-p)
+(defun emms-stream-onsen--url-to-html (url &optional xmlp)
   (let ((buf (url-retrieve-synchronously url)))
     (with-current-buffer buf
       (goto-char (point-min))
       (while (and (not (eobp)) (not (eolp))) (forward-line 1))
       (unless (eobp) (forward-line 1))
-      (unwind-protect (funcall (if xml-p #'libxml-parse-xml-region
+      (unwind-protect (funcall (if xmlp #'libxml-parse-xml-region
                                  #'libxml-parse-html-region) (point) (point-max))
         (kill-buffer buf)))))
 
@@ -125,7 +125,10 @@ If UPDATEP is no-nil, cache is updated."
   "Helper function for `emms-stream-onsen-add-bookmark', etc.
 Add stream list of DAYS.
 If UPDATEP is non-nil, cache is updated."
-  (set-buffer (get-buffer-create emms-stream-buffer-name))
+  (let ((buf (get-buffer emms-stream-buffer-name)))
+    (unless (buffer-live-p buf)
+      (error "%s is not a live buffer" emms-stream-buffer-name))
+    (set-buffer buf))
   (let* ((stream-alist (emms-stream-onsen--fetch-stream-alist updatep))
          (line         (emms-line-number-at-pos (point)))
          (index        (+ (/ line 2) 1)))
@@ -139,68 +142,24 @@ If UPDATEP is non-nil, cache is updated."
     (forward-line (1- line))))
 
 ;;;###autoload
-(defun emms-stream-onsen-add-bookmark (&optional updatep)
+(defun emms-stream-onsen-add-bookmark (&optional updatep dow)
   "Create onsen bookmark, and insert it at point position.
 If UPDATEP is no-nil, cache is updated.
+DOW is a number of 0-6.
 
 If save,run `emms-stream-save-bookmarks-file' after."
   (interactive "P")
-  (emms-stream-onsen--add-bookmark-dows
-   '("mon" "tue" "wed" "thu" "fri" "sat" "sun") updatep))
-
-;;;###autoload
-(defun emms-stream-onsen-add-bookmark-mon (&optional updatep)
-  "Create onsen bookmark, and insert it at point position.
-If UPDATEP is no-nil, cache is updated.
-
-If save,run `emms-stream-save-bookmarks-file' after."
-  (interactive "P")
-  (emms-stream-onsen--add-bookmark-dows '("mon") updatep))
-
-;;;###autoload
-(defun emms-stream-onsen-add-bookmark-tue (&optional updatep)
-  "Create onsen bookmark, and insert it at point position.
-If UPDATEP is no-nil, cache is updated.
-
-If save,run `emms-stream-save-bookmarks-file' after."
-  (interactive "P")
-  (emms-stream-onsen--add-bookmark-dows '("tue") updatep))
-
-;;;###autoload
-(defun emms-stream-onsen-add-bookmark-wed (&optional updatep)
-  "Create onsen bookmark, and insert it at point position.
-If UPDATEP is no-nil, cache is updated.
-
-If save,run `emms-stream-save-bookmarks-file' after."
-  (interactive "P")
-  (emms-stream-onsen--add-bookmark-dows '("wed") updatep))
-
-;;;###autoload
-(defun emms-stream-onsen-add-bookmark-thu (&optional updatep)
-  "Create onsen bookmark, and insert it at point position.
-If UPDATEP is no-nil, cache is updated.
-
-If save,run `emms-stream-save-bookmarks-file' after."
-  (interactive "P")
-  (emms-stream-onsen--add-bookmark-dows '("thu") updatep))
-
-;;;###autoload
-(defun emms-stream-onsen-add-bookmark-fri (&optional updatep)
-  "Create onsen bookmark, and insert it at point position.
-If UPDATEP is no-nil, cache is updated.
-
-If save,run `emms-stream-save-bookmarks-file' after."
-  (interactive "P")
-  (emms-stream-onsen--add-bookmark-dows '("fri") updatep))
-
-;;;###autoload
-(defun emms-stream-onsen-add-bookmark-sat-sun (&optional updatep)
-  "Create onsen bookmark, and insert it at point position.
-If UPDATEP is no-nil, cache is updated.
-
-If save,run `emms-stream-save-bookmarks-file' after."
-  (interactive "P")
-  (emms-stream-onsen--add-bookmark-dows '("sat" "sun") updatep))
+  (unless (integerp dow)
+    (let ((msg (concat "[0] All  [1] Mon  [2] Tue  [3] Wed  [4] Thu\n"
+                       "         [5] Fri  [6] Sat/Sun\n\n"
+                       "Input a number of 0-6: ")))
+      (while (not (and (integerp (setq dow (read-number msg))) (<= 0 dow 6))))))
+  (let ((days '("mon" "tue" "wed" "thu" "fri")))
+   (emms-stream-onsen--add-bookmark-dows
+    (cond ((zerop dow) days)
+          ((= dow 6) '("sat" "sun"))
+          (t (list (nth (1- dow) days))))
+    updatep)))
 
 (provide 'emms-streams-onsen)
 ;;; emms-streams-onsen.el ends here

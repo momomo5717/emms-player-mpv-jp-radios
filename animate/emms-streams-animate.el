@@ -115,7 +115,7 @@ Object returned by GETTER is collected."
 
 (defun emms-stream-animate--fetch-stream-alist (&optional updatep)
   "Fetch stream alist.
-If UPDATEP is non-nil, cache is forced to update."
+If UPDATEP is non-nil, cache is updated."
   (if (or updatep (null emms-stream-animate--stream-alist-cache))
       (let ((html (emms-stream-animate--url-to-html emms-stream-animate--url)))
         (setq emms-stream-animate--stream-alist-cache
@@ -125,12 +125,15 @@ If UPDATEP is non-nil, cache is forced to update."
 
 (defun emms-stream-animate-ger-stream-list-dow (day &optional updatep)
   "Return streamlist of the DAY of the weekdays.
-If UPDATEP is non-nil, cache is forced to update."
+If UPDATEP is non-nil, cache is updated."
   (assoc-default day (emms-stream-animate--fetch-stream-alist updatep)))
 
 (defun emms-stream-animate-add-bookmark-1 (&optional updatep &rest days)
   "Helper function for `emms-stream-animate-add-bookmark', etc."
-  (set-buffer (get-buffer-create emms-stream-buffer-name))
+  (let ((buf (get-buffer emms-stream-buffer-name)))
+    (unless (buffer-live-p buf)
+      (error "%s is not a live buffer" emms-stream-buffer-name))
+    (set-buffer buf))
   (emms-stream-animate--fetch-stream-alist updatep)
   (let* ((days (or days emms-stream-animate--days))
          (line  (emms-line-number-at-pos (point)))
@@ -145,67 +148,21 @@ If UPDATEP is non-nil, cache is forced to update."
     (forward-line (1- line))))
 
 ;;;###autoload
-(defun emms-stream-animate-add-bookmark (&optional updatep)
+(defun emms-stream-animate-add-bookmark (&optional updatep dow)
   "Create animate bookmark, and insert it at point position.
 If UPDATEP is no-nil, cache is updated.
+DOW is a number of 0-6.
 
 If save,run `emms-stream-save-bookmarks-file' after."
   (interactive "P")
-  (emms-stream-animate-add-bookmark-1 updatep))
-
-;;;###autoload
-(defun emms-stream-animate-add-bookmark-mon (&optional updatep)
-  "Create animate bookmark, and insert it at point position.
-If UPDATEP is no-nil, cache is updated.
-
-If save,run `emms-stream-save-bookmarks-file' after."
-  (interactive "P")
-  (emms-stream-animate-add-bookmark-1 updatep "mon"))
-
-;;;###autoload
-(defun emms-stream-animate-add-bookmark-tue (&optional updatep)
-  "Create animate bookmark, and insert it at point position.
-If UPDATEP is no-nil, cache is updated.
-
-If save,run `emms-stream-save-bookmarks-file' after."
-  (interactive "P")
-  (emms-stream-animate-add-bookmark-1 updatep "tue"))
-
-;;;###autoload
-(defun emms-stream-animate-add-bookmark-wed (&optional updatep)
-  "Create animate bookmark, and insert it at point position.
-If UPDATEP is no-nil, cache is updated.
-
-If save,run `emms-stream-save-bookmarks-file' after."
-  (interactive "P")
-  (emms-stream-animate-add-bookmark-1 updatep "wed"))
-
-;;;###autoload
-(defun emms-stream-animate-add-bookmark-thu (&optional updatep)
-  "Create animate bookmark, and insert it at point position.
-If UPDATEP is no-nil, cache is updated.
-
-If save,run `emms-stream-save-bookmarks-file' after."
-  (interactive "P")
-  (emms-stream-animate-add-bookmark-1 updatep "thu"))
-
-;;;###autoload
-(defun emms-stream-animate-add-bookmark-fri (&optional updatep)
-  "Create animate bookmark, and insert it at point position.
-If UPDATEP is no-nil, cache is updated.
-
-If save,run `emms-stream-save-bookmarks-file' after."
-  (interactive "P")
-  (emms-stream-animate-add-bookmark-1 updatep "fri"))
-
-;;;###autoload
-(defun emms-stream-animate-add-bookmark-irr (&optional updatep)
-  "Create animate bookmark, and insert it at point position.
-If UPDATEP is no-nil, cache is updated.
-
-If save,run `emms-stream-save-bookmarks-file' after."
-  (interactive "P")
-  (emms-stream-animate-add-bookmark-1 updatep "irr"))
+  (unless (integerp dow)
+    (let ((msg (concat "[0] All  [1] Mon  [2] Tue  [3] Wed  [4] Thu\n"
+                       "         [5] Fri  [6] Irr\n\n"
+                       "Input a number of 0-6: ")))
+      (while (not (and (integerp (setq dow (read-number msg))) (<= 0 dow 6))))))
+  (if (zerop dow) (emms-stream-animate-add-bookmark-1 updatep)
+    (emms-stream-animate-add-bookmark-1
+     updatep (nth (1- dow) emms-stream-animate--days))))
 
 (provide 'emms-streams-animate)
 ;;; emms-streams-animate.el ends here
