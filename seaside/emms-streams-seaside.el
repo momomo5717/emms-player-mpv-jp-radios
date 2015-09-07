@@ -63,7 +63,10 @@
 
 If save,run `emms-stream-save-bookmarks-file' after."
   (interactive)
-  (set-buffer (get-buffer-create emms-stream-buffer-name))
+  (let ((buf (get-buffer emms-stream-buffer-name)))
+    (unless (buffer-live-p buf)
+      (error "%s is not a live buffer" emms-stream-buffer-name))
+    (set-buffer buf))
   (let* ((streamlist emms-stream-seaside-streamlist)
          (line       (emms-line-number-at-pos (point)))
          (index      (+ (/ line 2) 1)))
