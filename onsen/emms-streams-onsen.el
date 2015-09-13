@@ -154,7 +154,7 @@ If save,run `emms-stream-save-bookmarks-file' after."
                        "         [5] Fri  [6] Sat/Sun\n\n"
                        "Input a number of 0-6: ")))
       (while (not (and (integerp (setq dow (read-number msg))) (<= 0 dow 6))))))
-  (let ((days '("mon" "tue" "wed" "thu" "fri")))
+  (let ((days '("mon" "tue" "wed" "thu" "fri" "sat" "sun")))
    (emms-stream-onsen--add-bookmark-dows
     (cond ((zerop dow) days)
           ((= dow 6) '("sat" "sun"))
