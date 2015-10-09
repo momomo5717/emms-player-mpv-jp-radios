@@ -44,6 +44,11 @@
  "\\`seaside://http://seaside-c.jp/program/emergency/" t
  'emms-player-mpv-seaside--track-name-to-nico-input-form)
 
+(emms-player-simple-mpv-add-to-converters
+ 'emms-player-mpv-seaside
+ "\\`seaside://http://seaside-c.jp/program/delicatezone/" t
+ 'emms-player-mpv-seaside--track-name-to-nico-input-form)
+
 (emms-player-set 'emms-player-mpv-seaside 'get-media-title
                  'emms-player-mpv-seaside--get-media-title)
 

@@ -26,11 +26,32 @@
 (require 'cl-lib)
 
 (defvar emms-stream-seaside-streamlist
-  '(("井上麻里奈・下田麻美のIT革命！ : 木曜日更新"
-     "seaside://http://it.seaside-c.jp/"
+  '(("あどりぶ : 月曜日更新"
+     "seaside://http://seaside-c.jp/program/adlib/"
      1 streamlist)
-    ("ごぶごぶちゃん☆～中村繪里子・田村睦心 : 水曜日更新"
+    ("ステキ情報バラエティ 発信！もいとろ君 : 月曜日更新"
+     "seaside://http://seaside-c.jp/program/moitorokun/"
+     1 streamlist)
+    ("BELOVED MEMORIES : 月曜日更新"
+     "seaside://http://seaside-c.jp/program/belovedmemories/"
+     1 streamlist)
+    ("ごぶごぶちゃん☆～中村繪里子・田村睦心 : 水曜日更新(最終回)"
      "seaside://http://seaside-c.jp/program/gobu/"
+     1 streamlist)
+    ("内田さんと浅倉さん : 水曜日更新"
+     "seaside://http://seaside-c.jp/program/uchidaasakura/"
+     1 streamlist)
+    ("ありがた系迷惑プレゼンショー　はるか・ちなみの「りめいく！」 : 水曜日更新"
+     "seaside://http://seaside-c.jp/program/remake/"
+     1 streamlist)
+    ("西明日香のデリケートゾーン！ : 水曜日更新"
+     "seaside://http://seaside-c.jp/program/delicatezone/"
+     1 streamlist)
+    ("春佳・彩花のSSちゃんねる : 水曜日更新"
+     "seaside://http://seaside-c.jp/program/ssc/"
+     1 streamlist)
+    ("井上麻里奈・下田麻美のIT革命！ : 木曜日更新"
+     "seaside://http://it.seaside-c.jp/"
      1 streamlist)
     ("洲崎西 : 木曜日更新"
      "seaside://http://seaside-c.jp/program/suzakinishi/"
@@ -38,23 +59,8 @@
     ("中村繪里子ら・ら☆ら♪　なかむランド～Love・Laugh☆Live♪～ : 木曜日更新"
      "seaside://http://nakamuland.net/"
      1 streamlist)
-    ("あどりぶ : 月曜日更新"
-     "seaside://http://seaside-c.jp/program/adlib/"
-     1 streamlist)
-    ("内田さんと浅倉さん : 水曜日更新"
-     "seaside://http://seaside-c.jp/program/uchidaasakura/"
-     1 streamlist)
-    ("ステキ情報バラエティ 発信！もいとろ君 : 月曜日更新"
-     "seaside://http://seaside-c.jp/program/moitorokun/"
-     1 streamlist)
-    ("ありがた系迷惑プレゼンショー　はるか・ちなみの「りめいく！」 : 水曜日更新"
-     "seaside://http://seaside-c.jp/program/remake/"
-     1 streamlist)
     ("EMERGENCY the RADIO : 土曜日更新"
      "seaside://http://seaside-c.jp/program/emergency/"
-     1 streamlist)
-    ("BELOVED MEMORIES : 火曜日更新"
-     "seaside://http://seaside-c.jp/program/belovedmemories/"
      1 streamlist)))
 
 ;;;###autoload
