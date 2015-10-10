@@ -103,7 +103,8 @@
    collect (cons id (emms-stream-listen--fetch-category-streams id))))
 
 (defvar emms-stream-listen--stream-alist
-  '((10002 ("カフェミュージック : 音楽ジャンル" "listen://20088" 1 streamlist)
+  '((10002 ("くつろぎClassic : 音楽ジャンル" "listen://20051" 1 streamlist)
+           ("カフェミュージック : 音楽ジャンル" "listen://20088" 1 streamlist)
            ("ラブソング : 音楽ジャンル" "listen://20006" 1 streamlist)
            ("オルゴール : 音楽ジャンル" "listen://20012" 1 streamlist)
            ("ジャズ : 音楽ジャンル" "listen://20010" 1 streamlist)
@@ -119,8 +120,7 @@
            ("クラブ/ダンス : 音楽ジャンル" "listen://20005" 1 streamlist)
            ("歌謡曲 : 音楽ジャンル" "listen://20008" 1 streamlist)
            ("蛍の光 : 音楽ジャンル" "listen://20079" 1 streamlist))
-    (10007 ("アイドルーチュ！ : 音楽ブランド" "listen://20096" 1 streamlist)
-           ("ロッカーズアイランド : 音楽ブランド" "listen://20080" 1 streamlist)
+    (10007 ("ロッカーズアイランド : 音楽ブランド" "listen://20080" 1 streamlist)
            ("IRMA records : 音楽ブランド" "listen://20084" 1 streamlist)
            ("Riddim Nation : 音楽ブランド" "listen://20071" 1 streamlist)
            ("Fan Music富ヶ谷 : 音楽ブランド" "listen://20074" 1 streamlist)
@@ -129,6 +129,7 @@
            ("VAA : 音楽ブランド" "listen://20066" 1 streamlist)
            ("WASABEAT : 音楽ブランド" "listen://20065" 1 streamlist)
            ("Wmiba : 音楽ブランド" "listen://20064" 1 streamlist)
+           ("アイドルーチュ！ : 音楽ブランド" "listen://20096" 1 streamlist)
            ("アスノカケハシ : 音楽ブランド" "listen://20070" 1 streamlist)
            ("みよー : 音楽ブランド" "listen://20068" 1 streamlist))
     (10004 ("目が覚めたとき : シチュエーション" "listen://20013" 1 streamlist)
@@ -154,7 +155,6 @@
            ("耳で聴くビジネス書 オーディオブック : バラエティ" "listen://20063" 1 streamlist)
            ("耳で聴く童話・むかしばなし オーディオブック : バラエティ" "listen://20073" 1 streamlist)
            ("耳で聴く名作 オーディオブック : バラエティ" "listen://20078" 1 streamlist)
-           ("もしも声優がいっぱい住んでいるマンションがあったら : バラエティ" "listen://20095" 1 streamlist)
            ("Owarai.radio : バラエティ" "listen://20072" 1 streamlist))
     (10005 (1 ("FMりべーる : 北海道 : 全国のラジオ局" "listen://30074" 1 streamlist)
               ("FMくしろ : 北海道 : 全国のラジオ局" "listen://30029" 1 streamlist)
@@ -241,7 +241,6 @@
               ("FMびざん : 中国・四国 : 全国のラジオ局" "listen://30010" 1 streamlist))
            (8 ("AIR STATION HIBIKI : 九州・沖縄 : 全国のラジオ局" "listen://30052" 1 streamlist)
               ("StarCorn FM : 九州・沖縄 : 全国のラジオ局" "listen://30085" 1 streamlist)
-              ("宮崎サンシャインエフエム : 九州・沖縄 : 全国のラジオ局" "listen://30023" 1 streamlist)
               ("FMのべおか : 九州・沖縄 : 全国のラジオ局" "listen://30088" 1 streamlist)
               ("あまみエフエム : 九州・沖縄 : 全国のラジオ局" "listen://30054" 1 streamlist)
               ("FMもとぶ : 九州・沖縄 : 全国のラジオ局" "listen://30072" 1 streamlist)
@@ -284,9 +283,8 @@ id  = number or (number ...)"
          (setq emms-stream-list
                (emms-stream-insert-at index stream emms-stream-list))
          (cl-incf index)))
-     else
-     for streams = (emms-stream-listen--get-stream-list id) do
-     (dolist (stream streams)
+     else do
+     (dolist (stream (emms-stream-listen--get-stream-list id))
        (setq emms-stream-list
              (emms-stream-insert-at index stream emms-stream-list))
        (cl-incf index)))
