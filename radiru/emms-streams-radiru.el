@@ -36,8 +36,7 @@
     ("NHK-FM 仙台"
      "radiru://rtmpe://netradio-hkfm-flash.nhk.jp/live/NetRadio_HKFM_flash@108237"
      1 streamlist))
-  "らじる★らじる 仙台 stream list.
-Replace radiru:// with mms:// when use it.")
+  "らじる★らじる 仙台 stream list.")
 
 (defvar emms-stream-radiru-streamlist-tokyo
   '(("NHK第1 東京"
@@ -49,8 +48,7 @@ Replace radiru:// with mms:// when use it.")
     ("NHK-FM 東京"
      "radiru://rtmpe://netradio-fm-flash.nhk.jp/live/NetRadio_FM_flash@63343"
      1 streamlist))
-  "らじる★らじる 東京 stream list.
-Replace radiru:// with mms:// when use it.")
+  "らじる★らじる 東京 stream list.")
 
 (defvar emms-stream-radiru-streamlist-nagoya
   '(("NHK第1 名古屋"
@@ -62,8 +60,7 @@ Replace radiru:// with mms:// when use it.")
     ("NHK-FM 名古屋"
      "radiru://rtmpe://netradio-ckfm-flash.nhk.jp/live/NetRadio_CKFM_flash@108235"
      1 streamlist))
-  "らじる★らじる 名古屋 stream list.
-Replace radiru:// with mms:// when use it.")
+  "らじる★らじる 名古屋 stream list.")
 
 (defvar emms-stream-radiru-streamlist-osaka
   '(("NHK第1 大阪"
@@ -75,8 +72,7 @@ Replace radiru:// with mms:// when use it.")
     ("NHK-FM 大阪"
      "radiru://rtmpe://netradio-bkfm-flash.nhk.jp/live/NetRadio_BKFM_flash@108233"
      1 streamlist))
-  "らじる★らじる 大阪 stream list.
-Replace radiru:// with mms:// when use it.")
+  "らじる★らじる 大阪 stream list.")
 
 (defun emms-stream-rajiru-get-streamlist (area)
   "Return streamlist of the AREA."

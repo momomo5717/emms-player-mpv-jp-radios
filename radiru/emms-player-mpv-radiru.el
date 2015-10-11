@@ -43,10 +43,15 @@
   "Loading message."
   (message "Loading らじる★らじる ... It takes a few seconds."))
 
+(defvar emms-player-mpv-radiru--swf-url
+  "http://www3.nhk.or.jp/netradio/files/swf/rtmpe.swf")
+
 (defun emms-player-mpv-radiru--track-name-to-input-form (track-name)
-  "Retrun \"rtmpe://radiru-url live=1\" from TRACK-NAME."
+  "Retrun \"rtmpe://radiru-url live=1 swfUrl=swf-url swfVfy=1\" from TRACK-NAME."
   (later-do #'emms-player-mpv-radiru--loading-message)
-  (format "%s live=1" (replace-regexp-in-string "\\`radiru://" "" track-name)))
+  (format "%s live=1 swfUrl=%s swfVfy=1"
+          (replace-regexp-in-string "\\`radiru://" "" track-name)
+          emms-player-mpv-radiru--swf-url))
 
 (defun emms-player-mpv-radiru--get-media-title (track)
   (if (eq (emms-track-type track) 'streamlist)
