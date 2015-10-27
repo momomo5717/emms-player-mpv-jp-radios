@@ -25,7 +25,8 @@
 ;; This provides EMMS players and stream lists of Japan radio stations.
 ;;
 ;; * Available only in Japan due to access restriction
-;;     Radiko, らじる★らじる, 超！A&G+, 音泉, 響, アニたまどっとコム
+;;     Radiko, らじる★らじる, 超！A&G+, 音泉, 響, アニたまどっとコム,
+;;     animate.tv
 ;;
 ;; * Available anywhere
 ;;     SimulRadio, ListenRadio, Sea Side Communications
@@ -54,6 +55,9 @@
 ;; M-x emms-streams
 ;; ;; serviceName is radiko, radiru, etc.
 ;; M-x emms-stream-serviceName-add-bookmark
+;;
+;; Some functions can update cache of stream list.
+;; C-u M-x emms-stream-serviceName-add-bookmark
 
 ;;; Code:
 (require 'cl-lib)
@@ -66,6 +70,7 @@
     "onsen"
     "hibiki"
     "anitama"
+    "animate"
     "simul"
     "listen"
     "seaside")
@@ -76,7 +81,7 @@
 
 ;;;###autoload
 (defun emms-player-mpv-jp-radios-add (&rest names)
-  "Add emms simple players for NAMES to `emms-player-list'."
+  "Add emms simple players of NAMES to `emms-player-list'."
   (dolist (name names)
     (let ((player   (intern (concat "emms-player-mpv-" name)))
           (streams  (intern (concat "emms-streams-"    name)))
