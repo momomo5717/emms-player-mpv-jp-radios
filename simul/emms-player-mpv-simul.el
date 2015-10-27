@@ -1,4 +1,4 @@
-;;; emms-player-mpv-saimaru.el --- An emms simple mpv player for SaimaruRadio -*- lexical-binding: t -*-
+;;; emms-player-mpv-simul.el --- An emms simple mpv player for SimulRadio -*- lexical-binding: t -*-
 
 ;; Copyright (C) 2015 momomo5717
 
@@ -18,10 +18,10 @@
 
 ;;; Commentary:
 
-;; This provides emms-player-mpv-saimaru.
+;; This provides emms-player-mpv-simul.
 
-;; (require 'emms-player-mpv-saimaru)
-;; (add-to-list 'emms-player-list 'emms-player-mpv-saimaru)
+;; (require 'emms-player-mpv-simul)
+;; (add-to-list 'emms-player-list 'emms-player-mpv-simul)
 
 ;;; Code:
 (require 'cl-lib)
@@ -31,18 +31,18 @@
 (require 'url)
 (require 'later-do)
 
-(define-emms-simple-player-mpv mpv-saimaru '(streamlist)
-  "\\`saimaru://"
+(define-emms-simple-player-mpv mpv-simul '(streamlist)
+  "\\`s\\(imul\\|aimaru\\)://"
   "mpv" "--no-terminal" "--force-window=no" "--audio-display=no")
 
 (emms-player-simple-mpv-add-to-converters
- 'emms-player-mpv-saimaru "." t
- 'emms-player-mpv-saimaru--track-name-to-input-form)
+ 'emms-player-mpv-simul "." t
+ 'emms-player-mpv-simul--track-name-to-input-form)
 
-(emms-player-set 'emms-player-mpv-saimaru 'get-media-title
-                 'emms-player-mpv-saimaru--get-media-title)
+(emms-player-set 'emms-player-mpv-simul 'get-media-title
+                 'emms-player-mpv-simul--get-media-title)
 
-(cl-defun emms-player-mpv-saimaru--xml-collect-node
+(cl-defun emms-player-mpv-simul--xml-collect-node
     (name xml-ls &key (test #'identity) (getter #'identity))
   "Collect nodes of NAME from XML-LS.
 TEST and GETTER takes a node of NAME as an argument.
@@ -66,7 +66,7 @@ Object returned by GETTER is collected."
                  (t ls))))
     (collect-name-node xml-ls nil)))
 
-(defun emms-player-mpv-saimaru--asx-to-href (asx)
+(defun emms-player-mpv-simul--asx-to-href (asx)
   "Return href from ASX."
   (let* ((buf (url-retrieve-synchronously asx))
          (html (with-current-buffer buf
@@ -75,31 +75,31 @@ Object returned by GETTER is collected."
                  (unless (eobp) (forward-line 1))
                  (prog1 (libxml-parse-html-region (point) (point-max))
                    (kill-buffer buf)))))
-    (car (last (emms-player-mpv-saimaru--xml-collect-node
+    (car (last (emms-player-mpv-simul--xml-collect-node
                 'ref html
                 :test
                 (lambda (node) (xml-get-attribute-or-nil node 'href))
                 :getter
                 (lambda (node) (xml-get-attribute node 'href)))))))
 
-(defun emms-player-mpv-saimaru--loading-message ()
+(defun emms-player-mpv-simul--loading-message ()
   "Loading message."
-  (message "Loading SaimaruRadio ... "))
+  (message "Loading SimulRadio ... "))
 
-(defun emms-player-mpv-saimaru--track-name-to-input-form (track-name)
+(defun emms-player-mpv-simul--track-name-to-input-form (track-name)
   "Return url from TRACK-NAME."
-  (let* ((stream-url (replace-regexp-in-string "\\`saimaru://" "" track-name))
+  (let* ((stream-url (replace-regexp-in-string "\\`s\\(imul\\|aimaru\\)://" "" track-name))
          (url (if (string-match-p "[.]asx$" stream-url)
-                  (emms-player-mpv-saimaru--asx-to-href stream-url)
+                  (emms-player-mpv-simul--asx-to-href stream-url)
                 stream-url)))
-    (later-do 'emms-player-mpv-saimaru--loading-message)
+    (later-do 'emms-player-mpv-simul--loading-message)
     url))
 
-(defun emms-player-mpv-saimaru--get-media-title (track)
+(defun emms-player-mpv-simul--get-media-title (track)
   "Return media title from TRACK."
   (if (eq (emms-track-type track) 'streamlist)
       (emms-stream-name(emms-track-get track 'metadata))
     (file-name-nondirectory (emms-track-name track))))
 
-(provide 'emms-player-mpv-saimaru)
-;;; emms-player-mpv-saimaru.el ends here
+(provide 'emms-player-mpv-simul)
+;;; emms-player-mpv-simul.el ends here
