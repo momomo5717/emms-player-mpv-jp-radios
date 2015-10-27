@@ -28,7 +28,7 @@
 ;;     Radiko, らじる★らじる, 超！A&G+, 音泉, 響, アニたまどっとコム
 ;;
 ;; * Available anywhere
-;;     SaimaruRadio, ListenRadio, Sea Side Communications
+;;     SimulRadio, ListenRadio, Sea Side Communications
 
 ;; Other Requirements:
 ;;
@@ -66,7 +66,7 @@
     "onsen"
     "hibiki"
     "anitama"
-    "saimaru"
+    "simul"
     "listen"
     "seaside")
   "List of radio servece names.")

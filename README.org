@@ -15,7 +15,7 @@
 
    + Available anywhere
 
-     + [[http://www.simulradio.info/][SaimaruRadio]]
+     + [[http://www.simulradio.info/][SimulRadio]]
      + [[http://listenradio.jp/][ListenRadio]]
      + [[http://seaside-c.jp/radio_program/index.html][Sea Side Communications]]
 
@@ -57,7 +57,7 @@
      + "onsen"   (インターネットラジオステーション〈音泉〉)
      + "hibiki"  (響 - HiBiKi Radio Station -)
      + "anitama" (アニたまどっとコム)
-     + "saimaru" (SaimaruRadio)
+     + "simul"   (SimulRadio)
      + "listen"  (ListenRadio)
      + "seaside" (Sea Side Communications)
 
