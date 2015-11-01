@@ -56,27 +56,74 @@ If UPDATEP is no-nil, cache is updated."
        (emms-stream-anitaam--bookservlet-xml-to-streamlist
         (libxml-parse-xml-region (point-min) (point-max)))))))
 
+(defun emms-stream-anitama--write-weeeef-async (&optional cont)
+  "Access and write www.weeeef.com cookies asynchronously.
+If CONT is no-nil, it is run with no arguments."
+  (url-retrieve
+   "http://www.weeeef.com/weeeefww1/Transition?command=top&group=G0000049"
+   (lambda (status &rest _)
+     (when (memq :error status)
+       (error "Failed to write www.weeeef.com cookies : %s" (cdr status)))
+     (kill-buffer)
+     (emms-player-mpv-anitama--write-cookies)
+     (unless (emms-player-mpv-anitama--have-cookies-p)
+       (error "Failed to get cookies of www.weeeef.com"))
+     (when (functionp cont) (funcall cont)))))
+
+(defun emms-stream-anitama-fetch-streamlist-async ()
+  "Update cache asynchronously."
+  (cl-labels
+      ((streamlist-async-filter (proc _)
+        (let ((buf (process-buffer proc))
+              (ps (process-status proc)))
+          (when (eq ps 'signal)
+            (error "Failed to fetch animate stream list"))
+          (when (eq ps 'exit)
+            (with-current-buffer buf
+              (goto-char (point-max))
+              (search-backward ">" (point-min) t)
+              (goto-char (match-end 0))
+              (setq emms-stream-anitama-streamlist-cache
+                    (emms-stream-anitaam--bookservlet-xml-to-streamlist
+                     (libxml-parse-xml-region (point-min) (point))))
+              (unless emms-stream-anitama-streamlist-cache
+                (error "Failed to read anitama xml"))
+              (kill-buffer)
+              (message "Updated anitama stream list cache"))))))
+    (emms-stream-anitama--write-weeeef-async
+     (lambda () (set-process-sentinel
+             (start-process "animate-fetch-streamlist-async"
+                            (make-temp-name "*animate-fetch-streamlist-async*")
+                            "wget" "-q" "-O" "-"
+                            (format "--load-cookies=%s"
+                                    emms-player-mpv-anitama--cookie-file)
+                            "http://www.weeeef.com/weeeefww1/BookServlet")
+             #'streamlist-async-filter)))))
+
 ;;;###autoload
 (defun emms-stream-anitama-add-bookmark (&optional updatep)
   "Create anitama bookmarks, and insert it at point position.
 If UPDATEP is no-nil, cache is updated.
-  
+If UPDATEP is -1, cache is updated asynchronously.
+
 If save,run `emms-stream-save-bookmarks-file' after."
   (interactive "P")
-  (let ((buf (get-buffer emms-stream-buffer-name)))
-    (unless (buffer-live-p buf)
-      (error "%s is not a live buffer" emms-stream-buffer-name))
-    (set-buffer buf))
-  (let* ((streamlist (emms-stream-anitama-fetch-streamlist updatep))
-         (line       (emms-line-number-at-pos (point)))
-         (index      (+ (/ line 2) 1)))
-    (dolist (stream streamlist)
-      (setq emms-stream-list (emms-stream-insert-at index stream
-                                                    emms-stream-list))
-      (cl-incf index))
-    (emms-stream-redisplay)
-    (goto-char (point-min))
-    (forward-line (1- line))))
+  (if (eq updatep -1)
+      (emms-stream-anitama-fetch-streamlist-async)
+   (let ((buf (get-buffer emms-stream-buffer-name)))
+     (unless (buffer-live-p buf)
+       (error "%s is not a live buffer" emms-stream-buffer-name))
+     (set-buffer buf))
+   (let* ((streamlist (emms-stream-anitama-fetch-streamlist updatep))
+          (line       (emms-line-number-at-pos (point)))
+          (index      (+ (/ line 2) 1)))
+     (dolist (stream streamlist)
+       (setq emms-stream-list (emms-stream-insert-at index stream
+                                                     emms-stream-list))
+       (cl-incf index))
+     (emms-stream-redisplay)
+     (goto-char (point-min))
+     (forward-line (1- line)))))
 
 (provide 'emms-streams-anitama)
 ;;; emms-streams-anitama.el ends here

@@ -54,7 +54,7 @@
                  'emms-player-mpv-anitama--start-process)
 
 (defun emms-player-mpv-anitama--access-weeeef ()
-  "Access www.weeeef.com to get cookes."
+  "Access www.weeeef.com to get cookies."
   (let ((buf (url-retrieve-synchronously
               "http://www.weeeef.com/weeeefww1/Transition?command=top&group=G0000049")))
     (kill-buffer buf)))

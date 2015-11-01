@@ -71,27 +71,34 @@
                             emms-player-mpv-radiko--keyfile)))
       (error "Failed to write the keydata"))))
 
+(defvar emms-player-mpv-radiko--auth-fms-base-headers
+  '(("pragma" . "no-cache")
+    ("X-Radiko-App" . "pc_1")
+    ("X-Radiko-App-Version" . "2.0.1")
+    ("X-Radiko-User" . "test-stream")
+    ("X-Radiko-Device" . "pc"))
+  "Base headers for auth fms.")
+
 (defun emms-player-mpv-radiko--access-auth1-fms ()
   "Return auth1_fms."
-  (shell-command-to-string
-   "wget -q \\
-     --header=\"pragma: no-cache\" \\
-     --header=\"X-Radiko-App: pc_1\" \\
-     --header=\"X-Radiko-App-Version: 2.0.1\" \\
-     --header=\"X-Radiko-User: test-stream\" \\
-     --header=\"X-Radiko-Device: pc\" \\
-     --post-data='\\r\\n' \\
-     --no-check-certificate \\
-     --save-headers \\
-     -O - \\
-     https://radiko.jp/v2/api/auth1_fms"))
+  (let* ((url-request-method "POST")
+         (url-request-data "\\r\\n")
+         (url-request-extra-headers
+          emms-player-mpv-radiko--auth-fms-base-headers)
+         (buf (url-retrieve-synchronously
+               "https://radiko.jp/v2/api/auth1_fms" t)))
+    (with-current-buffer buf
+      (prog1 (buffer-substring-no-properties
+              (point-min) (point-max))
+        (kill-buffer buf)))))
 
 (defun emms-player-mpv-radiko--get-auth1-value (key auth1)
   "Return value of KEY from AUTH1."
   (if (string-match (format "%s: " key) auth1)
       (let ((pos (match-end 0)))
-        (if (string-match "\r\n" auth1 pos)
-            (substring auth1 pos (match-beginning 0))))
+        (if (string-match "\n\\|\r\n" auth1 pos)
+            (substring auth1 pos (match-beginning 0))
+          (error "Failed to get %s value" key)))
     (error "Failed to get %s value" key)))
 
 (defun emms-player-mpv-radiko--get-authtoken (auth1)
@@ -118,26 +125,25 @@
 
 (defun emms-player-mpv-radiko--access-auth2-fms (auth1)
   "Return auth2_fms from AUTH1."
-  (shell-command-to-string
-   (format
-    "wget -q \\
-        --header=\"pragma: no-cache\" \\
-        --header=\"X-Radiko-App: pc_1\" \\
-        --header=\"X-Radiko-App-Version: 2.0.1\" \\
-        --header=\"X-Radiko-User: test-stream\" \\
-        --header=\"X-Radiko-Device: pc\" \\
-        --header=\"X-Radiko-Authtoken: %s\" \\
-        --header=\"X-Radiko-Partialkey: %s\" \\
-        --post-data='\\r\\n' \\
-        --no-check-certificate \\
-        -O - \\
-        https://radiko.jp/v2/api/auth2_fms"
-    (emms-player-mpv-radiko--get-authtoken auth1)
-    (emms-player-mpv-radiko--get-partialkey emms-player-mpv-radiko--keyfile auth1))))
+  (let* ((url-request-method "POST")
+         (url-request-data "\\r\\n")
+         (url-request-extra-headers
+          `(("X-Radiko-Authtoken" .
+             ,(emms-player-mpv-radiko--get-authtoken auth1))
+            ("X-Radiko-Partialkey" .
+             ,(emms-player-mpv-radiko--get-partialkey
+               emms-player-mpv-radiko--keyfile auth1))
+            ,@emms-player-mpv-radiko--auth-fms-base-headers))
+         (buf (url-retrieve-synchronously
+               "https://radiko.jp/v2/api/auth2_fms" t)))
+    (with-current-buffer buf
+      (prog1 (buffer-substring-no-properties
+              (point-min) (point-max))
+        (kill-buffer buf)))))
 
 (defun emms-player-mpv-radiko--get-area-id (auth2)
   "Retrun area-id from AUTH2."
-  (if (string-match "^.+[0-9][,]" auth2)
+  (if (string-match "^JP[0-9]+[,]" auth2)
       (substring auth2 (match-beginning 0) (1- (match-end 0)))
     (error "Failed to get area-id")))
 
@@ -145,17 +151,19 @@
   "Return stream-url from CHANNEL.
 \"channel\"
 => \"rtmpe://f-radiko.smartstream.ne.jp/channel/_definst_/simul-stream.stream\""
-  (with-temp-buffer
-    (unless (zerop
-             (call-process
-              "wget"  nil t nil "-q" "-O" "-"
-              (format "http://radiko.jp/v2/station/stream/%s.xml" channel)))
-      (error "Failed to wget station/stream/%s.xml" channel))
-    (let* ((stream-xml (libxml-parse-xml-region (point-min) (point-max)))
-           (item (car (xml-get-children stream-xml 'item)))
-           (stream-url (car (xml-node-children item))))
-      (if (stringp stream-url) stream-url
-        (error "Failed to parce stream url")))))
+  (let ((buf (url-retrieve-synchronously
+              (format "http://radiko.jp/v2/station/stream/%s.xml" channel) t))
+        (stream-url nil))
+    (with-current-buffer buf
+      (goto-char (point-min))
+      (while (and (not (eobp)) (not (eolp))) (forward-line 1))
+      (unless (eobp) (forward-line 1))
+      (let* ((stream-xml (libxml-parse-xml-region (point) (point-max)))
+             (item (car (xml-get-children stream-xml 'item))))
+        (setq stream-url (car (xml-node-children item))))
+      (kill-buffer buf))
+    (if (stringp stream-url) stream-url
+      (error "Failed to parce stream/%s.xml" channel))))
 
 (defun emms-player-mpv-radiko--loading-message ()
   "Loading message."

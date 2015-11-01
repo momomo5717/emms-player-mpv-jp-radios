@@ -30,13 +30,12 @@
 (require 'emms-player-mpv-radiko)
 
 (defvar emms-stream-radiko-streamlist-cache nil)
-
-(defun emms-stream-radiko--fetch-streamlist (area-id)
+(defun emms-stream-radiko--fetch-streamlist (area-id &optional buf)
   "Retrun AREA-ID radiko stream list.
 string -> streamlist
 \(emms-radiko-wget-radiko-stream-list \"JP13\"\) => streamlist"
-  (let ((buf (url-retrieve-synchronously
-              (format "http://radiko.jp/v2/station/list/%s.xml" area-id))))
+  (let ((buf (or buf (url-retrieve-synchronously
+                      (format "http://radiko.jp/v2/station/list/%s.xml" area-id)))))
     (with-current-buffer buf
       (goto-char (point-min))
       (while (and (not (eobp)) (not (eolp))) (forward-line 1))
@@ -55,31 +54,144 @@ string -> streamlist
   (if (and (not updatep) (consp emms-stream-radiko-streamlist-cache))
       emms-stream-radiko-streamlist-cache
     (setq emms-stream-radiko-streamlist-cache
-     (emms-stream-radiko--fetch-streamlist
-        (emms-player-mpv-radiko--get-area-id
-         (emms-player-mpv-radiko--access-auth2-fms
-          (emms-player-mpv-radiko--access-auth1-fms)))))))
+          (progn
+            (emms-player-mpv-radiko--wget-playerfile)
+            (emms-player-mpv-radiko--write-keydata)
+            (emms-stream-radiko--fetch-streamlist
+             (emms-player-mpv-radiko--get-area-id
+              (emms-player-mpv-radiko--access-auth2-fms
+               (emms-player-mpv-radiko--access-auth1-fms))))))))
+
+(defun emms-stream-radiko--wget-playerfile-async (&optional cont)
+  "Run CONT with no arguments after doing wget playerfile."
+  (if (file-exists-p emms-player-mpv-radiko--playerfile)
+      (when (functionp cont) (funcall cont))
+    (cl-labels
+        ((wget-playerfile-async-filter (proc _)
+          (let ((ps (process-status proc)))
+            (when (eq ps 'exit)
+              (unless (file-exists-p emms-player-mpv-radiko--playerfile)
+                (error "Failed to get %s" emms-player-mpv-radiko--playerfile))
+              (when (functionp cont) (funcall cont))))))
+      (set-process-sentinel
+       (start-process "radiko-wget-playerfile-async"
+                      nil
+                      "wget" "-q" "-O"
+                      emms-player-mpv-radiko--playerfile
+                      emms-player-mpv-radiko--playerurl)
+       #'wget-playerfile-async-filter))))
+
+(defun emms-stream-radiko--write-keydata-async (&optional cont)
+  "Run CONT after writing keydata."
+  (if (file-exists-p  emms-player-mpv-radiko--keyfile)
+      (when (functionp cont) (funcall cont))
+    (cl-labels
+        ((write-keydate-async-filter (proc _)
+          (let ((ps (process-status proc)))
+            (when (eq ps 'exit)
+              (unless (file-exists-p emms-player-mpv-radiko--keyfile)
+                (error "Failed to write %s" emms-player-mpv-radiko--keyfile))
+              (when (functionp cont) (funcall cont))))))
+     (set-process-sentinel
+      (start-process "radiko-write-keydata-async"
+                     nil
+                     "swfextract" "-b" "14"
+                     emms-player-mpv-radiko--playerfile
+                     "-o"
+                     emms-player-mpv-radiko--keyfile)
+      #'write-keydate-async-filter))))
+
+(defun emms-stream-radiko--access-auth1-fms-async (&optional cont)
+  "Send auth1 to CONT."
+  (let ((url-request-method "POST")
+        (url-request-data "\\r\\n")
+        (url-request-extra-headers
+          emms-player-mpv-radiko--auth-fms-base-headers)
+        (auth1 ""))
+    (url-retrieve
+     "https://radiko.jp/v2/api/auth1_fms"
+     (lambda (status &rest _)
+       (when (memq :error status)
+         (error "Failed to get auth1_fms : %s" (cdr status)))
+       (setq auth1
+             (buffer-substring-no-properties
+              (point-min) (point-max)))
+       (kill-buffer)
+       (when (functionp cont) (funcall cont auth1))))))
+
+(defun emms-stream-radiko--access-auth2-fms-async (auth1 cont)
+  "Send auth2 of AUTH1 to CONT."
+  (let ((url-request-method "POST")
+        (url-request-data "\\r\\n")
+        (url-request-extra-headers
+         `(("X-Radiko-Authtoken" .
+            ,(emms-player-mpv-radiko--get-authtoken auth1))
+           ("X-Radiko-Partialkey" .
+            ,(emms-player-mpv-radiko--get-partialkey
+              emms-player-mpv-radiko--keyfile auth1))
+           ,@emms-player-mpv-radiko--auth-fms-base-headers))
+        (auth2 ""))
+    (url-retrieve
+     "https://radiko.jp/v2/api/auth2_fms"
+     (lambda (status &rest _)
+       (when (memq :error status)
+         (error "Failed to get auth1_fms : %s" (cdr status)))
+       (setq auth2 (buffer-substring-no-properties
+                    (point-min) (point-max)))
+                     (kill-buffer)
+              (funcall cont auth2)))))
+
+(defun emms-stream-radiko--fetch-streamlist-async-1 (area-id)
+  "Helper function for `emms-stream-radiko--fetch-streamlist-async'."
+  (url-retrieve
+   (format "http://radiko.jp/v2/station/list/%s.xml" area-id)
+   (lambda (status &rest _)
+     (when (memq :error status)
+       (error "Failed to get radiko station list : %s" (cdr status)))
+     (setq emms-stream-radiko-streamlist-cache
+           (emms-stream-radiko--fetch-streamlist nil (current-buffer)))
+     (unless emms-stream-radiko-streamlist-cache
+       (error "Failed to get radiko stream list"))
+     (message "Updated radiko stream list cache"))))
+
+(defun emms-stream-radiko--fetch-streamlist-async ()
+  "Update cache asynchronously."
+  (cl-labels
+      ((fetch-streamlist-async ()
+        (emms-stream-radiko--access-auth1-fms-async
+         (lambda (auth1)
+           (emms-stream-radiko--access-auth2-fms-async
+            auth1 (lambda (auth2)
+                    (emms-stream-radiko--fetch-streamlist-async-1
+                     (emms-player-mpv-radiko--get-area-id auth2))))))))
+    (emms-stream-radiko--wget-playerfile-async
+     (lambda ()
+       (emms-stream-radiko--write-keydata-async
+        #'fetch-streamlist-async)))))
 
 ;;;###autoload
 (defun emms-stream-radiko-add-bookmark (&optional updatep)
   "Create radiko bookmarks, and insert it at point position.
+If UPDATEP is no-nil, cache is updated.
+If UPDATEP is -1, cache is updated asynchronously.
 
 If save,run `emms-stream-save-bookmarks-file' after."
   (interactive "P")
-  (let ((buf (get-buffer emms-stream-buffer-name)))
-    (unless (buffer-live-p buf)
-      (error "%s is not a live buffer" emms-stream-buffer-name))
-    (set-buffer buf))
-  (let* ((streamlist (emms-stream-radiko-fetch-current-area-streamlist updatep))
-         (line       (emms-line-number-at-pos (point)))
-         (index      (+ (/ line 2) 1)))
-    (dolist (stream streamlist)
-      (setq emms-stream-list (emms-stream-insert-at index stream
-                                                    emms-stream-list))
-      (cl-incf index))
-    (emms-stream-redisplay)
-    (goto-char (point-min))
-    (forward-line (1- line))))
+  (if (eq updatep -1) (emms-stream-radiko--fetch-streamlist-async)
+    (let ((buf (get-buffer emms-stream-buffer-name)))
+      (unless (buffer-live-p buf)
+        (error "%s is not a live buffer" emms-stream-buffer-name))
+      (set-buffer buf))
+    (let* ((streamlist (emms-stream-radiko-fetch-current-area-streamlist updatep))
+           (line       (emms-line-number-at-pos (point)))
+           (index      (+ (/ line 2) 1)))
+      (dolist (stream streamlist)
+        (setq emms-stream-list (emms-stream-insert-at index stream
+                                                      emms-stream-list))
+        (cl-incf index))
+      (emms-stream-redisplay)
+      (goto-char (point-min))
+      (forward-line (1- line)))))
 
 (provide 'emms-streams-radiko)
 ;;; emms-streams-radiko.el ends here
