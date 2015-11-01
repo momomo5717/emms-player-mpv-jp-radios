@@ -53,11 +53,19 @@
 ;; Usage:
 ;;
 ;; M-x emms-streams
-;; ;; serviceName is radiko, radiru, etc.
-;; M-x emms-stream-serviceName-add-bookmark
+;; ;; stationName is radiko, radiru, etc.
+;; M-x emms-stream-stationName-add-bookmark
 ;;
 ;; Some functions can update cache of stream list.
-;; C-u M-x emms-stream-serviceName-add-bookmark
+;; ;; Updating synchronously
+;; C-u M-x emms-stream-stationName-add-bookmark
+;; ;; Updating asynchronously
+;; C-u -1 M-x emms-stream-stationName-add-bookmark
+;;
+;; The following plugins are available:
+;; + emms-streams-jp-radios.el
+;; + emms-streams-jp-radios-helm.el (hlem v1.7.9 or later is needed.)
+;;
 
 ;;; Code:
 (require 'cl-lib)
@@ -74,7 +82,7 @@
     "simul"
     "listen"
     "seaside")
-  "List of radio servece names.")
+  "List of radio station names.")
 
 (defvar emms-player-mpv-jp-radios--dir
   (file-name-directory (or load-file-name (buffer-file-name))))
