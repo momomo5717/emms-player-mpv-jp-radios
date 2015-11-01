@@ -223,7 +223,8 @@ If save,run `emms-stream-save-bookmarks-file' after."
                        "         [7] 近畿(kinki)       [8] 中国(Chugoku)  [9] 四国(Shikoku)\n"
                        "        [10] 九州(kyusyu)     [11] 沖縄(Okinawa)\n\n"
                        "Input a number of 0-11: ")))
-      (while (not (and (integerp (setq location (read-number msg))) (<= 0 location 12))))))
+      (while (not (and (integerp (setq location (read-number msg)))
+                       (<= 0 location) (<= location 11))))))
   (if (zerop location)
       (apply #'emms-stream-simul-add-bookmark-1 emms-stream-simul-streams-name)
     (emms-stream-simul-add-bookmark-1 (nth (1- location) emms-stream-simul-streams-name))))

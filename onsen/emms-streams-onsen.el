@@ -55,8 +55,8 @@ Object returned by GETTER is collected."
                  (t ls))))
     (collect-name-node xml-ls nil)))
 
-(defun emms-stream-onsen--url-to-html (url &optional xmlp)
-  (let ((buf (url-retrieve-synchronously url)))
+(defun emms-stream-onsen--url-to-html (url &optional xmlp buf)
+  (let ((buf (or buf (url-retrieve-synchronously url))))
     (with-current-buffer buf
       (goto-char (point-min))
       (while (and (not (eobp)) (not (eolp))) (forward-line 1))
@@ -121,6 +121,16 @@ If UPDATEP is no-nil, cache is updated."
              (emms-stream-onsen--url-to-html "http://www.onsen.ag")))
     emms-stream-onsen--stream-alist-cache))
 
+(defun emms-stream-onsen--fetch-stream-alist-async ()
+  "Update cache asynchronously."
+  (url-retrieve
+   "http://www.onsen.ag"
+   (lambda (_status)
+     (setq emms-stream-onsen--stream-alist-cache
+           (emms-stream-onsen--top-html-to-stream-alist
+            (emms-stream-onsen--url-to-html nil nil (current-buffer))))
+     (message "Updated onsen stream list cache"))))
+
 (defun emms-stream-onsen--add-bookmark-dows (days &optional updatep)
   "Helper function for `emms-stream-onsen-add-bookmark', etc.
 Add stream list of DAYS.
@@ -145,21 +155,24 @@ If UPDATEP is non-nil, cache is updated."
 (defun emms-stream-onsen-add-bookmark (&optional updatep dow)
   "Create onsen bookmark, and insert it at point position.
 If UPDATEP is no-nil, cache is updated.
-DOW is a number of 0-6.
+DOW is a number of 0-6 or -1.
 
 If save,run `emms-stream-save-bookmarks-file' after."
   (interactive "P")
   (unless (integerp dow)
     (let ((msg (concat "[0] All  [1] Mon  [2] Tue  [3] Wed  [4] Thu\n"
-                       "         [5] Fri  [6] Sat/Sun\n\n"
-                       "Input a number of 0-6: ")))
-      (while (not (and (integerp (setq dow (read-number msg))) (<= 0 dow 6))))))
+                       "         [5] Fri  [6] Sat/Sun\n"
+                       "[-1] Update stream list cache asynchronously\n\n"
+                       "Input a number of 0-6 or -1: ")))
+      (while (not (and (integerp (setq dow (read-number msg)))
+                       (<= -1 dow) (<= dow 6))))))
   (let ((days '("mon" "tue" "wed" "thu" "fri" "sat" "sun")))
-   (emms-stream-onsen--add-bookmark-dows
-    (cond ((zerop dow) days)
-          ((= dow 6) '("sat" "sun"))
-          (t (list (nth (1- dow) days))))
-    updatep)))
+    (if (= dow -1) (emms-stream-onsen--fetch-stream-alist-async)
+      (emms-stream-onsen--add-bookmark-dows
+       (cond ((zerop dow) days)
+             ((= dow 6) '("sat" "sun"))
+             (t (list (nth (1- dow) days))))
+       updatep))))
 
 (provide 'emms-streams-onsen)
 ;;; emms-streams-onsen.el ends here

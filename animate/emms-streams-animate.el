@@ -59,13 +59,14 @@ Object returned by GETTER is collected."
                  (t ls))))
     (collect-name-node xml-ls nil)))
 
-(defun emms-stream-animate--url-to-html (url)
-  (let* ((buf (url-retrieve-synchronously url)))
+(defun emms-stream-animate--url-to-html (url &optional xmlp buf)
+  (let ((buf (or buf (url-retrieve-synchronously url))))
     (with-current-buffer buf
       (goto-char (point-min))
       (while (and (not (eobp)) (not (eolp))) (forward-line 1))
       (unless (eobp) (forward-line 1))
-      (unwind-protect (libxml-parse-html-region (point) (point-max))
+      (unwind-protect (funcall (if xmlp #'libxml-parse-xml-region
+                                 #'libxml-parse-html-region) (point) (point-max))
         (kill-buffer buf)))))
 
 (defun emms-stream-animate--box-to-stream (box)
@@ -123,6 +124,17 @@ If UPDATEP is non-nil, cache is updated."
                        (cons day (emms-stream-animate--html-to-stream-list day html)))))
     emms-stream-animate--stream-alist-cache))
 
+(defun emms-stream-animate--fetch-stream-alist-async ()
+  "Update cache asynchronously."
+  (url-retrieve
+   emms-stream-animate--url
+   (lambda (_status)
+    (let ((html (emms-stream-animate--url-to-html nil nil (current-buffer))))
+      (setq emms-stream-animate--stream-alist-cache
+            (cl-loop for day in emms-stream-animate--days collect
+                     (cons day (emms-stream-animate--html-to-stream-list day html)))))
+    (message "Updated animate stream list cache"))))
+
 (defun emms-stream-animate-ger-stream-list-dow (day &optional updatep)
   "Return streamlist of the DAY of the weekdays.
 If UPDATEP is non-nil, cache is updated."
@@ -151,18 +163,21 @@ If UPDATEP is non-nil, cache is updated."
 (defun emms-stream-animate-add-bookmark (&optional updatep dow)
   "Create animate bookmark, and insert it at point position.
 If UPDATEP is no-nil, cache is updated.
-DOW is a number of 0-6.
+DOW is a number of 0-6 or -1.
 
 If save,run `emms-stream-save-bookmarks-file' after."
   (interactive "P")
   (unless (integerp dow)
     (let ((msg (concat "[0] All  [1] Mon  [2] Tue  [3] Wed  [4] Thu\n"
-                       "         [5] Fri  [6] Irr\n\n"
-                       "Input a number of 0-6: ")))
-      (while (not (and (integerp (setq dow (read-number msg))) (<= 0 dow 6))))))
-  (if (zerop dow) (emms-stream-animate-add-bookmark-1 updatep)
-    (emms-stream-animate-add-bookmark-1
-     updatep (nth (1- dow) emms-stream-animate--days))))
+                       "         [5] Fri  [6] Irr\n"
+                       "[-1] Update stream list cache asynchronously\n\n"
+                       "Input a number of 0-6 or -1: ")))
+      (while (not (and (integerp (setq dow (read-number msg)))
+                       (<= -1 dow) (<= dow 6))))))
+  (cond ((= dow -1) (emms-stream-animate--fetch-stream-alist-async))
+        ((zerop dow) (emms-stream-animate-add-bookmark-1 updatep))
+        (t (emms-stream-animate-add-bookmark-1
+            updatep (nth (1- dow) emms-stream-animate--days)))))
 
 (provide 'emms-streams-animate)
 ;;; emms-streams-animate.el ends here

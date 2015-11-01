@@ -304,12 +304,14 @@ If save,run `emms-stream-save-bookmarks-file' after."
     (let ((msg (concat "[0] All  [1] 音楽ジャンル  [2] 音楽ブランド  [3] シチュエーション\n"
                        "         [4] 気持ち        [5] バラエティ    [6] 全国のラジオ局\n\n"
                        "Input a number of 0-6: ")))
-      (while (not (and (integerp (setq category (read-number msg))) (<= 0 category 6))))))
+      (while (not (and (integerp (setq category (read-number msg)))
+                       (<= 0 category) (<= category 6))))))
   (when (and (eq category 6) (null area))
     (let ((msg (concat "[0] All  [1] 北海道  [2] 東北  [3] 関東        [4] 東海\n"
                        "         [5] 北信越  [6] 近畿  [7] 中国・四国  [8] 九州・沖縄\n\n"
                        "Input a number of 0-8: ")))
-      (while (not (and (integerp (setq area (read-number msg))) (<= 0 area 8))))))
+      (while (not (and (integerp (setq area (read-number msg)))
+                       (<= 0 area) (<= area 8))))))
   (let ((id-ls (mapcar #'car emms-stream-listen--category-alist)))
    (cond
     ((zerop category) (emms-stream-listen--add-bookmark-1 id-ls))

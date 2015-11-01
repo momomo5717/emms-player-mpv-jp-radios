@@ -217,7 +217,8 @@ If save,run `emms-stream-save-bookmarks-file' after."
                 "         [5] Fri  [6] Sat/San\n"
                 "[-1] Update stream list cache asynchronously\n\n"
                 "Input a number of 0-6 or -1: ")))
-      (while (not (and (integerp (setq dow (read-number msg))) (<= -1 dow 6))))))
+      (while (not (and (integerp (setq dow (read-number msg)))
+                       (<= -1 dow) (<= dow 6))))))
   (cond
    ((= dow -1) (emms-stream-hibiki-update-cache-async))
    ((zerop dow) (emms-stream-hibiki--add-bookmark-dows '(1 2 3 4 5 6) updatep))
