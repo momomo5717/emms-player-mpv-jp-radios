@@ -20,6 +20,11 @@
      + [[http://listenradio.jp/][ListenRadio]]
      + [[http://seaside-c.jp/radio_program/index.html][Sea Side Communications]]
 
+   The following plugins are available:
+
+   + emms-streams-jp-radios.el
+   + emms-streams-jp-radios-helm.el (hlem v1.7.9 or later is needed.)
+
 ** Requirements
 
    + GNU Emacs 24 or later
@@ -74,14 +79,17 @@
 
    #+BEGIN_SRC
    M-x emms-streams
-   ;; serviceName is radiko, radiru, etc.
-   M-x emms-stream-serviceName-add-bookmark
+   ;; stationName is radiko, radiru, etc.
+   M-x emms-stream-stationName-add-bookmark
    #+END_SRC
 
    Some functions can update cache of stream list.
 
    #+BEGIN_EXAMPLE
-   C-u M-x emms-stream-serviceName-add-bookmark
+   ;; Updating synchronously
+   C-u M-x emms-stream-stationName-add-bookmark
+   ;; Updating asynchronously
+   C-u -1 M-x emms-stream-stationName-add-bookmark
    #+END_EXAMPLE
 
 ** References
@@ -92,3 +100,4 @@
      + [[http://vector.hateblo.jp/entry/2015/01/03/193556]]
    + How to play ListenRadio
      + [[http://actinium.org/devel/tips/listenradio-recording]]
+   + helm-emms ( https://github.com/emacs-helm/helm-emms )
