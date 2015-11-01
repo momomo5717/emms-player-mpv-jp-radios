@@ -292,6 +292,20 @@ id  = number or (number ...)"
     (goto-char (point-min))
     (forward-line (1- line))))
 
+(defun emms-stream-listen-get-stream-list ()
+  "Return new stream-list."
+  (cl-loop
+   with ls = nil
+   for id in (mapcar #'car emms-stream-listen--category-alist) do
+   (if (eq id 10005)
+       (cl-loop
+        for area in (mapcar #'car emms-stream-listen--area-alist) do
+        (dolist (stream (emms-stream-listen--get-stream-list id area))
+          (push stream ls)))
+     (dolist (stream (emms-stream-listen--get-stream-list id))
+       (push stream ls)))
+   finally return (nreverse ls)))
+
 ;;;###autoload
 (defun emms-stream-listen-add-bookmark (&optional category area)
   "Create listen bookmark, and insert it at point position.

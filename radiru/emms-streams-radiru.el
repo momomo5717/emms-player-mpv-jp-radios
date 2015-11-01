@@ -26,7 +26,7 @@
 (require 'emms-streams)
 (require 'cl-lib)
 
-(defvar emms-stream-radiru-streamlist-sendai
+(defvar emms-stream-radiru-stream-list-sendai
   '(("NHK第1 仙台"
      "radiru://rtmpe://netradio-hkr1-flash.nhk.jp/live/NetRadio_HKR1_flash@108442"
      1 streamlist)
@@ -38,7 +38,7 @@
      1 streamlist))
   "らじる★らじる 仙台 stream list.")
 
-(defvar emms-stream-radiru-streamlist-tokyo
+(defvar emms-stream-radiru-stream-list-tokyo
   '(("NHK第1 東京"
      "radiru://rtmpe://netradio-r1-flash.nhk.jp/live/NetRadio_R1_flash@63346"
      1 streamlist)
@@ -50,7 +50,7 @@
      1 streamlist))
   "らじる★らじる 東京 stream list.")
 
-(defvar emms-stream-radiru-streamlist-nagoya
+(defvar emms-stream-radiru-stream-list-nagoya
   '(("NHK第1 名古屋"
      "radiru://rtmpe://netradio-ckr1-flash.nhk.jp/live/NetRadio_CKR1_flash@108234"
      1 streamlist)
@@ -62,7 +62,7 @@
      1 streamlist))
   "らじる★らじる 名古屋 stream list.")
 
-(defvar emms-stream-radiru-streamlist-osaka
+(defvar emms-stream-radiru-stream-list-osaka
   '(("NHK第1 大阪"
      "radiru://rtmpe://netradio-bkr1-flash.nhk.jp/live/NetRadio_BKR1_flash@108232"
      1 streamlist)
@@ -74,14 +74,30 @@
      1 streamlist))
   "らじる★らじる 大阪 stream list.")
 
-(defun emms-stream-rajiru-get-streamlist (area)
+(defun emms-stream-radiru-get-area-stream-list (area)
   "Return streamlist of the AREA."
   (cl-case area
-    (sendai emms-stream-radiru-streamlist-sendai)
-    (tokyo  emms-stream-radiru-streamlist-tokyo)
-    (nagoya emms-stream-radiru-streamlist-nagoya)
-    (osaka  emms-stream-radiru-streamlist-osaka)
+    (sendai emms-stream-radiru-stream-list-sendai)
+    (tokyo  emms-stream-radiru-stream-list-tokyo)
+    (nagoya emms-stream-radiru-stream-list-nagoya)
+    (osaka  emms-stream-radiru-stream-list-osaka)
     (t nil)))
+
+(defun emms-stream-radiru-get-stream-list ()
+  "Return new stream-list."
+  (cons '("NHK第2"
+          "radiru://rtmpe://netradio-r2-flash.nhk.jp/live/NetRadio_R2_flash@63342"
+          1 streamlist)
+        (cl-loop
+         with ls = nil
+         for area-stream-list in (list emms-stream-radiru-stream-list-sendai
+                                       emms-stream-radiru-stream-list-tokyo
+                                       emms-stream-radiru-stream-list-nagoya
+                                       emms-stream-radiru-stream-list-osaka)
+         do (dolist (stream area-stream-list)
+              (unless (equal (car stream) "NHK第2")
+                (push stream ls)))
+         finally return (nreverse ls))))
 
 ;;;###autoload
 (defun emms-stream-radiru-add-bookmark (area)
@@ -93,10 +109,10 @@ If save ,run `emms-stream-save-bookmarks-file' after."
     (unless (buffer-live-p buf)
       (error "%s is not a live buffer" emms-stream-buffer-name))
     (set-buffer buf))
-  (let* ((streamlist (emms-stream-rajiru-get-streamlist area))
+  (let* ((stream-list (emms-stream-radiru-get-area-stream-list area))
          (line       (emms-line-number-at-pos (point)))
          (index      (+ (/ line 2) 1)))
-    (dolist (stream streamlist)
+    (dolist (stream stream-list)
       (setq emms-stream-list (emms-stream-insert-at index stream
                                                     emms-stream-list))
       (cl-incf index))

@@ -28,10 +28,14 @@
 (require 'cl-lib)
 (require 'emms-player-mpv-agqr)
 
-(defvar emms-stream-agqr-streamlist
+(defvar emms-stream-agqr-stream-list
   '(("超!A&G+" "agqr://fms-base2.mitene.ad.jp/agqr/aandg22" 1 streamlist))
   "超!A&G+ stream list.
 Replace agqr:// with rtmp:// when use it.")
+
+(defun emms-stream-agqr-get-stream-list ()
+  "Return new streamlist."
+  (cl-copy-list emms-stream-agqr-stream-list))
 
 ;;;###autoload
 (defun emms-stream-agqr-add-bookmark ()
@@ -43,7 +47,7 @@ If save,run `emms-stream-save-bookmarks-file' after."
     (unless (buffer-live-p buf)
       (error "%s is not a live buffer" emms-stream-buffer-name))
     (set-buffer buf))
-  (let* ((streamlist emms-stream-agqr-streamlist)
+  (let* ((streamlist emms-stream-agqr-stream-list)
          (line       (emms-line-number-at-pos (point)))
          (index      (+ (/ line 2) 1)))
     (dolist (stream streamlist)

@@ -109,7 +109,7 @@ Object returned by GETTER is collected."
                     div-hbkPrograms))))
 
 (defun emms-stream-hibiki--fetch-stream-list-dow (n &optional updatep)
-  "Retrun streamlist of N\(DOW\).
+  "Retrun stream-list of N\(DOW\).
 If UPDATEP is non-nil, cache is updated."
   (unless (and (< 0 n) (< n 7)) (error "N needs an integer of 1-6"))
   (let (stream-list-dow)
@@ -216,6 +216,15 @@ If UPDATEP is non-nil, cache is updated."
     (emms-stream-redisplay)
     (goto-char (point-min))
     (forward-line (1- line))))
+
+(defun emms-stream-hibiki-get-stream-list ()
+  "Return new stream-list from cache."
+  (cl-loop
+   with ls = nil
+   for dow from 1 to 6 do
+   (dolist (stream (cdr (assq dow emms-stream-hibiki--stream-alist-cache)))
+     (push stream ls))
+   finally return (nreverse ls)))
 
 ;;;###autoload
 (defun emms-stream-hibiki-add-bookmark (&optional updatep dow)

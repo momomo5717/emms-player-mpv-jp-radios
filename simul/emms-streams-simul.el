@@ -210,6 +210,15 @@
     (goto-char (point-min))
     (forward-line (1- line))))
 
+(defun emms-stream-simul-get-stream-list ()
+  "Return new stream-list."
+  (cl-loop
+   with ls = nil
+   for streams-name in emms-stream-simul-streams-name do
+   (dolist (stream (symbol-value streams-name))
+     (push stream ls))
+   finally return (nreverse ls)))
+
 ;;;###autoload
 (defun emms-stream-simul-add-bookmark (&optional location)
   "Create simul bookmark, and insert it at point position.

@@ -25,7 +25,7 @@
 (require 'emms-streams)
 (require 'cl-lib)
 
-(defvar emms-stream-seaside-streamlist
+(defvar emms-stream-seaside-stream-list
   '(("あどりぶ : 月曜日更新"
      "seaside://http://seaside-c.jp/program/adlib/"
      1 streamlist)
@@ -63,6 +63,10 @@
      "seaside://http://seaside-c.jp/program/emergency/"
      1 streamlist)))
 
+(defun emms-stream-seaside-get-stream-list ()
+  "Return new stream-list."
+  (cl-copy-list emms-stream-seaside-stream-list))
+
 ;;;###autoload
 (defun emms-stream-seaside-add-bookmark ()
   "Create seaside bookmark, and insert it at point position.
@@ -73,10 +77,10 @@ If save,run `emms-stream-save-bookmarks-file' after."
     (unless (buffer-live-p buf)
       (error "%s is not a live buffer" emms-stream-buffer-name))
     (set-buffer buf))
-  (let* ((streamlist emms-stream-seaside-streamlist)
+  (let* ((stream-list emms-stream-seaside-stream-list)
          (line       (emms-line-number-at-pos (point)))
          (index      (+ (/ line 2) 1)))
-    (dolist (stream streamlist)
+    (dolist (stream stream-list)
       (setq emms-stream-list (emms-stream-insert-at index stream
                                                     emms-stream-list))
       (cl-incf index))

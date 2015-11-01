@@ -153,6 +153,15 @@ If UPDATEP is non-nil, cache is updated."
     (goto-char (point-min))
     (forward-line (1- line))))
 
+(defun emms-stream-onsen-get-stream-list ()
+  "Return new stream-list from cache."
+  (cl-loop
+   with ls = nil
+   for day in '("mon" "tue" "wed" "thu" "fri" "sat" "sun") do
+   (dolist (stream (assoc-default day emms-stream-onsen--stream-alist-cache))
+     (push stream ls))
+   finally return (nreverse ls)))
+
 ;;;###autoload
 (defun emms-stream-onsen-add-bookmark (&optional updatep dow)
   "Create onsen bookmark, and insert it at point position.

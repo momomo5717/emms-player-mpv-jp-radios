@@ -161,6 +161,15 @@ If UPDATEP is non-nil, cache is updated."
     (goto-char (point-min))
     (forward-line (1- line))))
 
+(defun emms-stream-animate-get-stream-list ()
+  "Return new streamlist from cache."
+  (cl-loop
+   with ls = nil
+   for day in emms-stream-animate--days do
+   (dolist (stream (assoc-default day emms-stream-animate--stream-alist-cache))
+     (push stream ls))
+   finally return (nreverse ls)))
+
 ;;;###autoload
 (defun emms-stream-animate-add-bookmark (&optional updatep dow)
   "Create animate bookmark, and insert it at point position.
