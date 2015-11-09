@@ -41,12 +41,11 @@
 
 (emms-player-simple-mpv-add-to-converters
  'emms-player-mpv-seaside
- "\\`seaside://http://seaside-c.jp/program/emergency/" t
- 'emms-player-mpv-seaside--track-name-to-nico-input-form)
-
-(emms-player-simple-mpv-add-to-converters
- 'emms-player-mpv-seaside
- "\\`seaside://http://seaside-c.jp/program/delicatezone/" t
+ (concat "\\`"
+         (regexp-opt '("seaside://http://seaside-c.jp/program/emergency/"
+                       "seaside://http://seaside-c.jp/program/delicatezone/"
+                       "seaside://http://ch.nicovideo.jp/grimoire-gakuen")))
+ t
  'emms-player-mpv-seaside--track-name-to-nico-input-form)
 
 (emms-player-set 'emms-player-mpv-seaside 'get-media-title
@@ -80,24 +79,22 @@ Object returned by GETTER is collected."
   "Loading message."
   (message "Loading Sea Side Communications ... "))
 
-(defun emms-player-mpv-seaside--url-to-body (url)
-  "Return body html list fron URL."
+(defun emms-player-mpv-seaside--url-to-html (url)
+  "Return html list fron URL."
   (let ((buf (url-retrieve-synchronously url)))
     (prog1
         (with-current-buffer buf
           (goto-char (point-min))
           (while (and (not (eobp)) (not (eolp))) (forward-line 1))
           (unless (eobp) (forward-line 1))
-          (let* ((html (libxml-parse-html-region (point) (point-max)))
-                 (body (car (xml-get-children html 'body))))
-            body))
+          (libxml-parse-html-region (point) (point-max)))
       (kill-buffer buf))))
 
-(defun emms-player-mpv-seaside--body-html-to-wax (body-html track-url)
-  "Return WAX from BODY-HTML with TRACK-URL."
+(defun emms-player-mpv-seaside--html-to-wax (html track-url)
+  "Return WAX from HTML with TRACK-URL."
   (let ((wax
          (car (emms-player-mpv-seaside--xml-collect-node
-               'a body-html
+               'a html
                :test
                (lambda (node) (let ((href (xml-get-attribute-or-nil node 'href)))
                             (and href
@@ -110,11 +107,11 @@ Object returned by GETTER is collected."
                      (concat track-url href))))))))
     (if wax wax (error "Not found WAX"))))
 
-(defun emms-player-mpv-seaside--body-html-to-nico (body-html)
-  "Return nico url from BODY-HTML with TRACK-URL."
+(defun emms-player-mpv-seaside--html-to-nico (html)
+  "Return nico url from HTML with TRACK-URL."
   (let ((nico-url
          (car (emms-player-mpv-seaside--xml-collect-node
-               'a body-html
+               'a html
                :test
                (lambda (node) (let ((href (xml-get-attribute-or-nil node 'href)))
                             (and href
@@ -143,8 +140,8 @@ Object returned by GETTER is collected."
   "Return url from TRACK-NAME."
   (let* ((track-url
           (replace-regexp-in-string "\\`seaside://" "" track-name))
-         (wax (emms-player-mpv-seaside--body-html-to-wax
-               (emms-player-mpv-seaside--url-to-body track-url)
+         (wax (emms-player-mpv-seaside--html-to-wax
+               (emms-player-mpv-seaside--url-to-html track-url)
                track-url))
          (wma (emms-player-mpv-seaside--wax-to-wma wax)))
     (later-do 'emms-player-mpv-seaside--loading-message)
@@ -157,8 +154,8 @@ Object returned by GETTER is collected."
   (let* ((track-url
           (replace-regexp-in-string "\\`seaside://" "" track-name))
          (nico-url
-          (emms-player-mpv-seaside--body-html-to-nico
-           (emms-player-mpv-seaside--url-to-body track-url))))
+          (emms-player-mpv-seaside--html-to-nico
+           (emms-player-mpv-seaside--url-to-html track-url))))
     (later-do 'emms-player-mpv-seaside--loading-message)
     nico-url))
 

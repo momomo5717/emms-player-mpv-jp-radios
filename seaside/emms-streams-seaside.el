@@ -35,6 +35,9 @@
     ("BELOVED MEMORIES : 月曜日更新"
      "seaside://http://seaside-c.jp/program/belovedmemories/"
      1 streamlist)
+    ("かおりとあさみのグリラジ!! : 火曜日更新"
+     "seaside://http://ch.nicovideo.jp/grimoire-gakuen"
+     1 streamlist)
     ("ごぶごぶちゃん☆～中村繪里子・田村睦心 : 水曜日更新(最終回)"
      "seaside://http://seaside-c.jp/program/gobu/"
      1 streamlist)
