@@ -10,7 +10,7 @@
 
    + Available anywhere
 
-     [[http://www.simulradio.info/][SimulRadio]], [[http://listenradio.jp/][ListenRadio]], [[http://seaside-c.jp/radio_program/index.html][Sea Side Communications]], [[http://lantis-net.com/][Lantis]], [[http://www.famitsu.com/][ファミ通.omc]]
+     [[http://www.simulradio.info/][SimulRadio]], [[http://listenradio.jp/][ListenRadio]], [[http://seaside-c.jp/radio_program/index.html][Sea Side Communications]], [[http://lantis-net.com/][Lantis]], [[http://www.famitsu.com/][ファミ通.com]]
 
    The following plugins are available:
 
