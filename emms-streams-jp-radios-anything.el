@@ -90,7 +90,7 @@
   :group 'emms
   :prefix "emms-stream-jp-radios-anything-")
 
-(defcustom emms-stream-jp-radios-hlem-use-emms-stream-list-p nil
+(defcustom emms-stream-jp-radios-anything-use-emms-stream-list-p nil
   "If non-nil, `emms-stream-list' is added to candidates."
   :group 'emms-streams-jp-radios-anything
   :type 'boolean)
@@ -169,12 +169,12 @@ GET-FN-LS is function list or \(station . function\) alist."
   `((name . "EMMS Streams JP Radio Stations")
     (init .
           (lambda ()
-            (when (and emms-stream-jp-radios-hlem-use-emms-stream-list-p
+            (when (and emms-stream-jp-radios-anything-use-emms-stream-list-p
                        (not (buffer-live-p (get-buffer emms-stream-buffer-name))))
               (emms-stream-init))))
    (candidates .
                (lambda ()
-                 (if emms-stream-jp-radios-hlem-use-emms-stream-list-p
+                 (if emms-stream-jp-radios-anything-use-emms-stream-list-p
                      (nconc
                       (cl-loop for can in emms-stream-list
                                collect (cons (format "emms: %s" (car can)) can))
