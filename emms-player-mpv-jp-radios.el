@@ -24,12 +24,17 @@
 
 ;; This provides EMMS players and stream lists of Japan radio stations.
 ;;
-;; * Available only in Japan due to access restriction
+;; * Available in Japan due to access restriction
 ;;     Radiko, らじる★らじる, 超！A&G+, 音泉, 響, アニたまどっとコム,
 ;;     animate.tv
 ;;
 ;; * Available anywhere
-;;     SimulRadio, ListenRadio, Sea Side Communications
+;;     SimulRadio, ListenRadio, Sea Side Communications, Lantis, ファミ通.com
+;;
+;; The following plugins are available:
+;; + emms-streams-jp-radios.el
+;; + emms-streams-jp-radios-anything.el
+;; + emms-streams-jp-radios-helm.el (hlem v1.7.9 or later is needed.)
 
 ;; Other Requirements:
 ;;
@@ -62,10 +67,14 @@
 ;; ;; Updating asynchronously
 ;; C-u -1 M-x emms-stream-stationName-add-bookmark
 ;;
-;; The following plugins are available:
-;; + emms-streams-jp-radios.el
-;; + emms-streams-jp-radios-helm.el (hlem v1.7.9 or later is needed.)
+;; emms-streams-jp-radios.el provides `emms-streams-jp-radios' and
+;; `emms-stream-jp-radios-popup' like `emms-streams'.
 ;;
+;; ;; If `anything' is installed, `emms-streams-jp-radios-anything' is available.
+;; (require 'emms-streams-jp-radios-anything)
+;;
+;; ;; If `helm' is installed, `emms-streams-jp-radios-helm' is available.
+;; (require 'emms-streams-jp-radios-helm)
 
 ;;; Code:
 (require 'cl-lib)
@@ -81,7 +90,9 @@
     "animate"
     "simul"
     "listen"
-    "seaside")
+    "seaside"
+    "lantis"
+    "famitsu")
   "List of radio station names.")
 
 (defvar emms-player-mpv-jp-radios--dir
