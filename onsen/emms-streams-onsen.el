@@ -121,7 +121,7 @@ If UPDATEP is no-nil, cache is updated."
              (emms-stream-onsen--url-to-html "http://www.onsen.ag")))
     emms-stream-onsen--stream-alist-cache))
 
-(defun emms-stream-onsen--fetch-stream-alist-async ()
+(defun emms-stream-onsen-update-cache-async ()
   "Update cache asynchronously."
   (url-retrieve
    "http://www.onsen.ag"
@@ -171,7 +171,7 @@ DOW is a number of 0-6 or -1.
 
 If save,run `emms-stream-save-bookmarks-file' after."
   (interactive "P")
-  (if (eq updatep -1) (emms-stream-onsen--fetch-stream-alist-async)
+  (if (eq updatep -1) (emms-stream-onsen-update-cache-async)
    (unless (integerp dow)
      (let ((msg (concat "[0] All  [1] Mon  [2] Tue  [3] Wed  [4] Thu\n"
                         "         [5] Fri  [6] Sat/Sun\n"
@@ -180,7 +180,7 @@ If save,run `emms-stream-save-bookmarks-file' after."
        (while (not (and (integerp (setq dow (read-number msg)))
                         (<= -1 dow) (<= dow 6))))))
    (let ((days '("mon" "tue" "wed" "thu" "fri" "sat" "sun")))
-     (if (= dow -1) (emms-stream-onsen--fetch-stream-alist-async)
+     (if (= dow -1) (emms-stream-onsen-update-cache-async)
        (emms-stream-onsen--add-bookmark-dows
         (cond ((zerop dow) days)
               ((= dow 6) '("sat" "sun"))

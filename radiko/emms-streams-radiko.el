@@ -141,8 +141,8 @@ string -> stream-list
                      (kill-buffer)
               (funcall cont auth2)))))
 
-(defun emms-stream-radiko--fetch-stream-list-async-1 (area-id)
-  "Helper function for `emms-stream-radiko--fetch-stream-list-async'."
+(defun emms-stream-radiko-update-cache-async-1 (area-id)
+  "Helper function for `emms-stream-radiko-update-cache-async'."
   (url-retrieve
    (format "http://radiko.jp/v2/station/list/%s.xml" area-id)
    (lambda (status &rest _)
@@ -154,7 +154,7 @@ string -> stream-list
        (error "Failed to get radiko stream list"))
      (message "Updated radiko stream list cache"))))
 
-(defun emms-stream-radiko--fetch-stream-list-async ()
+(defun emms-stream-radiko-update-cache-async ()
   "Update cache asynchronously."
   (cl-labels
       ((fetch-stream-list-async ()
@@ -162,7 +162,7 @@ string -> stream-list
          (lambda (auth1)
            (emms-stream-radiko--access-auth2-fms-async
             auth1 (lambda (auth2)
-                    (emms-stream-radiko--fetch-stream-list-async-1
+                    (emms-stream-radiko-update-cache-async-1
                      (emms-player-mpv-radiko--get-area-id auth2))))))))
     (emms-stream-radiko--wget-playerfile-async
      (lambda ()
@@ -181,7 +181,7 @@ If UPDATEP is -1, cache is updated asynchronously.
 
 If save,run `emms-stream-save-bookmarks-file' after."
   (interactive "P")
-  (if (eq updatep -1) (emms-stream-radiko--fetch-stream-list-async)
+  (if (eq updatep -1) (emms-stream-radiko-update-cache-async)
     (let ((buf (get-buffer emms-stream-buffer-name)))
       (unless (buffer-live-p buf)
         (error "%s is not a live buffer" emms-stream-buffer-name))

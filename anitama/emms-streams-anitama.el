@@ -70,7 +70,7 @@ If CONT is no-nil, it is run with no arguments."
        (error "Failed to get cookies of www.weeeef.com"))
      (when (functionp cont) (funcall cont)))))
 
-(defun emms-stream-anitama-fetch-stream-list-async ()
+(defun emms-stream-anitama-update-cache-async ()
   "Update cache asynchronously."
   (cl-labels
       ((stream-list-async-filter (proc _)
@@ -113,7 +113,7 @@ If UPDATEP is -1, cache is updated asynchronously.
 If save,run `emms-stream-save-bookmarks-file' after."
   (interactive "P")
   (if (eq updatep -1)
-      (emms-stream-anitama-fetch-stream-list-async)
+      (emms-stream-anitama-update-cache-async)
    (let ((buf (get-buffer emms-stream-buffer-name)))
      (unless (buffer-live-p buf)
        (error "%s is not a live buffer" emms-stream-buffer-name))

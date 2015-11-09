@@ -124,7 +124,7 @@ If UPDATEP is non-nil, cache is updated."
                        (cons day (emms-stream-animate--html-to-stream-list day html)))))
     emms-stream-animate--stream-alist-cache))
 
-(defun emms-stream-animate--fetch-stream-alist-async ()
+(defun emms-stream-animate-update-cache-async ()
   "Update cache asynchronously."
   (url-retrieve
    emms-stream-animate--url
@@ -179,7 +179,7 @@ DOW is a number of 0-6 or -1.
 
 If save,run `emms-stream-save-bookmarks-file' after."
   (interactive "P")
-  (if (eq updatep -1) (emms-stream-animate--fetch-stream-alist-async)
+  (if (eq updatep -1) (emms-stream-animate-update-cache-async)
    (unless (integerp dow)
      (let ((msg (concat "[0] All  [1] Mon  [2] Tue  [3] Wed  [4] Thu\n"
                         "         [5] Fri  [6] Irr\n"
@@ -187,7 +187,7 @@ If save,run `emms-stream-save-bookmarks-file' after."
                         "Input a number of 0-6 or -1: ")))
        (while (not (and (integerp (setq dow (read-number msg)))
                         (<= -1 dow) (<= dow 6))))))
-   (cond ((= dow -1) (emms-stream-animate--fetch-stream-alist-async))
+   (cond ((= dow -1) (emms-stream-animate-update-cache-async))
          ((zerop dow) (emms-stream-animate-add-bookmark-1 updatep))
          (t (emms-stream-animate-add-bookmark-1
              updatep (nth (1- dow) emms-stream-animate--days))))))
