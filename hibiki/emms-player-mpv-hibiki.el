@@ -66,13 +66,15 @@ If BUF is no-nil, it is used."
       (goto-char (point-min))
       (while (and (not (eobp)) (not (eolp))) (forward-line 1))
       (unless (eobp) (forward-line 1))
-      (let ((str (buffer-substring (point) (point-max))))
-             (prog1 (with-temp-buffer
-                      (insert str)
-                      (decode-coding-region (point-min) (point-max) 'utf-8)
-                      (goto-char (point-min))
-                      (json-read))
-               (kill-buffer))))))
+      (let ((p (point))
+            (p-max (point-max)))
+        (prog1 (with-temp-buffer
+                 (insert-buffer-substring-no-properties buf p p-max)
+                 (decode-coding-region (point-min) (point-max) 'utf-8)
+                 (goto-char (point-min))
+                 (json-read))
+          (when (buffer-live-p buf)
+            (kill-buffer buf)))))))
 
 (defun emms-player-mpv-hibiki--access_id-to-video_id (access_id)
   "Return video id of ACCESS_ID ."
