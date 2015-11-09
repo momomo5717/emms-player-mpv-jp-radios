@@ -43,13 +43,13 @@
 ;; (defvar emms-stream-onsen-helm-source-list
 ;;   (helm-make-source "EMMS Streams 音泉" 'emms-stream-jp-radios-helm-source
 ;;     :init nil
-;;     :candidates (lambda () (cl-loop for stream in (emms-stream-onsen-get-stream-list)
-;;                                 collect (cons (car stream) stream)))))
+;;     :candidates (lambda () (emms-stream-jp-radios-helm-combine
+;;                         '(emms-stream-onsen-get-stream-list)))))
 ;; (defun emms-stream-onsen-helm ()
 ;;   "`helm' for emms streams onsen."
 ;;   (interactive)
 ;;   (helm :sources 'emms-stream-onsen-helm-source-list
-;;         :buffer "*Helm Emms Streams 音泉"))
+;;         :buffer "*Helm Emms Streams 音泉*"))
 ;;
 ;; Note: This package is not compiled to be installed from MELPA.
 
@@ -63,9 +63,9 @@
 (defgroup emms-streams-jp-radios-helm nil
   "Helm for jp radio stations"
   :group 'emms
-  :prefix "emms-stream-jp-radios-")
+  :prefix "emms-stream-jp-radios-helm-")
 
-(defcustom emms-stream-jp-radios-hlem-use-emms-stream-list-p nil
+(defcustom emms-stream-jp-radios-helm-use-emms-stream-list-p nil
   "If non-nil, `emms-stream-list' is added to candidates."
   :group 'emms-streams-jp-radios-helm
   :type 'boolean)
@@ -77,64 +77,86 @@
                                          station))))
   "Each function returns new stream list."
   :group 'emms-streams-jp-radios-helm
-  :type '(alist :key-type string  :value-type function))
+  :type '(alist :key-type string  :value-type symbol))
 
-(defun emms-stream-jp-radios--helm-collect-candidates ()
-  "Combine stream-list which are defined or cache."
+(defun emms-stream-jp-radios-helm-combine (get-fn-ls)
+  "Combine stream-lists from GET-FN-LS.
+GET-FN-LS is function list or \(station . function\) alist."
   (let ((candidates nil))
-    (when emms-stream-jp-radios-hlem-use-emms-stream-list-p
-      (dolist (can (cl-copy-list emms-stream-list))
-        (setq candidates (cons (cons (format "emms: %s"  (car can))
-                                     can)
-                               candidates))))
-    (cl-loop for (station . fn) in emms-stream-jp-radios-helm-collect-function-alist
-             for stream-list = (if (fboundp fn) (funcall fn) '()) do
-             (cl-loop
-              for can in stream-list do
-              (setq candidates (cons (cons (format "%s: %s" station (car can))
-                                           can)
-                                     candidates))))
+    (cl-loop for fn in get-fn-ls
+             for stream-list = (if (consp fn)
+                                   (if (fboundp (cdr fn)) (funcall (cdr fn)) '())
+                                 (if (fboundp fn) (funcall fn) '()))
+             do
+             (if (consp fn)
+                 (dolist (can stream-list)
+                   (setq candidates (cons (cons (format "%s: %s" (car fn) (car can))
+                                                can)
+                                          candidates)))
+               (dolist (can stream-list)
+                 (setq candidates (cons (cons (car can) can) candidates)))))
     (nreverse candidates)))
-(byte-compile 'emms-stream-jp-radios--helm-collect-candidates)
+(byte-compile 'emms-stream-jp-radios-helm-combine)
+
+(defun emms-stream-jp-radios-helm-action-play (stream)
+  "Helm action for `emms-stream-jp-radios-helm-action-list'."
+  (let* ((url (cl-second stream))
+         (current-prefix-arg
+          (or helm-current-prefix-arg
+              current-prefix-arg)))
+    (setq emms-stream-last-stream stream)
+    (funcall #'emms-play-streamlist url)))
+(byte-compile 'emms-stream-jp-radios-helm-action-play)
+
+(defun emms-stream-jp-radios-helm-action-add-streams (_)
+  "Helm action for `emms-stream-jp-radios-helm-action-list'."
+  (with-current-emms-playlist
+    (when helm-current-prefix-arg
+      (emms-playlist-current-clear))
+    (emms-playlist-new)
+    (let ((current-prefix-arg nil)
+          (streams (helm-marked-candidates))
+          (len 0))
+      (dolist (stream streams)
+        (setq emms-stream-last-stream stream)
+        (funcall #'emms-add-streamlist (cl-second stream))
+        (cl-incf len))
+      (unless emms-player-playing-p
+        (if helm-current-prefix-arg
+            (emms-playlist-first)
+          (goto-char (point-max))
+          (cl-loop repeat len do (emms-playlist-previous))
+          (unless (emms-playlist-track-at (point))
+            (emms-playlist-first)))
+        (emms-playlist-mode-play-smart)))))
+(byte-compile 'emms-stream-jp-radios-helm-action-add-streams)
+
+(defvar emms-stream-jp-radios-helm-action-list
+  '(("Play (C-u Add to Playlist)" .
+     emms-stream-jp-radios-helm-action-play)
+    ("Add Stream(s) to Playlist and play (C-u clear current)" .
+     emms-stream-jp-radios-helm-action-add-streams)
+    ("Update each stream list cache asynchronously." .
+     (lambda (_) (emms-stream-jp-radios-update-cache-async))))
+  "Action list for `emms-stream-jp-radios-helm-source'.")
 
 (defclass emms-stream-jp-radios-helm-source (helm-source-sync)
-  ((init :initform (lambda ()
-                     (when (and emms-stream-jp-radios-hlem-use-emms-stream-list-p
-                                (not (buffer-live-p (get-buffer emms-stream-buffer-name))))
-                       (emms-stream-init))))
-   (candidates :initform #'emms-stream-jp-radios--helm-collect-candidates)
-   (action :initform
-           '(("Play (C-u Add to Playlist)" .
-              (lambda (stream)
-                (let* ((url (cl-second stream))
-                       (current-prefix-arg
-                        (or helm-current-prefix-arg
-                            current-prefix-arg)))
-                  (setq emms-stream-last-stream stream)
-                  (funcall #'emms-play-streamlist url))))
-             ("Add Stream(s) to Playlist and play (C-u clear current)" .
-              (lambda (_)
-                (with-current-emms-playlist
-                  (when helm-current-prefix-arg
-                    (emms-playlist-current-clear))
-                  (emms-playlist-new)
-                  (let* ((current-prefix-arg nil)
-                         (streams (helm-marked-candidates))
-                         (len 0))
-                    (dolist (stream streams)
-                      (setq emms-stream-last-stream stream)
-                      (funcall #'emms-add-streamlist (cl-second stream))
-                      (cl-incf len))
-                    (unless emms-player-playing-p
-                      (if helm-current-prefix-arg
-                          (emms-playlist-first)
-                        (goto-char (point-max))
-                        (cl-loop repeat len do (emms-playlist-previous))
-                        (unless (emms-playlist-track-at (point))
-                          (emms-playlist-first)))
-                      (emms-playlist-mode-play-smart))))))
-             ("Update each stream list cache asynchronously." .
-              (lambda (_) (emms-stream-jp-radios-update-cache-async)))))
+  ((init :initform
+         (lambda ()
+           (when (and emms-stream-jp-radios-helm-use-emms-stream-list-p
+                      (not (buffer-live-p (get-buffer emms-stream-buffer-name))))
+             (emms-stream-init))))
+   (candidates :initform
+               (lambda ()
+                 (if emms-stream-jp-radios-helm-use-emms-stream-list-p
+                     (nconc
+                      (cl-loop for can in emms-stream-list
+                               collect (cons (format "emms: %s" (car can)) can))
+                      (emms-stream-jp-radios-helm-combine
+                       emms-stream-jp-radios-helm-collect-function-alist))
+                   (emms-stream-jp-radios-helm-combine
+                    emms-stream-jp-radios-helm-collect-function-alist))))
+   (action :initform emms-stream-jp-radios-helm-action-list)
    (migemo :initform t)
    (candidate-number-limit :initform 9999)))
 
