@@ -4,26 +4,21 @@
 
    This provides EMMS ( [[https://www.gnu.org/software/emms/][The Emacs Multimedia System]] ) simple players for Japan radio stations:
 
-   + Available only in Japan due to access restriction
+   + Available in Japan due to access restriction
 
-     + [[http://radiko.jp/][Radiko]]
-     + [[http://www3.nhk.or.jp/netradio/][らじる★らじる]]
-     + [[http://www.agqr.jp/][超!A&G+]]
-     + [[http://www.onsen.ag/][インターネットラジオステーション〈音泉〉]]
-     + [[http://hibiki-radio.jp/][響 - HiBiKi Radio Station -]]
-     + [[http://www.weeeef.com/weeeefww1/Transition?command=top&group=G0000049][アニたまどっとコム インターネットラジオ]]
-     + [[http://www.animate.tv/radio/][animate.tv]]
+     [[http://radiko.jp/][Radiko]], [[http://www3.nhk.or.jp/netradio/][らじる★らじる]], [[http://www.agqr.jp/][超!A&G+]], [[http://www.onsen.ag/][音泉]] , [[http://hibiki-radio.jp/][響]], [[http://www.weeeef.com/weeeefww1/Transition?command=top&group=G0000049][アニたまどっとコム]], [[http://www.animate.tv/radio/][animate.tv]]
 
    + Available anywhere
 
-     + [[http://www.simulradio.info/][SimulRadio]]
-     + [[http://listenradio.jp/][ListenRadio]]
-     + [[http://seaside-c.jp/radio_program/index.html][Sea Side Communications]]
+     [[http://www.simulradio.info/][SimulRadio]], [[http://listenradio.jp/][ListenRadio]], [[http://seaside-c.jp/radio_program/index.html][Sea Side Communications]], [[http://lantis-net.com/][Lantis]], [[http://www.famitsu.com/][ファミ通.omc]]
 
    The following plugins are available:
 
    + emms-streams-jp-radios.el
-   + emms-streams-jp-radios-helm.el (hlem v1.7.9 or later is needed.)
+   + emms-streams-jp-radios-anything.el
+   + emms-streams-jp-radios-helm.el ( [[https://github.com/emacs-helm/helm][hlem]] v1.7.9 or later is needed. )
+
+   [[file:image/image.gif]]
 
 ** Requirements
 
@@ -67,6 +62,8 @@
      + "simul"   (SimulRadio)
      + "listen"  (ListenRadio)
      + "seaside" (Sea Side Communications)
+     + "lantis"  (Lantis)
+     + "famitsu" (ファミ通.com)
 
      #+BEGIN_SRC emacs-lisp
      ;; An example of setting only for Radiko and らじる★らじる
@@ -92,6 +89,21 @@
    C-u -1 M-x emms-stream-stationName-add-bookmark
    #+END_EXAMPLE
 
+   emms-streams-jp-radios.el provides =emms-streams-jp-radios= and
+   =emms-stream-jp-radios-popup= like =emms-streams=.
+
+   If =anything= is installed, =emms-streams-jp-radios-anything= is available.
+
+   #+BEGIN_SRC emacs-lisp
+     (require 'emms-streams-jp-radios-anything)
+   #+END_SRC
+
+   If =helm= is installed, =emms-streams-jp-radios-helm= is available.
+
+   #+BEGIN_SRC emacs-lisp
+     (require 'emms-streams-jp-radios-helm)
+   #+END_SRC
+
 ** References
 
    + How to play Radiko
@@ -100,4 +112,4 @@
      + [[http://vector.hateblo.jp/entry/2015/01/03/193556]]
    + How to play ListenRadio
      + [[http://actinium.org/devel/tips/listenradio-recording]]
-   + helm-emms ( https://github.com/emacs-helm/helm-emms )
+   + helm-emms ( [[https://github.com/emacs-helm/helm-emms]] )
