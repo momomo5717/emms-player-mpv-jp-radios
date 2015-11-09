@@ -55,14 +55,11 @@
 (require 'cl-lib)
 
 (defun emms-stream-jp-radios-update-cache-async ()
-    "Update stream lists asynchronously which are bounded."
+    "Update each stream list or alist asynchronously."
     (interactive)
-    (dolist (fn '(emms-stream-radiko-add-bookmark
-                  emms-stream-anitama-add-bookmark
-                  emms-stream-animate-add-bookmark
-                  emms-stream-hibiki-add-bookmark
-                  emms-stream-onsen-add-bookmark))
-      (when (fboundp fn) (funcall fn -1))))
+    (cl-loop for station in emms-player-mpv-jp-radios-list
+             for fn = (intern (format "emms-stream-%s-update-cache-async" station))
+             when (fboundp fn) do (funcall fn)))
 
 (defun emms-stream-jp-radios-track-description (track)
   "Return TRACK description for `emms-track-description-function'.
