@@ -31,13 +31,27 @@
 
 (defvar emms-stream-anitama-stream-list-cache nil)
 
+(defun emms-stream-anitama--Book-to-KikanTo-date (Book)
+  "Return date from BOOK."
+  (let* ((node Book)
+         (date (dolist (name '(NodeData Node KikanFrom)
+                             (car (xml-node-children node)))
+                 (setq node (car (xml-get-children node name))))))
+    (if (and (stringp date) (eq (length date) 8))
+        (concat (cl-loop for c across date for i from 0
+                         collect c
+                         when (or (eq i 3) (eq i 5)) collect ?/))
+      date)))
+
 (defun emms-stream-anitaam--bookservlet-xml-to-stream-list (bookservlet-xml)
   "Retrun stream list from BOOKSERVLET-XML."
   (let ((Books (xml-get-children bookservlet-xml 'Book)))
     (cl-loop for Book in Books
              for id    = (xml-get-attribute Book 'id)
              for label = (xml-get-attribute Book 'label)
-             collect (list label (format "anitama://%s" id) 1 'streamlist))))
+             for date  = (emms-stream-anitama--Book-to-KikanTo-date Book)
+             collect (list (format "%s : %s" label date)
+                           (format "anitama://%s" id) 1 'streamlist))))
 
 (defun emms-stream-anitama-fetch-stream-list (&optional updatep)
   "Retrun anitama stream list.
