@@ -105,7 +105,7 @@ GET-FN-LS is function list or \(station . function\) alist."
           (or helm-current-prefix-arg
               current-prefix-arg)))
     (setq emms-stream-last-stream stream)
-    (funcall #'emms-play-streamlist url)))
+    (emms-play-streamlist url)))
 (byte-compile 'emms-stream-jp-radios-helm-action-play)
 
 (defun emms-stream-jp-radios-helm-action-add-streams (_)
@@ -119,7 +119,7 @@ GET-FN-LS is function list or \(station . function\) alist."
           (len 0))
       (dolist (stream streams)
         (setq emms-stream-last-stream stream)
-        (funcall #'emms-add-streamlist (cl-second stream))
+        (emms-add-streamlist (cl-second stream))
         (cl-incf len))
       (unless emms-player-playing-p
         (if helm-current-prefix-arg
