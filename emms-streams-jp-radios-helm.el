@@ -49,7 +49,7 @@
 ;;   "`helm' for emms streams onsen."
 ;;   (interactive)
 ;;   (helm :sources 'emms-stream-onsen-helm-source-list
-;;         :buffer "*Helm Emms Streams 音泉*"))
+;;         :buffer "*Helm EMMS Streams 音泉*"))
 ;;
 ;; Note: This package is not compiled to be installed from MELPA.
 
@@ -168,7 +168,7 @@ GET-FN-LS is function list or \(station . function\) alist."
   "`helm' for emms streams jp radio stations."
   (interactive)
   (helm :sources 'emms-stream-jp-radios-helm-source-list
-        :buffer "*Helm Emms Streams JP Radio Stations*"))
+        :buffer "*Helm EMMS Streams JP Radios*"))
 (byte-compile 'emms-streams-jp-radios-helm)
 
 (provide 'emms-streams-jp-radios-helm)

@@ -53,7 +53,7 @@
 ;;   "`anything' for emms streams onsen."
 ;;   (interactive)
 ;;   (anything :sources '(emms-stream-onsen-anything-c-source)
-;;             :buffer "*Anything Emms Streams 音泉*"))
+;;             :buffer "*Anything EMMS Streams 音泉*"))
 ;;
 ;; Note: This package is not compiled to be installed from MELPA.
 ;;
@@ -190,7 +190,7 @@ GET-FN-LS is function list or \(station . function\) alist."
   "`anything' for emms streams jp radio stations."
   (interactive)
   (anything :sources '(emms-stream-jp-radios-anything-c-source)
-            :buffer "*Anything Emms Streams JP Radio Stations*"))
+            :buffer "*Anything EMMS Streams JP Radios*"))
 (byte-compile 'emms-streams-jp-radios-anything)
 
 (provide 'emms-streams-jp-radios-anything)
