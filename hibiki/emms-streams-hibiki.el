@@ -41,12 +41,31 @@
 (defun emms-stream-hibiki--get-programs-url (dow)
   "Return programs url of DOW."
   (format "%s?day_of_week=%s"
-          emms-stream-hibiki--base-url-programs dow))
+          emms-stream-hibiki--base-url-programs
+          (cdr (assq dow emms-stream-hibiki--dow-alist))))
+
+(defvar emms-stream-hibiki--url-request-extra-headers
+  '(("x-requested-with" . "XMLHttpRequest")
+    ("Connection" . "close")))
+
+(defun emms-stream-hibiki--url-retrieve-synchronously
+    (url &optional silent inhibit-cookies)
+  "`url-retrieve-synchronously' for hibiki."
+  (let ((url-request-extra-headers
+         emms-stream-hibiki--url-request-extra-headers))
+    (url-retrieve-synchronously url silent inhibit-cookies)))
+
+(defun emms-stream-hibiki--url-retrieve
+    (url callback &optional cbargs silent inhibit-cookies)
+  "`url-retrieve' for hibiki."
+  (let ((url-request-extra-headers
+         emms-stream-hibiki--url-request-extra-headers))
+    (url-retrieve url callback cbargs silent inhibit-cookies)))
 
 (defun emms-stream-hibiki--url-to-json (url &optional buf)
   "Return a json object from URL.
 If BUF is no-nil, it is used."
-  (let ((buf (or buf (url-retrieve-synchronously url nil))))
+  (let ((buf (or buf (emms-stream-hibiki--url-retrieve-synchronously url))))
     (with-current-buffer buf
       (goto-char (point-min))
       (while (and (not (eobp)) (not (eolp))) (forward-line 1))
@@ -107,7 +126,7 @@ If UPDATEP is non-nil, cache of DOW is updated."
 (defun emms-stream-hibiki--update-cache-async-1 (dow)
   "Update DOW stream-list cache."
   (if (and (< 0 dow) (< dow 7))
-      (url-retrieve
+      (emms-stream-hibiki--url-retrieve
        (emms-stream-hibiki--get-programs-url dow)
        (lambda (status &rest _)
          (when (memq :error status)

@@ -29,6 +29,7 @@
 (require 'emms-streams)
 (require 'xml)
 (require 'url)
+(require 'json)
 (require 'later-do)
 
 (define-emms-simple-player-mpv mpv-hibiki '(streamlist)
@@ -58,10 +59,21 @@
   (format "%s?video_id=%s"
           emms-player-mpv-hibiki--base-url-play_check video_id))
 
+(defvar emms-player-mpv-hibiki--url-request-extra-headers
+  '(("x-requested-with" . "XMLHttpRequest")
+    ("Connection" . "close")))
+
+(defun emms-player-mpv-hibiki--url-retrieve-synchronously
+    (url &optional silent inhibit-cookies)
+  "`url-retrieve-synchronously' for hibiki."
+  (let ((url-request-extra-headers
+         emms-player-mpv-hibiki--url-request-extra-headers))
+    (url-retrieve-synchronously url silent inhibit-cookies)))
+
 (defun emms-player-mpv-hibiki--url-to-json (url &optional buf)
   "Return a json object from URL.
 If BUF is no-nil, it is used."
-  (let ((buf (or buf (url-retrieve-synchronously url nil))))
+  (let ((buf (or buf (emms-player-mpv-hibiki--url-retrieve-synchronously url))))
     (with-current-buffer buf
       (goto-char (point-min))
       (while (and (not (eobp)) (not (eolp))) (forward-line 1))
@@ -82,7 +94,7 @@ If BUF is no-nil, it is used."
                     (emms-player-mpv-hibiki--get-programs-url access_id)))
          (id (cdr (assq 'id (assq 'video (assq 'episode programs))))))
     (unless id
-      (error "Failed to get video id form %S" access_id))
+      (error "Failed to get video id from %S" access_id))
     id))
 
 (defun emms-player-mpv-hibiki--url-to-playlist_url (url)
