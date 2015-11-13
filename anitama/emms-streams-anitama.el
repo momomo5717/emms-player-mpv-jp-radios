@@ -31,7 +31,7 @@
 
 (defvar emms-stream-anitama-stream-list-cache nil)
 
-(defun emms-stream-anitama--Book-to-KikanTo-date (Book)
+(defun emms-stream-anitama--Book-to-KikanFrom-date (Book)
   "Return date from BOOK."
   (let* ((node Book)
          (date (dolist (name '(NodeData Node KikanFrom)
@@ -49,7 +49,7 @@
     (cl-loop for Book in Books
              for id    = (xml-get-attribute Book 'id)
              for label = (xml-get-attribute Book 'label)
-             for date  = (emms-stream-anitama--Book-to-KikanTo-date Book)
+             for date  = (emms-stream-anitama--Book-to-KikanFrom-date Book)
              collect (list (format "%s : %s" label date)
                            (format "anitama://%s" id) 1 'streamlist))))
 
