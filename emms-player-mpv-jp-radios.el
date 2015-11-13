@@ -34,7 +34,7 @@
 ;; The following plugins are available:
 ;; + emms-streams-jp-radios.el
 ;; + emms-streams-jp-radios-anything.el
-;; + emms-streams-jp-radios-helm.el (hlem v1.7.9 or later is needed.)
+;; + emms-streams-jp-radios-helm.el (helm v1.7.9 or later is needed.)
 
 ;; Other Requirements:
 ;;
