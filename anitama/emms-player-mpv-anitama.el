@@ -36,7 +36,8 @@
 
 (define-emms-simple-player-mpv mpv-anitama '(streamlist)
   "\\`anitama://"
-  "mpv" "--no-terminal" "--force-window=no" "--audio-display=no")
+  "mpv" "--no-terminal" "--force-window=no" "--audio-display=no"
+  "--cache=150000" "--force-seekable=yes")
 
 (emms-player-simple-mpv-add-to-converters
  'emms-player-mpv-anitama "\\`anitama://" t
@@ -44,11 +45,6 @@
 
 (emms-player-set 'emms-player-mpv-anitama 'get-media-title
                  'emms-player-mpv-anitama--get-media-title)
-
-;; mpv cannot seek while playing アニたまどっとコム
-;; because `emms-player-mpv-anitama' plays back a stream via wget.
-(emms-player-set emms-player-mpv-anitama 'seek nil)
-(emms-player-set emms-player-mpv-anitama 'seek-to nil)
 
 (emms-player-set 'emms-player-mpv-anitama 'mpv-start-process-function
                  'emms-player-mpv-anitama--start-process)
