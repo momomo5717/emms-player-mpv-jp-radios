@@ -284,9 +284,10 @@ If POPUP-HEIGHT is non-nil, it is used for the height."
                                        (point-min)))
                         (get-text-property (point) 'emms-stream))
                       (error "No stream found at point")))
-           (url   (emms-stream-url  line)))
+           (url   (emms-stream-url  line))
+           (type  (emms-stream-type line)))
       (setq emms-stream-last-stream line)
-      (funcall (intern (format "emms-%s-streamlist" play-or-add)) url))))
+      (funcall (intern (format "emms-%s-%s" play-or-add type)) url))))
 
 (defun emms-stream-jp-radios-play ()
   "Play stream at the point."
