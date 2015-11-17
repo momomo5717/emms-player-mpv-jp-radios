@@ -200,12 +200,10 @@ If it is more than 0 or equal to 1, it is used."
        'jit-lock-refontify)
   (goto-char (point-min))
   (emms-stream-jp-radios-display)
-  (read-only-mode 1)
+  (set (make-local-variable 'buffer-read-only) t)
   (set-buffer-modified-p nil)
   (run-hooks 'emms-stream-jp-radios-hook)
   (message "EMMS Streams JP Radios Menu"))
-
-(add-hook 'emms-stream-jp-radios-hook (lambda () (view-mode -1)))
 
 ;;;###autoload
 (defun emms-stream-jp-radios-display ()
