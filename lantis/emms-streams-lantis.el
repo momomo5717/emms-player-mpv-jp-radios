@@ -36,30 +36,29 @@
 (defvar emms-stream-lantis--url-headers
   '(("User-Agent" .
      "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_5) AppleWebKit/600.8.9 (KHTML, like Gecko) Version/8.0.8 Safari/600.8.9"))
-  "To get mp3 likn.")
+  "To get mp3 link.")
 
 (cl-defun emms-stream-lantis--xml-collect-node
-        (name xml-ls &key (test #'identity) (getter #'identity))
+    (name xml-ls &key (test #'identity) (getter #'identity))
   "Collect nodes of NAME from XML-LS.
 TEST and GETTER takes a node of NAME as an argument.
 TEST is a predicate function.
 Object returned by GETTER is collected."
   (cl-labels ((collect-name-node (xml-ls ls)
-                (cond
-                 ((atom xml-ls) ls)
-                 ((consp (car xml-ls))
-                  (collect-name-node (car xml-ls)
-                                     (collect-name-node (cdr xml-ls) ls)))
-
-                 ((and (eq (car xml-ls) name)
-                       (funcall test xml-ls))
-                  (cons (funcall getter xml-ls) ls))
-                 ((or (null (car xml-ls))
-                      (not (symbolp (car xml-ls))))
-                  (collect-name-node (cdr xml-ls) ls))
-                 ((symbolp (car xml-ls))
-                  (collect-name-node (xml-node-children xml-ls) ls ))
-                 (t ls))))
+               (cond
+                ((atom xml-ls) ls)
+                ((consp (car xml-ls))
+                 (collect-name-node (car xml-ls)
+                                    (collect-name-node (cdr xml-ls) ls)))
+                ((and (eq (car xml-ls) name)
+                      (funcall test xml-ls))
+                 (cons (funcall getter xml-ls) ls))
+                ((or (null (car xml-ls))
+                     (not (symbolp (car xml-ls))))
+                 (collect-name-node (cdr xml-ls) ls))
+                ((symbolp (car xml-ls))
+                 (collect-name-node (xml-node-children xml-ls) ls ))
+                (t ls))))
     (collect-name-node xml-ls nil)))
 
 (defun emms-stream-lantis--url-to-html (url &optional xmlp buf)
