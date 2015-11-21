@@ -31,28 +31,30 @@
 (defvar emms-stream-onsen--stream-alist-cache nil
   "Cache for stream alist.")
 
+(defvar emms-stream-onsen--days
+  '("mon" "tue" "wed" "thu" "fri" "sat" "sun"))
+
 (cl-defun emms-stream-onsen--xml-collect-node
-        (name xml-ls &key (test #'identity) (getter #'identity))
+    (name xml-ls &key (test #'identity) (getter #'identity))
   "Collect nodes of NAME from XML-LS.
 TEST and GETTER takes a node of NAME as an argument.
 TEST is a predicate function.
 Object returned by GETTER is collected."
   (cl-labels ((collect-name-node (xml-ls ls)
-                (cond
-                 ((atom xml-ls) ls)
-                 ((consp (car xml-ls))
-                  (collect-name-node (car xml-ls)
-                                     (collect-name-node (cdr xml-ls) ls)))
-
-                 ((and (eq (car xml-ls) name)
-                       (funcall test xml-ls))
-                  (cons (funcall getter xml-ls) ls))
-                 ((or (null (car xml-ls))
-                      (not (symbolp (car xml-ls))))
-                  (collect-name-node (cdr xml-ls) ls))
-                 ((symbolp (car xml-ls))
-                  (collect-name-node (xml-node-children xml-ls) ls ))
-                 (t ls))))
+               (cond
+                ((atom xml-ls) ls)
+                ((consp (car xml-ls))
+                 (collect-name-node (car xml-ls)
+                                    (collect-name-node (cdr xml-ls) ls)))
+                ((and (eq (car xml-ls) name)
+                      (funcall test xml-ls))
+                 (cons (funcall getter xml-ls) ls))
+                ((or (null (car xml-ls))
+                     (not (symbolp (car xml-ls))))
+                 (collect-name-node (cdr xml-ls) ls))
+                ((symbolp (car xml-ls))
+                 (collect-name-node (xml-node-children xml-ls) ls ))
+                (t ls))))
     (collect-name-node xml-ls nil)))
 
 (defun emms-stream-onsen--url-to-html (url &optional xmlp buf)
@@ -87,7 +89,7 @@ Object returned by GETTER is collected."
                           (car (xml-node-children
                                 (car (xml-get-children node 'span)))))))))
     (list week
-         (list (format "%s : %s : update %s (%s)" title navigator update week)
+          (list (format "%s : %s : update %s (%s)" title navigator update week)
                 (format "onsen://%s" id) 1 'streamlist))))
 
 (defun emms-stream-onsen--top-html-to-stream-alist (html)
@@ -145,10 +147,10 @@ If UPDATEP is non-nil, cache is updated."
          (line         (emms-line-number-at-pos (point)))
          (index        (+ (/ line 2) 1)))
     (dolist (day days)
-     (dolist (stream (assoc-default day stream-alist))
-       (setq emms-stream-list (emms-stream-insert-at index stream
-                                                     emms-stream-list))
-       (cl-incf index)))
+      (dolist (stream (assoc-default day stream-alist))
+        (setq emms-stream-list (emms-stream-insert-at index stream
+                                                      emms-stream-list))
+        (cl-incf index)))
     (emms-stream-redisplay)
     (goto-char (point-min))
     (forward-line (1- line))))
@@ -157,7 +159,7 @@ If UPDATEP is non-nil, cache is updated."
   "Return new stream-list from cache."
   (cl-loop
    with ls = nil
-   for day in '("mon" "tue" "wed" "thu" "fri" "sat" "sun") do
+   for day in emms-stream-onsen--days do
    (dolist (stream (assoc-default day emms-stream-onsen--stream-alist-cache))
      (push stream ls))
    finally return (nreverse ls)))
@@ -172,20 +174,19 @@ DOW is a number of 0-6 or -1.
 If save,run `emms-stream-save-bookmarks-file' after."
   (interactive "P")
   (if (eq updatep -1) (emms-stream-onsen-update-cache-async)
-   (unless (integerp dow)
-     (let ((msg (concat "[0] All  [1] Mon  [2] Tue  [3] Wed  [4] Thu\n"
-                        "         [5] Fri  [6] Sat/Sun\n"
-                        "[-1] Update stream list cache asynchronously\n\n"
-                        "Input a number of 0-6 or -1: ")))
-       (while (not (and (integerp (setq dow (read-number msg)))
-                        (<= -1 dow) (<= dow 6))))))
-   (let ((days '("mon" "tue" "wed" "thu" "fri" "sat" "sun")))
-     (if (= dow -1) (emms-stream-onsen-update-cache-async)
-       (emms-stream-onsen--add-bookmark-dows
-        (cond ((zerop dow) days)
-              ((= dow 6) '("sat" "sun"))
-              (t (list (nth (1- dow) days))))
-        updatep)))))
+    (unless (integerp dow)
+      (let ((msg (concat "[0] All  [1] Mon  [2] Tue  [3] Wed  [4] Thu\n"
+                         "         [5] Fri  [6] Sat/Sun\n"
+                         "[-1] Update stream list cache asynchronously\n\n"
+                         "Input a number of 0-6 or -1: ")))
+        (while (not (and (integerp (setq dow (read-number msg)))
+                         (<= -1 dow) (<= dow 6))))))
+    (if (= dow -1) (emms-stream-onsen-update-cache-async)
+      (emms-stream-onsen--add-bookmark-dows
+       (cond ((zerop dow) emms-stream-onsen--days)
+             ((= dow 6) '("sat" "sun"))
+             (t (list (nth (1- dow) emms-stream-onsen--days))))
+       updatep))))
 
 (provide 'emms-streams-onsen)
 ;;; emms-streams-onsen.el ends here
