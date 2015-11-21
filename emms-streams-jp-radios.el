@@ -222,7 +222,7 @@ If it is more than 0 or equal to 1, it is used."
   "Display `emms-stream-jp-radios-buffer-name' in a pop-up window.
 If POPUP-HEIGHT is non-nil, it is used for the height."
   (interactive "P")
-  (let* ((buf-lived-p (buffer-live-p (get-buffer emms-stream-jp-radios-buffer-name)))
+  (let* ((buf-live-p (buffer-live-p (get-buffer emms-stream-jp-radios-buffer-name)))
          (buf (get-buffer-create emms-stream-jp-radios-buffer-name))
          (win (display-buffer
                buf
@@ -235,7 +235,7 @@ If POPUP-HEIGHT is non-nil, it is used for the height."
                            (t (floor (* (frame-height)
                                        emms-stream-jp-radios-popup-ratio)))))))))
     (set-buffer buf)
-    (unless buf-lived-p
+    (unless buf-live-p
       (erase-buffer)
       (when (or (null emms-playlist-buffer)
                 (not (buffer-live-p emms-playlist-buffer)))
@@ -256,14 +256,9 @@ If POPUP-HEIGHT is non-nil, it is used for the height."
   "Bury `emms-stream-jp-radios-buffer-name' buffer."
   (interactive)
   (let* ((buf (get-buffer emms-stream-jp-radios-buffer-name))
-         (buf-lived-p (buffer-live-p buf)))
-    (when buf-lived-p
-      (when (eq buf (window-buffer emms-stream-jp-radios--poped-up-win))
-        (quit-window nil emms-stream-jp-radios--poped-up-win))
-      (walk-windows
-       (lambda (win)
-         (when (eq (window-buffer win) buf)
-           (quit-restore-window win 'bury))))
+         (buf-live-p (buffer-live-p buf)))
+    (when buf-live-p
+      (quit-windows-on buf)
       (unless emms-stream-jp-radios--poped-up-win
         (when (buffer-live-p emms-playlist-buffer)
           (switch-to-buffer emms-playlist-buffer)))
