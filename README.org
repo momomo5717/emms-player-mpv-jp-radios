@@ -20,6 +20,21 @@
 
    [[file:image/image.gif]]
 
+** Table of contents
+
+   + [[#requirements][Requirements]]
+   + [[#setup][Setup]]
+     + [[#adding-all-emms-jp-radio-players][Adding all EMMS jp radio players]]
+     + [[#adding-separately][Adding separately]]
+     + [[#using-another-media-player-with-some-emms-streams-files][Using another media player with some emms streams files]]
+
+   + [[#usage][Usage]]
+     + [[#adding-a-stream-list-to-emms-streams-buffer][Adding a stream list to =*EMMS Streams*= buffer]]
+     + [[#emms-streams-jp-radiosel][emms-streams-jp-radios.el]]
+     + [[#emms-streams-jp-radios-anythingel][emms-streams-jp-radios-anything.el]]
+     + [[#emms-streams-jp-radios-helmel][emms-streams-jp-radios-helm.el]]
+   + [[#references][References]]
+
 ** Requirements
 
    + GNU Emacs 24 or later
@@ -40,13 +55,13 @@
      (require 'emms-player-mpv-jp-radios)
    #+END_SRC
 
-   + Adding all EMMS jp radio players
+*** Adding all EMMS jp radio players
 
      #+BEGIN_EXAMPLE emacs-lisp
        (emms-player-mpv-jp-radios-add-all)
      #+END_EXAMPLE
 
-   + Adding separately
+*** Adding separately
 
      Function: =emms-player-mpv-jp-radios-add= /&rest/ /names/
 
@@ -70,9 +85,52 @@
      (emms-player-mpv-jp-radios-add "radiko" "radiru")
      #+END_SRC
 
+*** Using another media player with some emms streams files
+
+     Each emms streams file can be used independently as below.
+
+     e.g. 音泉 with mplayer
+
+     #+BEGIN_EXAMPLE
+       svn checkout https://github.com/momomo5717/emms-player-mpv-jp-radios/trunk/onsen
+     #+END_EXAMPLE
+
+     #+BEGIN_SRC emacs-lisp
+       (require 'emms-player-mplayer)
+
+       (add-to-list 'load-path "/path/to/onsen")
+       (require 'emms-streams-onsen)
+
+       ;; `emms-player-mplayer-onsen' is defined in this case.
+       (define-emms-simple-player mplayer-onsen '(streamlist)
+         "\\`onsen://" "mplayer" "-slave" "-quiet" "-really-quiet")
+
+       (dolist (key '(pause seek seek-to))
+         (emms-player-set 'emms-player-mplayer-onsen
+                          key (intern (format "emms-player-mplayer-%s" key))))
+
+       (emms-player-set emms-player-mplayer-onsen 'resume nil)
+
+       ;; `emms-player-mplayer-onsen' needs a specific function to start a streamlist.
+       (emms-player-set 'emms-player-mplayer-onsen 'start
+                        'emms-player-mplayer-onsen-start-stream)
+
+       (defun emms-player-mplayer-onsen-start-stream (track)
+         ;; Each emms streams file provides emms-stream-*-stream-url-to-*
+         (emms-player-simple-start (emms-stream-onsen-stream-url-to-moviePath
+                                    (emms-track-name track))
+                                   emms-player-mplayer-onsen
+                                   emms-player-mplayer-onsen-command-name
+                                   emms-player-mplayer-onsen-parameters))
+
+       (add-to-list 'emms-player-list 'emms-player-mplayer-onsen)
+     #+END_SRC
+
 ** Usage
 
-   Each emms streams package provides a function to add streams to =*EMMS Streams*= buffer.
+*** Adding a stream list to =*EMMS Streams*= buffer
+
+   Each emms streams file provides a function to add a stream list to =*EMMS Streams*= buffer.
 
    #+BEGIN_SRC
    M-x emms-streams
@@ -89,20 +147,84 @@
    C-u -1 M-x emms-stream-stationName-add-bookmark
    #+END_EXAMPLE
 
-   emms-streams-jp-radios.el provides =emms-streams-jp-radios= and
-   =emms-stream-jp-radios-popup= like =emms-streams=.
+*** emms-streams-jp-radios.el
 
-   If =anything= is installed, =emms-streams-jp-radios-anything= is available.
+    emms-streams-jp-radios.el provides =emms-stream-jp-radios-update-cache-async= and
+    =emms-streams-jp-radios= / =emms-stream-jp-radios-popup= like =emms-streams=.
 
-   #+BEGIN_SRC emacs-lisp
-     (require 'emms-streams-jp-radios-anything)
-   #+END_SRC
+    #+BEGIN_SRC emacs-lisp
+      (require 'emms-streams-jp-radios)
+    #+END_SRC
 
-   If =helm= is installed, =emms-streams-jp-radios-helm= is available.
+    =M-x emms-stream-jp-radios-update-cache-async= updates each stream list.
 
-   #+BEGIN_SRC emacs-lisp
-     (require 'emms-streams-jp-radios-helm)
-   #+END_SRC
+    =M-x emms-streams-jp-radios= refreshes =*EMMS JP Radios*= buffer
+    and switches to it.
+
+    =M-x emms-stream-jp-radios-popup= popes up the window of =*EMMS JP Radios*= buffer.
+
+    This file provides the following functions to display the stream name of a streamlist.
+
+    + =emms-stream-jp-radios-track-description=
+
+      This function displays the stream name of a streamlist in =*EMMS Playlist*= buffer.
+
+      #+BEGIN_SRC emacs-lisp
+        (custom-set-variables
+         '(emms-track-description-function
+           'emms-stream-jp-radios-track-description))
+      #+END_SRC
+
+    + =emms-stream-jp-radios-playlist-current=
+
+      #+BEGIN_SRC emacs-lisp
+        (require 'emms-mode-line)
+        (custom-set-variables
+         '(emms-mode-line-mode-line-function 'emms-stream-jp-radios-playlist-current))
+      #+END_SRC
+
+    + =emms-stream-jp-radios-mode-line-icon-function=
+
+      #+BEGIN_SRC emacs-lisp
+        (require 'emms-mode-line-icon)
+        (custom-set-variables
+         '(emms-mode-line-mode-line-function 'emms-stream-jp-radios-mode-line-icon-function))
+      #+END_SRC
+
+    + =emms-stream-jp-radios-current-title-function=
+
+      #+BEGIN_SRC emacs-lisp
+        (require 'emms-mode-line-cycle)
+        (custom-set-variables
+         '(emms-mode-line-cycle-current-title-function
+           'emms-stream-jp-radios-current-title-function))
+      #+END_SRC
+
+*** emms-streams-jp-radios-anything.el
+
+    If =anything= is installed, =emms-streams-jp-radios-anything= is available.
+
+    #+BEGIN_SRC emacs-lisp
+      (require 'emms-streams-jp-radios-anything)
+
+      ;; If `emms-stream-jp-radios-anything-use-emms-stream-list-p' is no-nil,
+      ;; candidates include `emms-stream-list'.
+      (custom-set-variables
+       '(emms-stream-jp-radios-anything-use-emms-stream-list-p t))
+    #+END_SRC
+
+*** emms-streams-jp-radios-helm.el
+
+    If =helm= is installed, =emms-streams-jp-radios-helm= is available.
+
+    #+BEGIN_SRC emacs-lisp
+      (require 'emms-streams-jp-radios-helm)
+
+      ;; If `emms-stream-jp-radios-helm-use-emms-stream-list-p' is no-nil,
+      ;; candidates include `emms-stream-list'.
+      (custom-set-variables
+       '(emms-stream-jp-radios-helm-use-emms-stream-list-p t))
+    #+END_SRC
 
 ** References
 
