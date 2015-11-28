@@ -42,7 +42,8 @@
 TEST and GETTER takes a node of NAME as an argument.
 TEST is a predicate function.
 Object returned by GETTER is collected."
-  (cl-labels ((collect-name-node (xml-ls ls)
+  (cl-labels ((collect-name-node
+               (xml-ls ls)
                 (cond
                  ((atom xml-ls) ls)
                  ((consp (car xml-ls))
@@ -191,6 +192,35 @@ If save,run `emms-stream-save-bookmarks-file' after."
          ((zerop dow) (emms-stream-animate-add-bookmark-1 updatep))
          (t (emms-stream-animate-add-bookmark-1
              updatep (nth (1- dow) emms-stream-animate--days))))))
+
+;; For media player
+
+(defun emms-stream-animate--fetch-wmp (url)
+  "Fetch wmp link from URL."
+  (let* ((wmp (car (emms-stream-animate--xml-collect-node
+                    'li (emms-stream-animate--url-to-html url)
+                    :test
+                    (lambda (node) (equal (xml-get-attribute-or-nil node 'class) "wmp clearfix"))
+                    :getter
+                    (lambda (node) (let ((a (car (xml-get-children node 'a))))
+                                 (xml-get-attribute-or-nil a 'href)))))))
+    (unless wmp (error "Failed to get wmp"))
+    (url-expand-file-name wmp url)))
+
+(defun emms-stream-animate--asx-to-href (asx)
+  "Return href of ASX."
+  (car (emms-stream-animate--xml-collect-node
+        'ref (emms-stream-animate--url-to-html asx)
+        :test
+        (lambda (node) (xml-get-attribute-or-nil node 'href))
+        :getter
+        (lambda (node) (xml-get-attribute node 'href)))))
+
+(defun emms-stream-animate-stream-url-to-asx-ref (stream-url)
+  "Retrun Ref of asx form STREAM-URL."
+  (emms-stream-animate--asx-to-href
+   (emms-stream-animate--fetch-wmp
+    (replace-regexp-in-string "\\`animate://" "" stream-url))))
 
 (provide 'emms-streams-animate)
 ;;; emms-streams-animate.el ends here

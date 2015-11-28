@@ -26,9 +26,8 @@
 ;;; Code:
 (require 'emms-player-simple-mpv)
 (require 'emms-streams)
-(require 'xml)
-(require 'url)
 (require 'later-do)
+(require 'emms-streams-animate)
 
 (define-emms-simple-player-mpv mpv-animate '(streamlist)
   "\\`animate://"
@@ -41,77 +40,30 @@
 (emms-player-set 'emms-player-mpv-animate 'get-media-title
                  'emms-player-mpv-animate--get-media-title)
 
-(cl-defun emms-player-mpv-animate--xml-collect-node
-    (name xml-ls &key (test #'identity) (getter #'identity))
-  "Collect nodes of NAME from XML-LS.
-TEST and GETTER takes a node of NAME as an argument.
-TEST is a predicate function.
-Object returned by GETTER is collected."
-  (cl-labels ((collect-name-node (xml-ls ls)
-                (cond
-                 ((atom xml-ls) ls)
-                 ((consp (car xml-ls))
-                  (collect-name-node
-                   (car xml-ls)
-                   (collect-name-node (cdr xml-ls) ls)))
-                 ((and (eq (car xml-ls) name)
-                       (funcall test xml-ls))
-                  (cons (funcall getter xml-ls) ls))
-                 ((or (null (car xml-ls))
-                      (not (symbolp (car xml-ls))))
-                  (collect-name-node (cdr xml-ls) ls))
-                 ((symbolp (car xml-ls))
-                  (collect-name-node (xml-node-children xml-ls) ls ))
-                 (t ls))))
-    (collect-name-node xml-ls nil)))
-
-(defun emms-player-mpv-animate--url-to-html (url)
-  (let* ((buf (url-retrieve-synchronously url)))
-    (with-current-buffer buf
-      (goto-char (point-min))
-      (while (and (not (eobp)) (not (eolp))) (forward-line 1))
-      (unless (eobp) (forward-line 1))
-      (unwind-protect (libxml-parse-html-region (point) (point-max))
-        (kill-buffer buf)))))
-
-(defun emms-player-mpv-animate--fetch-wmp (url)
-  "Fetch wmp link from URL."
-  (let* ((wmp (car (emms-player-mpv-animate--xml-collect-node
-                    'li (emms-player-mpv-animate--url-to-html url)
-                    :test
-                    (lambda (node) (equal (xml-get-attribute-or-nil node 'class) "wmp clearfix"))
-                    :getter
-                    (lambda (node) (let ((a (car (xml-get-children node 'a))))
-                                 (xml-get-attribute-or-nil a 'href)))))))
-    (unless wmp (error "Failed to get wmp"))
-    (url-expand-file-name wmp url)))
-
-(defun emms-player-mpv-animate--asx-to-href (asx)
-  "Return href from ASX."
-  (car (emms-player-mpv-animate--xml-collect-node
-        'ref (emms-player-mpv-animate--url-to-html asx)
-        :test
-        (lambda (node) (xml-get-attribute-or-nil node 'href))
-        :getter
-        (lambda (node) (xml-get-attribute node 'href)))))
-
 (defun emms-player-mpv-animate--loading-message ()
   "Loading message."
   (message "Loading animate.tv ... "))
 
 (defun emms-player-mpv-animate--track-name-to-input-form (track-name)
-  "Return url from TRACK-NAME."
-  (let* ((stream-url (replace-regexp-in-string "\\`animate://" "" track-name))
-         (url (emms-player-mpv-animate--asx-to-href
-               (emms-player-mpv-animate--fetch-wmp stream-url))))
+  "Return Ref of asx from TRACK-NAME."
+  (let ((asx-ref (emms-stream-animate-stream-url-to-asx-ref track-name)))
     (later-do 'emms-player-mpv-animate--loading-message)
-    url))
+    asx-ref))
 
 (defun emms-player-mpv-animate--get-media-title (track)
   "Return media title from TRACK."
   (if (eq (emms-track-type track) 'streamlist)
       (emms-stream-name(emms-track-get track 'metadata))
     (file-name-nondirectory (emms-track-name track))))
+
+(define-obsolete-function-alias 'emms-player-mpv-animate--xml-collect-node
+  'emms-stream-animate--xml-collect-node "20151128")
+(define-obsolete-function-alias 'emms-player-mpv-animate--url-to-html
+  'emms-stream-animate--url-to-html "20151128")
+(define-obsolete-function-alias 'emms-player-mpv-animate--fetch-wmp
+  'emms-stream-animate--fetch-wmp "20151128")
+(define-obsolete-function-alias 'emms-player-mpv-animate--asx-to-href
+  'emms-stream-animate--asx-to-href "20151128")
 
 (provide 'emms-player-mpv-animate)
 ;;; emms-player-mpv-animate.el ends here
