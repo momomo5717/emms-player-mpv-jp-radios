@@ -27,9 +27,66 @@
 (require 'cl-lib)
 (require 'xml)
 (require 'url)
-(require 'emms-player-mpv-anitama)
+(require 'url-cookie)
+
+(defvar emms-stream-anitama--cookie-file
+  (expand-file-name "weeeef_cookies" temporary-file-directory))
+
+(defvar emms-stream-anitama--url-top
+  "http://www.weeeef.com/weeeefww1/Transition?command=top&group=G0000049")
+
+(defun emms-stream-anitama--access-weeeef ()
+  "Access www.weeeef.com to get cookies."
+  (let ((buf (url-retrieve-synchronously emms-stream-anitama--url-top)))
+    (kill-buffer buf)))
+
+(defun emms-stream-anitama--write-cookies ()
+  "Write cookies to `emms-stream-anitama--cookie-file'."
+  (let* ((weeeef-cookie (cl-find "www.weeeef.com" url-cookie-storage
+                                 :key #'car :test #'equal))
+         (domain (car weeeef-cookie))
+         (file emms-stream-anitama--cookie-file))
+    (unless weeeef-cookie (error "Not found cookies of www.weeeef.com"))
+    (with-temp-buffer
+      (dolist (cookie (cdr weeeef-cookie))
+        (insert
+         (mapconcat
+          #'identity
+          (list domain "FALSE" (url-cookie-localpart cookie) "FALSE" "0"
+                (url-cookie-name  cookie) (url-cookie-value  cookie))
+          (string 9)) ;; mapconcat with TAB
+         "\n"))
+      (write-region (point-min) (point-max) file nil 'nomessage))))
+
+(defun emms-stream-anitama--have-cookies-p ()
+  "Return non-nil, if `url-cookie-storage' has cookies."
+  (> (length (cdr (cl-find "www.weeeef.com" url-cookie-storage
+                           :key #'car :test #'equal)))
+     1))
+
+(defun emms-stream-anitama--write-unless-cookies (&optional forcep)
+  "Access and write if `url-cookie-storage' doesn't have cookies.
+Access and write if `emms-stream-anitama--cookie-file' doesn't exist
+or the time of last acces is more than 1800 sec.
+If FORCEP is non-nil, force to access and write."
+  (unless (and (emms-stream-anitama--have-cookies-p)
+               (file-exists-p emms-stream-anitama--cookie-file)
+               (< (- (float-time (current-time))
+                     (float-time (nth 5 (file-attributes
+                                         emms-stream-anitama--cookie-file))))
+                  1800)
+               (not forcep))
+    (emms-stream-anitama--access-weeeef)
+    (unless (emms-stream-anitama--have-cookies-p)
+      (error "Failed to get cookies of www.weeeef.com"))
+    (emms-stream-anitama--write-cookies)))
+
+;; For stream-list
 
 (defvar emms-stream-anitama-stream-list-cache nil)
+
+(defvar emms-stream-anitama--url-BookServlet
+  "http://www.weeeef.com/weeeefww1/BookServlet")
 
 (defun emms-stream-anitama--Book-to-KikanFrom-date (Book)
   "Return date from BOOK."
@@ -58,15 +115,15 @@
 If UPDATEP is no-nil, cache is updated."
   (if (and (not updatep) (consp emms-stream-anitama-stream-list-cache))
       emms-stream-anitama-stream-list-cache
-    (emms-player-mpv-anitama--write-unless-cookies t)
+    (emms-stream-anitama--write-unless-cookies t)
     (setq emms-stream-anitama-stream-list-cache
      (with-temp-buffer
        (unless (zerop (call-process
                        "wget"  nil t nil "-q" "-O" "-"
                        (format "--load-cookies=%s"
-                               emms-player-mpv-anitama--cookie-file)
-                       "http://www.weeeef.com/weeeefww1/BookServlet"))
-         (error "Failed to fetch http://www.weeeef.com/weeeefww1/BookServlet"))
+                               emms-stream-anitama--cookie-file)
+                       emms-stream-anitama--url-BookServlet))
+         (error "Failed to fetch %s" emms-stream-anitama--url-BookServlet))
        (emms-stream-anitaam--bookservlet-xml-to-stream-list
         (libxml-parse-xml-region (point-min) (point-max)))))))
 
@@ -74,13 +131,13 @@ If UPDATEP is no-nil, cache is updated."
   "Access and write www.weeeef.com cookies asynchronously.
 If CONT is no-nil, it is run with no arguments."
   (url-retrieve
-   "http://www.weeeef.com/weeeefww1/Transition?command=top&group=G0000049"
+   emms-stream-anitama--url-top
    (lambda (status &rest _)
      (when (memq :error status)
        (error "Failed to write www.weeeef.com cookies : %s" (cdr status)))
      (kill-buffer)
-     (emms-player-mpv-anitama--write-cookies)
-     (unless (emms-player-mpv-anitama--have-cookies-p)
+     (emms-stream-anitama--write-cookies)
+     (unless (emms-stream-anitama--have-cookies-p)
        (error "Failed to get cookies of www.weeeef.com"))
      (when (functionp cont) (funcall cont)))))
 
@@ -91,7 +148,7 @@ If CONT is no-nil, it is run with no arguments."
         (let ((buf (process-buffer proc))
               (ps (process-status proc)))
           (when (eq ps 'signal)
-            (error "Failed to fetch animate stream list"))
+            (error "Failed to fetch anitama stream list"))
           (when (eq ps 'exit)
             (with-current-buffer buf
               (goto-char (point-max))
@@ -106,12 +163,12 @@ If CONT is no-nil, it is run with no arguments."
               (message "Updated anitama stream list cache"))))))
     (emms-stream-anitama--write-weeeef-async
      (lambda () (set-process-sentinel
-             (start-process "animate-fetch-stream-list-async"
-                            (make-temp-name "*animate-fetch-stream-list-async*")
+             (start-process "anitama-fetch-stream-list-async"
+                            (make-temp-name "*anitama-fetch-stream-list-async*")
                             "wget" "-q" "-O" "-"
                             (format "--load-cookies=%s"
-                                    emms-player-mpv-anitama--cookie-file)
-                            "http://www.weeeef.com/weeeefww1/BookServlet")
+                                    emms-stream-anitama--cookie-file)
+                            emms-stream-anitama--url-BookServlet)
              #'stream-list-async-filter)))))
 
 (defun emms-stream-anitama-get-stream-list ()
@@ -142,6 +199,56 @@ If save,run `emms-stream-save-bookmarks-file' after."
      (emms-stream-redisplay)
      (goto-char (point-min))
      (forward-line (1- line)))))
+
+;; For media player
+
+(defvar emms-stream-anitama-url-BookXmlGet
+  "http://www.weeeef.com/weeeefww1/BookXmlGet")
+
+(defun emms-stream-anitama-get-BookXmlGet-id-url (id)
+  "Add Book ID to BookXmlGet."
+  (format "%s?BookId=%s"
+          emms-stream-anitama-url-BookXmlGet id))
+
+(defvar emms-stream-anitama-url-OriginalGet
+  "http://www.weeeef.com/weeeefww1/OriginalGet")
+
+(defun emms-stream-anitama--fetch-BookXmlGet-nodeId (id)
+  "Return nodeId from ID."
+  (emms-stream-anitama--write-unless-cookies)
+  (let*
+      ((BookXmlGet-xml
+        (with-temp-buffer
+          (unless
+              (zerop
+               (call-process
+                "wget"  nil t nil "-q" "-O" "-"
+                (format "--load-cookies=%s" emms-stream-anitama--cookie-file)
+                (emms-stream-anitama-get-BookXmlGet-id-url id)))
+            (error "Failed to fetch %s" emms-stream-anitama-url-BookXmlGet))
+          (libxml-parse-xml-region (point-min) (point-max))))
+       (Node (cl-loop
+              with Node = (car (xml-get-children BookXmlGet-xml 'Node))
+              with nextNode = (car (xml-get-children Node 'Node))
+              while nextNode do
+              (setq Node nextNode)
+              (setq nextNode (car (xml-get-children Node 'Node)))
+              finally return Node))
+       (nodeId (car (xml-node-children (car (xml-get-children Node 'Id))))))
+    nodeId))
+
+(defun emms-stream-anitama-stream-url-to-wget-form (stream-url)
+  "Return wget form from STREAM-URL."
+  (let* ((id (replace-regexp-in-string "\\`anitama://" "" stream-url))
+         (nodeId (emms-stream-anitama--fetch-BookXmlGet-nodeId id)))
+    (unless nodeId (error "Failed to fetch nodeId"))
+    (mapconcat
+     #'shell-quote-argument
+     (list "wget" "-O" "-" "-q"
+           (format "--load-cookie=%s" emms-stream-anitama--cookie-file)
+           (format "--post-data=nodeId=%s&type=S" nodeId)
+           emms-stream-anitama-url-OriginalGet)
+     " ")))
 
 (provide 'emms-streams-anitama)
 ;;; emms-streams-anitama.el ends here
