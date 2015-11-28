@@ -28,6 +28,7 @@
 (require 'emms-player-simple-mpv)
 (require 'emms-streams)
 (require 'later-do)
+(require 'emms-streams-listen)
 
 (define-emms-simple-player-mpv mpv-listen '(streamlist)
   "\\`listen://"
@@ -46,10 +47,8 @@
 
 (defun emms-player-mpv-listen--track-name-to-input-form (track-name)
   "Return url from TRACK-NAME."
-  (let ((url (format "http://mtist.as.smartstream.ne.jp/%s/livestream/playlist.m3u8"
-                     (replace-regexp-in-string "\\`listen://" "" track-name))))
-    (later-do 'emms-player-mpv-listen--loading-message)
-    url))
+  (later-do 'emms-player-mpv-listen--loading-message)
+  (emms-stream-listen-stream-url-to-url track-name))
 
 (defun emms-player-mpv-listen--get-media-title (track)
   "Return media title from TRACK."

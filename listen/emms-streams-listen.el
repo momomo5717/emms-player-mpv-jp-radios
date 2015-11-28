@@ -334,5 +334,12 @@ If save,run `emms-stream-save-bookmarks-file' after."
             (emms-stream-listen--add-bookmark-1 `((,(nth (1- category) id-ls) ,area)))))
     (t (emms-stream-listen--add-bookmark-1 (list (nth (1- category) id-ls)))))))
 
+;; For media player
+
+(defun emms-stream-listen-stream-url-to-url (stream-url)
+  "Return url from STREAM-URL."
+  (format "http://mtist.as.smartstream.ne.jp/%s/livestream/playlist.m3u8"
+          (replace-regexp-in-string "\\`listen://" "" stream-url)))
+
 (provide 'emms-streams-listen)
 ;;; emms-streams-listen.el ends here
