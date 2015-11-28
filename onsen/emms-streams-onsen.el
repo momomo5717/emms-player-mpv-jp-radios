@@ -27,6 +27,7 @@
 (require 'cl-lib)
 (require 'xml)
 (require 'url)
+(require 'json)
 
 (defvar emms-stream-onsen--stream-alist-cache nil
   "Cache for stream alist.")
@@ -187,6 +188,27 @@ If save,run `emms-stream-save-bookmarks-file' after."
              ((= dow 6) '("sat" "sun"))
              (t (list (nth (1- dow) emms-stream-onsen--days))))
        updatep))))
+
+;; For media player
+
+(defun emms-stream-onsen--stream-url-to-json-obj (stream-url)
+  "Return json obj from STREAM-URL."
+  (let* ((id (file-name-nondirectory stream-url))
+         (buf (url-retrieve-synchronously
+               (format "http://www.onsen.ag/data/api/getMovieInfo/%s" id))))
+    (prog1
+        (with-current-buffer buf
+          (goto-char (point-min))
+          (search-forward "callback(")
+          (json-read))
+      (kill-buffer buf))))
+
+(defun emms-stream-onsen-stream-url-to-moviePath (stream-url)
+  "Return pc link of moviePath from STREAM-URL."
+  (let* ((json-obj (emms-stream-onsen--stream-url-to-json-obj stream-url))
+         (moviePath (cdr (assq 'pc (cdr (assq 'moviePath json-obj))))))
+    (unless moviePath (error "Failed to fetch moviePath"))
+    moviePath))
 
 (provide 'emms-streams-onsen)
 ;;; emms-streams-onsen.el ends here

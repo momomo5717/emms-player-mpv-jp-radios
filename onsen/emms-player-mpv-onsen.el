@@ -27,8 +27,8 @@
 ;;; Code:
 (require 'emms-player-simple-mpv)
 (require 'emms-streams)
-(require 'json)
 (require 'later-do)
+(require 'emms-streams-onsen)
 
 (define-emms-simple-player-mpv mpv-onsen '(streamlist)
   "\\`onsen://"
@@ -41,27 +41,13 @@
 (emms-player-set 'emms-player-mpv-onsen 'get-media-title
                  'emms-player-mpv-onsen--get-media-title)
 
-(defun emms-player-mpv-onsen--track-name-to-json-obj (track-name)
-  "Return json obj from TRACK-NAME."
-  (let* ((id (file-name-nondirectory track-name))
-         (buf (url-retrieve-synchronously
-               (format "http://www.onsen.ag/data/api/getMovieInfo/%s" id))))
-    (prog1
-        (with-current-buffer buf
-          (goto-char (point-min))
-          (search-forward "callback(")
-          (json-read))
-      (kill-buffer buf))))
-
 (defun emms-player-mpv-onsen--loading-message ()
   "Loading message."
   (message "Loading 音泉 ... "))
 
 (defun emms-player-mpv-onsen--track-name-to-input-form (track-name)
   "Return url from TRACK-NAME."
-  (let* ((json-obj (emms-player-mpv-onsen--track-name-to-json-obj track-name))
-         (url (cdr (assq 'pc (cdr (assq 'moviePath json-obj))))))
-    (unless url (error "Failed to fetch url"))
+  (let ((url (emms-stream-onsen-stream-url-to-moviePath track-name)))
     (later-do 'emms-player-mpv-onsen--loading-message)
     url))
 
@@ -69,8 +55,11 @@
   "Return media title from TRACK."
   (if (eq (emms-track-type track) 'streamlist)
       (car (split-string
-            (emms-stream-name(emms-track-get track 'metadata)) " : "))
+            (emms-stream-name (emms-track-get track 'metadata)) " : "))
     (file-name-nondirectory (emms-track-name track))))
+
+(define-obsolete-function-alias 'emms-player-mpv-onsen--track-name-to-json-obj
+  'emms-stream-onsen--stream-url-to-json-obj "20151128")
 
 (provide 'emms-player-mpv-onsen)
 ;;; emms-player-mpv-onsen.el ends here
