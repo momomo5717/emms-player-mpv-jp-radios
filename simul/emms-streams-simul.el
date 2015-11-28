@@ -23,6 +23,8 @@
 ;;; Code:
 (require 'emms-streams)
 (require 'cl-lib)
+(require 'xml)
+(require 'url)
 
 (defvar emms-stream-simul-hokkaido
   '(("三角山放送局 : 札幌市西区 : 北海道" "simul://http://wm.sankakuyama.co.jp/asx/sankaku_24k.asx" 1 streamlist)
@@ -237,6 +239,57 @@ If save,run `emms-stream-save-bookmarks-file' after."
   (if (zerop location)
       (apply #'emms-stream-simul-add-bookmark-1 emms-stream-simul-streams-name)
     (emms-stream-simul-add-bookmark-1 (nth (1- location) emms-stream-simul-streams-name))))
+
+;; For media player
+
+(cl-defun emms-stream-simul--xml-collect-node
+    (name xml-ls &key (test #'identity) (getter #'identity))
+  "Collect nodes of NAME from XML-LS.
+TEST and GETTER takes a node of NAME as an argument.
+TEST is a predicate function.
+Object returned by GETTER is collected."
+  (cl-labels ((collect-name-node (xml-ls ls)
+                (cond
+                 ((atom xml-ls) ls)
+                 ((consp (car xml-ls))
+                  (collect-name-node
+                   (car xml-ls)
+                   (collect-name-node (cdr xml-ls) ls)))
+                 ((and (eq (car xml-ls) name)
+                       (funcall test xml-ls))
+                  (cons (funcall getter xml-ls) ls))
+                 ((or (null (car xml-ls))
+                      (not (symbolp (car xml-ls))))
+                  (collect-name-node (cdr xml-ls) ls))
+                 ((symbolp (car xml-ls))
+                  (collect-name-node (xml-node-children xml-ls) ls ))
+                 (t ls))))
+    (collect-name-node xml-ls nil)))
+
+(defun emms-stream-simul--asx-to-href (asx)
+  "Return href from ASX."
+  (let* ((buf (url-retrieve-synchronously asx))
+         (html (with-current-buffer buf
+                 (goto-char (point-min))
+                 (while (and (not (eobp)) (not (eolp))) (forward-line 1))
+                 (unless (eobp) (forward-line 1))
+                 (prog1 (libxml-parse-html-region (point) (point-max))
+                   (kill-buffer buf)))))
+    (car (last (emms-stream-simul--xml-collect-node
+                'ref html
+                :test
+                (lambda (node) (xml-get-attribute-or-nil node 'href))
+                :getter
+                (lambda (node) (xml-get-attribute node 'href)))))))
+
+(defun emms-stream-simul-stream-url-to-url (stream-url)
+  "Replace simul:\\ of STREAM-URL with empty string."
+  (replace-regexp-in-string "\\`s\\(imul\\|aimaru\\)://" "" stream-url))
+
+(defun emms-stream-simul-stream-url-to-asx-ref (stream-url)
+  "Return ref of asx from STREAM-URL."
+  (emms-stream-simul--asx-to-href
+   (emms-stream-simul-stream-url-to-url stream-url)))
 
 (provide 'emms-streams-simul)
 ;;; emms-streams-simul.el ends here
