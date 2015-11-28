@@ -163,5 +163,11 @@ If save,run `emms-stream-save-bookmarks-file' after."
       (goto-char (point-min))
       (forward-line (1- line)))))
 
+;; For media player
+
+(defun emms-stream-famitsu-stream-url-to-mp3 (stream-url)
+  "Return mp3 link from STREAM-URL."
+  (replace-regexp-in-string "\\`famitsu://" "" stream-url))
+
 (provide 'emms-streams-famitsu)
 ;;; emms-streams-famitsu.el ends here

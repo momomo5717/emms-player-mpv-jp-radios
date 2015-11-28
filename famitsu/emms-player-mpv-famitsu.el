@@ -28,6 +28,7 @@
 (require 'emms-player-simple-mpv)
 (require 'emms-streams)
 (require 'later-do)
+(require 'emms-streams-famitsu)
 
 (define-emms-simple-player-mpv mpv-famitsu '(streamlist)
   "\\`famitsu://"
@@ -47,7 +48,7 @@
 (defun emms-player-mpv-famitsu--track-name-to-input-form (track-name)
   "Return url from TRACK-NAME."
   (later-do 'emms-player-mpv-famitsu--loading-message)
-  (replace-regexp-in-string "\\`famitsu://" "" track-name))
+  (emms-stream-famitsu-stream-url-to-mp3 track-name))
 
 (defun emms-player-mpv-famitsu--get-media-title (track)
   "Return media title from TRACK."
