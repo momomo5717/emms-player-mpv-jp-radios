@@ -26,49 +26,46 @@
 (require 'emms-streams)
 (require 'cl-lib)
 
+(defvar emms-stream-radiru-streamlist-daini
+  '("NHK第2"
+     "radiru://rtmpe://netradio-r2-flash.nhk.jp/live/NetRadio_R2_flash@63342"
+     1 streamlist))
+
 (defvar emms-stream-radiru-stream-list-sendai
-  '(("NHK第1 仙台"
+  `(("NHK第1 仙台"
      "radiru://rtmpe://netradio-hkr1-flash.nhk.jp/live/NetRadio_HKR1_flash@108442"
      1 streamlist)
-    ("NHK第2"
-     "radiru://rtmpe://netradio-r2-flash.nhk.jp/live/NetRadio_R2_flash@63342"
-     1 streamlist)
+    ,emms-stream-radiru-streamlist-daini
     ("NHK-FM 仙台"
      "radiru://rtmpe://netradio-hkfm-flash.nhk.jp/live/NetRadio_HKFM_flash@108237"
      1 streamlist))
   "らじる★らじる 仙台 stream list.")
 
 (defvar emms-stream-radiru-stream-list-tokyo
-  '(("NHK第1 東京"
+  `(("NHK第1 東京"
      "radiru://rtmpe://netradio-r1-flash.nhk.jp/live/NetRadio_R1_flash@63346"
      1 streamlist)
-    ("NHK第2"
-     "radiru://rtmpe://netradio-r2-flash.nhk.jp/live/NetRadio_R2_flash@63342"
-     1 streamlist)
+    ,emms-stream-radiru-streamlist-daini
     ("NHK-FM 東京"
      "radiru://rtmpe://netradio-fm-flash.nhk.jp/live/NetRadio_FM_flash@63343"
      1 streamlist))
   "らじる★らじる 東京 stream list.")
 
 (defvar emms-stream-radiru-stream-list-nagoya
-  '(("NHK第1 名古屋"
+  `(("NHK第1 名古屋"
      "radiru://rtmpe://netradio-ckr1-flash.nhk.jp/live/NetRadio_CKR1_flash@108234"
      1 streamlist)
-    ("NHK第2"
-     "radiru://rtmpe://netradio-r2-flash.nhk.jp/live/NetRadio_R2_flash@63342"
-     1 streamlist)
+    ,emms-stream-radiru-streamlist-daini
     ("NHK-FM 名古屋"
      "radiru://rtmpe://netradio-ckfm-flash.nhk.jp/live/NetRadio_CKFM_flash@108235"
      1 streamlist))
   "らじる★らじる 名古屋 stream list.")
 
 (defvar emms-stream-radiru-stream-list-osaka
-  '(("NHK第1 大阪"
+  `(("NHK第1 大阪"
      "radiru://rtmpe://netradio-bkr1-flash.nhk.jp/live/NetRadio_BKR1_flash@108232"
      1 streamlist)
-    ("NHK第2"
-     "radiru://rtmpe://netradio-r2-flash.nhk.jp/live/NetRadio_R2_flash@63342"
-     1 streamlist)
+    ,emms-stream-radiru-streamlist-daini
     ("NHK-FM 大阪"
      "radiru://rtmpe://netradio-bkfm-flash.nhk.jp/live/NetRadio_BKFM_flash@108233"
      1 streamlist))
@@ -85,9 +82,7 @@
 
 (defun emms-stream-radiru-get-stream-list ()
   "Return new stream-list."
-  (cons '("NHK第2"
-          "radiru://rtmpe://netradio-r2-flash.nhk.jp/live/NetRadio_R2_flash@63342"
-          1 streamlist)
+  (cons emms-stream-radiru-streamlist-daini
         (cl-loop
          with ls = nil
          for area-stream-list in (list emms-stream-radiru-stream-list-sendai
@@ -119,6 +114,15 @@ If save ,run `emms-stream-save-bookmarks-file' after."
     (emms-stream-redisplay)
     (goto-char (point-min))
     (forward-line (1- line))))
+
+;; For media player
+
+(defvar emms-stream-radiru-url-swf
+  "http://www3.nhk.or.jp/netradio/files/swf/rtmpe.swf")
+
+(defun emms-stream-radiru-stream-url-to-rtmpe (stream-url)
+  "Return rtmpe from STREAM-URL."
+  (replace-regexp-in-string "\\`radiru://" "" stream-url))
 
 (provide 'emms-streams-radiru)
 ;;; emms-streams-radiru.el ends here
