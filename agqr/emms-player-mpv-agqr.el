@@ -27,6 +27,7 @@
 (require 'emms-player-simple-mpv)
 (require 'emms-streams)
 (require 'later-do)
+(require 'emms-streams-agqr)
 
 (define-emms-simple-player-mpv mpv-agqr '(streamlist)
   "\\`agqr://"
@@ -46,7 +47,7 @@
 (defun emms-player-mpv-agqr--track-name-to-input-form (track-name)
   "Retrun \"rtmp://fms-base2.mitene.ad.jp/agqr/aandg22 live=1\" from TRACK-NAME."
   (later-do #'emms-player-mpv-agqr--loading-message)
-  (format "%s live=1" (replace-regexp-in-string "\\`agqr" "rtmp" track-name)))
+  (format "%s live=1" (emms-stream-agqr-stream-url-to-rtmp track-name)))
 
 (defun emms-player-mpv-agqr--get-media-title (track)
   (if (eq (emms-track-type track) 'streamlist)

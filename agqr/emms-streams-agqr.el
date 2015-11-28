@@ -26,12 +26,10 @@
 ;;; Code:
 (require 'emms-streams)
 (require 'cl-lib)
-(require 'emms-player-mpv-agqr)
 
 (defvar emms-stream-agqr-stream-list
-  '(("超!A&G+" "agqr://fms-base2.mitene.ad.jp/agqr/aandg22" 1 streamlist))
-  "超!A&G+ stream list.
-Replace agqr:// with rtmp:// when use it.")
+  '(("超!A&G+" "agqr://rtmp://fms-base2.mitene.ad.jp/agqr/aandg22" 1 streamlist))
+  "超!A&G+ stream list.")
 
 (defun emms-stream-agqr-get-stream-list ()
   "Return new streamlist."
@@ -57,6 +55,14 @@ If save,run `emms-stream-save-bookmarks-file' after."
     (emms-stream-redisplay)
     (goto-char (point-min))
     (forward-line (1- line))))
+
+;; For media player
+
+(defun emms-stream-agqr-stream-url-to-rtmp (stream-url)
+  "Return rtmp of STREAM-URL for meida player."
+  (if (string-match "\\`agqr://fms-base2" stream-url)
+      (replace-regexp-in-string "\\`agqr" "rtmp" stream-url)
+    (replace-regexp-in-string "\\`agqr://" "" stream-url)))
 
 (provide 'emms-streams-agqr)
 ;;; emms-streams-agqr.el ends here
