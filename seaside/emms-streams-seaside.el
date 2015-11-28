@@ -24,6 +24,8 @@
 ;;; Code:
 (require 'emms-streams)
 (require 'cl-lib)
+(require 'xml)
+(require 'url)
 
 (defvar emms-stream-seaside-stream-list
   '(("あどりぶ : 月曜日更新"
@@ -90,6 +92,114 @@ If save,run `emms-stream-save-bookmarks-file' after."
     (emms-stream-redisplay)
     (goto-char (point-min))
     (forward-line (1- line))))
+
+;; For media player
+
+(cl-defun emms-stream-seaside--xml-collect-node
+    (name xml-ls &key (test #'identity) (getter #'identity))
+  "Collect nodes of NAME from XML-LS.
+TEST and GETTER takes a node of NAME as an argument.
+TEST is a predicate function.
+Object returned by GETTER is collected."
+  (cl-labels ((collect-name-node (xml-ls ls)
+               (cond
+                ((atom xml-ls) ls)
+                ((consp (car xml-ls))
+                 (collect-name-node (car xml-ls)
+                                    (collect-name-node (cdr xml-ls) ls)))
+                ((and (eq (car xml-ls) name)
+                      (funcall test xml-ls))
+                 (cons (funcall getter xml-ls) ls))
+                ((or (null (car xml-ls))
+                     (not (symbolp (car xml-ls))))
+                 (collect-name-node (cdr xml-ls) ls))
+                ((symbolp (car xml-ls))
+                 (collect-name-node (xml-node-children xml-ls) ls ))
+                (t ls))))
+    (collect-name-node xml-ls nil)))
+
+(defun emms-stream-seaside--url-to-html (url)
+  "Return html list fron URL."
+  (let ((buf (url-retrieve-synchronously url)))
+    (prog1
+        (with-current-buffer buf
+          (goto-char (point-min))
+          (while (and (not (eobp)) (not (eolp))) (forward-line 1))
+          (unless (eobp) (forward-line 1))
+          (libxml-parse-html-region (point) (point-max)))
+      (kill-buffer buf))))
+
+(defun emms-stream-seaside--html-to-wax (html track-url)
+  "Return WAX from HTML with TRACK-URL."
+  (let ((wax
+         (car (emms-stream-seaside--xml-collect-node
+               'a html
+               :test
+               (lambda (node) (let ((href (xml-get-attribute-or-nil node 'href)))
+                            (and href
+                                 (string-match-p "[.]wax$" href))))
+               :getter
+               (lambda (node)
+                 (let ((href (xml-get-attribute-or-nil node 'href)))
+                   (if (string-match-p "\\`http://" href)
+                       href
+                     (concat track-url href))))))))
+    (if wax wax (error "Not found WAX"))))
+
+(defun emms-stream-seaside--html-to-nico (html)
+  "Return nico url from HTML with TRACK-URL."
+  (let ((nico-url
+         (car (emms-stream-seaside--xml-collect-node
+               'a html
+               :test
+               (lambda (node) (let ((href (xml-get-attribute-or-nil node 'href)))
+                            (and href
+                                 (string-match-p "\\`http://www.nicovideo.jp/watch/"
+                                                 href))))
+               :getter
+               (lambda (node) (xml-get-attribute-or-nil node 'href))))))
+    (if nico-url nico-url (error "Not found nico url"))))
+
+(defvar emms-stream-seaside-nico-stream-regex
+  (concat "\\`"
+   (regexp-opt '("seaside://http://seaside-c.jp/program/emergency/"
+                 "seaside://http://seaside-c.jp/program/delicatezone/"
+                 "seaside://http://ch.nicovideo.jp/grimoire-gakuen"))))
+
+(defun emms-stream-seaside-nico-stream-url-p (stream-url)
+  "Return t, if STREAM-URL needs nico url."
+  (string-match emms-stream-seaside-nico-stream-regex stream-url))
+
+(defun emms-stream-seaside--stream-url-to-url (stream-url)
+  "Replace seaside:// with of STREAM-URL empty string."
+  (replace-regexp-in-string "\\`seaside://" "" stream-url))
+
+(defun emms-stream-seaside-stream-url-to-wax (stream-url)
+  "Return wax from STREAM-URL."
+  (let ((url (emms-stream-seaside--stream-url-to-url stream-url)))
+   (emms-stream-seaside--html-to-wax
+    (emms-stream-seaside--url-to-html url) url)))
+
+(defun emms-stream-seaside-wax-to-wma (wax)
+  "Return wax fron WAX."
+  (let ((buf (url-retrieve-synchronously wax)))
+    (prog1
+        (with-current-buffer buf
+          (goto-char (point-min))
+          (while (and (not (eobp)) (not (eolp))) (forward-line 1))
+          (unless (eobp) (forward-line 1))
+          (let ((wma (car
+                      (emms-stream-seaside--xml-collect-node
+                       'ref (libxml-parse-html-region (point) (point-max))
+                       :getter (lambda (node) (xml-get-attribute-or-nil node 'href)) ))))
+            (if wma wma (error "Not found WMA"))))
+      (kill-buffer buf))))
+
+(defun emms-stream-seaside-stream-url-to-nico-url (stream-url)
+  "Return nico url from STREAM-URL."
+  (emms-stream-seaside--html-to-nico
+   (emms-stream-seaside--url-to-html
+    (emms-stream-seaside--stream-url-to-url stream-url))))
 
 (provide 'emms-streams-seaside)
 ;;; emms-streams-seaside.el ends here

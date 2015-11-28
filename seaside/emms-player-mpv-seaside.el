@@ -24,12 +24,10 @@
 ;; (add-to-list 'emms-player-list 'emms-player-mpv-seaside)
 
 ;;; Code:
-(require 'cl-lib)
 (require 'emms-player-simple-mpv)
 (require 'emms-streams)
-(require 'xml)
-(require 'url)
 (require 'later-do)
+(require 'emms-streams-seaside)
 
 (define-emms-simple-player-mpv mpv-seaside '(streamlist)
   "\\`seaside://"
@@ -41,121 +39,28 @@
 
 (emms-player-simple-mpv-add-to-converters
  'emms-player-mpv-seaside
- (concat "\\`"
-         (regexp-opt '("seaside://http://seaside-c.jp/program/emergency/"
-                       "seaside://http://seaside-c.jp/program/delicatezone/"
-                       "seaside://http://ch.nicovideo.jp/grimoire-gakuen")))
- t
+ emms-stream-seaside-nico-stream-regex t
  'emms-player-mpv-seaside--track-name-to-nico-input-form)
 
 (emms-player-set 'emms-player-mpv-seaside 'get-media-title
                  'emms-player-mpv-seaside--get-media-title)
 
-(cl-defun emms-player-mpv-seaside--xml-collect-node
-    (name xml-ls &key (test #'identity) (getter #'identity))
-  "Collect nodes of NAME from XML-LS.
-TEST and GETTER takes a node of NAME as an argument.
-TEST is a predicate function.
-Object returned by GETTER is collected."
-  (cl-labels ((collect-name-node (xml-ls ls)
-                (cond
-                 ((atom xml-ls) ls)
-                 ((consp (car xml-ls))
-                  (collect-name-node (car xml-ls)
-                                     (collect-name-node (cdr xml-ls) ls)))
-
-                 ((and (eq (car xml-ls) name)
-                       (funcall test xml-ls))
-                  (cons (funcall getter xml-ls) ls))
-                 ((or (null (car xml-ls))
-                      (not (symbolp (car xml-ls))))
-                  (collect-name-node (cdr xml-ls) ls))
-                 ((symbolp (car xml-ls))
-                  (collect-name-node (xml-node-children xml-ls) ls ))
-                 (t ls))))
-    (collect-name-node xml-ls nil)))
-
 (defun emms-player-mpv-seaside--loading-message ()
   "Loading message."
   (message "Loading Sea Side Communications ... "))
 
-(defun emms-player-mpv-seaside--url-to-html (url)
-  "Return html list fron URL."
-  (let ((buf (url-retrieve-synchronously url)))
-    (prog1
-        (with-current-buffer buf
-          (goto-char (point-min))
-          (while (and (not (eobp)) (not (eolp))) (forward-line 1))
-          (unless (eobp) (forward-line 1))
-          (libxml-parse-html-region (point) (point-max)))
-      (kill-buffer buf))))
-
-(defun emms-player-mpv-seaside--html-to-wax (html track-url)
-  "Return WAX from HTML with TRACK-URL."
-  (let ((wax
-         (car (emms-player-mpv-seaside--xml-collect-node
-               'a html
-               :test
-               (lambda (node) (let ((href (xml-get-attribute-or-nil node 'href)))
-                            (and href
-                                 (string-match-p "[.]wax$" href))))
-               :getter
-               (lambda (node)
-                 (let ((href (xml-get-attribute-or-nil node 'href)))
-                   (if (string-match-p "\\`http://" href)
-                       href
-                     (concat track-url href))))))))
-    (if wax wax (error "Not found WAX"))))
-
-(defun emms-player-mpv-seaside--html-to-nico (html)
-  "Return nico url from HTML with TRACK-URL."
-  (let ((nico-url
-         (car (emms-player-mpv-seaside--xml-collect-node
-               'a html
-               :test
-               (lambda (node) (let ((href (xml-get-attribute-or-nil node 'href)))
-                            (and href
-                                 (string-match-p "\\`http://www.nicovideo.jp/watch/"
-                                                 href))))
-               :getter
-               (lambda (node) (xml-get-attribute-or-nil node 'href))))))
-    (if nico-url nico-url (error "Not found nico url"))))
-
-(defun emms-player-mpv-seaside--wax-to-wma (wax)
-  "Return WMA fron WAX."
-  (let ((buf (url-retrieve-synchronously wax)))
-    (prog1
-        (with-current-buffer buf
-          (goto-char (point-min))
-          (while (and (not (eobp)) (not (eolp))) (forward-line 1))
-          (unless (eobp) (forward-line 1))
-          (let ((wma (car
-                      (emms-player-mpv-seaside--xml-collect-node
-                       'ref (libxml-parse-html-region (point) (point-max))
-                       :getter (lambda (node) (xml-get-attribute-or-nil node 'href)) ))))
-            (if wma wma (error "Not found WMA"))))
-      (kill-buffer buf))))
-
 (defun emms-player-mpv-seaside--track-name-to-wma-input-form (track-name)
-  "Return url from TRACK-NAME."
-  (let* ((track-url
-          (replace-regexp-in-string "\\`seaside://" "" track-name))
-         (wax (emms-player-mpv-seaside--html-to-wax
-               (emms-player-mpv-seaside--url-to-html track-url)
-               track-url))
-         (wma (emms-player-mpv-seaside--wax-to-wma wax)))
+  "Return wma from TRACK-NAME."
+  (let ((wma (emms-stream-seaside-wax-to-wma
+              (emms-stream-seaside-stream-url-to-wax track-name))))
     (later-do 'emms-player-mpv-seaside--loading-message)
     wma))
 
 (defun emms-player-mpv-seaside--track-name-to-nico-input-form (track-name)
-  "Return url from TRACK-NAME."
+  "Return nico url from TRACK-NAME."
   (unless (executable-find "youtube-dl")
-      (error "Can not play %s" track-name))
-  (let* ((track-url
-          (replace-regexp-in-string "\\`seaside://" "" track-name))
-         (nico-url
-          (emms-player-mpv-seaside--html-to-nico
-           (emms-player-mpv-seaside--url-to-html track-url))))
+    (error "Can not play %s" track-name))
+  (let ((nico-url (emms-stream-seaside-stream-url-to-nico-url track-name)))
     (later-do 'emms-player-mpv-seaside--loading-message)
     nico-url))
 
@@ -164,6 +69,16 @@ Object returned by GETTER is collected."
   (if (eq (emms-track-type track) 'streamlist)
       (emms-stream-name(emms-track-get track 'metadata))
     (file-name-nondirectory (emms-track-name track))))
+
+
+(define-obsolete-function-alias 'emms-player-mpv-seaside--xml-collect-node
+  'emms-stream-seaside--xml-collect-node "20151128")
+(define-obsolete-function-alias 'emms-player-mpv-seaside--url-to-html
+  'emms-stream-seaside--url-to-html "20151128")
+(define-obsolete-face-alias 'emms-player-mpv-seaside--wax-to-wma
+  'emms-stream-seaside--html-to-wax "20151128")
+(define-obsolete-function-alias 'emms-player-mpv-seaside--html-to-nico
+  'emms-stream-seaside--html-to-nico "20151128")
 
 (provide 'emms-player-mpv-seaside)
 ;;; emms-player-mpv-seaside.el ends here
