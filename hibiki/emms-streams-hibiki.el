@@ -199,5 +199,47 @@ If save,run `emms-stream-save-bookmarks-file' after."
     ((zerop dow) (emms-stream-hibiki--add-bookmark-dows '(1 2 3 4 5 6) updatep))
     (t (emms-stream-hibiki--add-bookmark-dows (list dow) updatep)))))
 
+;; For media player
+
+(defvar emms-stream-hibiki--base-url-access-programs
+  "https://vcms-api.hibiki-radio.jp/api/v1/programs/")
+
+(defun emms-stream-hibiki--get-access-programs-url (access_id)
+  "Return programs url of ACCESS_ID."
+  (format "%s%s"
+          emms-stream-hibiki--base-url-access-programs access_id))
+
+(defvar emms-stream-hibiki--base-url-play_check
+  "https://vcms-api.hibiki-radio.jp/api/v1/videos/play_check")
+
+(defun emms-stream-hibiki--get-play_check-url (video_id)
+  "Return play_check url of VIDEO_ID."
+  (format "%s?video_id=%s"
+          emms-stream-hibiki--base-url-play_check video_id))
+
+(defun emms-stream-hibiki--access_id-to-video_id (access_id)
+  "Return video id of ACCESS_ID ."
+  (let* ((programs (emms-stream-hibiki--url-to-json
+                    (emms-stream-hibiki--get-access-programs-url access_id)))
+         (id (cdr (assq 'id (assq 'video (assq 'episode programs))))))
+    (unless id
+      (error "Failed to get video id from %S" access_id))
+    id))
+
+(defun emms-stream-hibiki--url-to-playlist_url (url)
+  "Return playlist_url from URL."
+  (let* ((play_check (emms-stream-hibiki--url-to-json url))
+         (playlist_url (cdr (assq 'playlist_url play_check))))
+    (unless playlist_url
+      (error "Failed to get playlist_url from %S" url))
+    playlist_url))
+
+(defun emms-stream-hibiki-stream-url-to-m3u8 (stream-url)
+  "Return m3u8 link from STREAM-URL."
+  (emms-stream-hibiki--url-to-playlist_url
+   (emms-stream-hibiki--get-play_check-url
+    (emms-stream-hibiki--access_id-to-video_id
+     (replace-regexp-in-string "\\`hibiki://" "" stream-url)))))
+
 (provide 'emms-streams-hibiki)
 ;;; emms-streams-hibiki.el ends here
