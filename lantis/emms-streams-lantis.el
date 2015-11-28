@@ -36,7 +36,7 @@
 (defvar emms-stream-lantis--url-headers
   '(("User-Agent" .
      "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_5) AppleWebKit/600.8.9 (KHTML, like Gecko) Version/8.0.8 Safari/600.8.9"))
-  "To get mp3 link.")
+  "To get m3u8 link.")
 
 (cl-defun emms-stream-lantis--xml-collect-node
     (name xml-ls &key (test #'identity) (getter #'identity))
@@ -161,6 +161,11 @@ If save,run `emms-stream-save-bookmarks-file' after."
       (emms-stream-redisplay)
       (goto-char (point-min))
       (forward-line (1- line)))))
+
+;; For media player
+(defun emms-stream-lantis-stream-url-to-m3u8 (stream-url)
+  "Return m3u8 from STREAM-URL."
+  (replace-regexp-in-string "\\`lantis://" "" stream-url))
 
 (provide 'emms-streams-lantis)
 ;;; emms-streams-lantis.el ends here

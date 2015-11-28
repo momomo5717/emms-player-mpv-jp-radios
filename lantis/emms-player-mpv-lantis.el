@@ -28,6 +28,7 @@
 (require 'emms-player-simple-mpv)
 (require 'emms-streams)
 (require 'later-do)
+(require 'emms-streams-lantis)
 
 (define-emms-simple-player-mpv mpv-lantis '(streamlist)
   "\\`lantis://"
@@ -47,7 +48,7 @@
 (defun emms-player-mpv-lantis--track-name-to-input-form (track-name)
   "Return url from TRACK-NAME."
   (later-do 'emms-player-mpv-lantis--loading-message)
-  (replace-regexp-in-string "\\`lantis://" "" track-name))
+  (emms-stream-lantis-stream-url-to-m3u8 track-name))
 
 (defun emms-player-mpv-lantis--get-media-title (track)
   "Return media title from TRACK."
