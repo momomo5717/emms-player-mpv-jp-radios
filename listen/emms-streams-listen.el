@@ -336,8 +336,8 @@ If save,run `emms-stream-save-bookmarks-file' after."
 
 ;; For media player
 
-(defun emms-stream-listen-stream-url-to-url (stream-url)
-  "Return url from STREAM-URL."
+(defun emms-stream-listen-stream-url-to-m3u8 (stream-url)
+  "Return m3u8 from STREAM-URL."
   (format "http://mtist.as.smartstream.ne.jp/%s/livestream/playlist.m3u8"
           (replace-regexp-in-string "\\`listen://" "" stream-url)))
 

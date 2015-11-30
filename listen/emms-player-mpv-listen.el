@@ -48,7 +48,7 @@
 (defun emms-player-mpv-listen--track-name-to-input-form (track-name)
   "Return url from TRACK-NAME."
   (later-do 'emms-player-mpv-listen--loading-message)
-  (emms-stream-listen-stream-url-to-url track-name))
+  (emms-stream-listen-stream-url-to-m3u8 track-name))
 
 (defun emms-player-mpv-listen--get-media-title (track)
   "Return media title from TRACK."
