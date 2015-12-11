@@ -35,6 +35,9 @@
 ;; + emms-streams-jp-radios.el
 ;; + emms-streams-jp-radios-anything.el
 ;; + emms-streams-jp-radios-helm.el (helm v1.7.9 or later is needed.)
+;;
+;; Further information is available from:
+;; https://github.com/momomo5717/emms-player-mpv-jp-radios  ( README.org )
 
 ;; Other Requirements:
 ;;
@@ -77,8 +80,6 @@
 ;; (require 'emms-streams-jp-radios-helm)
 
 ;;; Code:
-(require 'cl-lib)
-(require 'emms-player-simple-mpv)
 
 (defvar emms-player-mpv-jp-radios-list
   '("radiko"
@@ -97,6 +98,8 @@
 
 (defvar emms-player-mpv-jp-radios--dir
   (file-name-directory (or load-file-name (buffer-file-name))))
+
+(defvar emms-player-list) ; Suppress a warning message
 
 ;;;###autoload
 (defun emms-player-mpv-jp-radios-add (&rest names)
