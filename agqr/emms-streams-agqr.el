@@ -37,6 +37,7 @@
   '(("超!A&G+" "agqr://rtmp://fms-base2.mitene.ad.jp/agqr/aandg22" 1 streamlist))
   "超!A&G+ stream list.")
 
+;;;###autoload
 (defun emms-stream-agqr-get-stream-list ()
   "Return new streamlist."
   (cl-copy-list emms-stream-agqr-stream-list))
@@ -65,6 +66,7 @@ If save,run `emms-stream-save-bookmarks-file' after."
 
 ;; For media player
 
+;;;###autoload
 (defun emms-stream-agqr-stream-url-to-rtmp (stream-url)
   "Return rtmp of STREAM-URL for meida player."
   (if (string-match "\\`agqr://fms-base2" stream-url)

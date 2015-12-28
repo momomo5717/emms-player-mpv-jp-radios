@@ -74,6 +74,7 @@
      "seaside://http://seaside-c.jp/program/emergency/"
      1 streamlist)))
 
+;;;###autoload
 (defun emms-stream-seaside-get-stream-list ()
   "Return new stream-list."
   (cl-copy-list emms-stream-seaside-stream-list))
@@ -177,14 +178,16 @@ Object returned by GETTER is collected."
   "Replace seaside:// with of STREAM-URL empty string."
   (replace-regexp-in-string "\\`seaside://" "" stream-url))
 
+;;;###autoload
 (defun emms-stream-seaside-stream-url-to-wax (stream-url)
   "Return wax from STREAM-URL."
   (let ((url (emms-stream-seaside--stream-url-to-url stream-url)))
    (emms-stream-seaside--html-to-wax
     (emms-stream-seaside--url-to-html url) url)))
 
+;;;###autoload
 (defun emms-stream-seaside-wax-to-wma (wax)
-  "Return wax fron WAX."
+  "Return wma from WAX."
   (let ((buf (url-retrieve-synchronously wax)))
     (prog1
         (with-current-buffer buf
@@ -194,10 +197,11 @@ Object returned by GETTER is collected."
           (let ((wma (car
                       (emms-stream-seaside--xml-collect-node
                        'ref (libxml-parse-html-region (point) (point-max))
-                       :getter (lambda (node) (xml-get-attribute-or-nil node 'href)) ))))
+                       :getter (lambda (node) (xml-get-attribute-or-nil node 'href))))))
             (if wma wma (error "Not found WMA"))))
       (kill-buffer buf))))
 
+;;;###autoload
 (defun emms-stream-seaside-stream-url-to-nico-url (stream-url)
   "Return nico url from STREAM-URL."
   (emms-stream-seaside--html-to-nico

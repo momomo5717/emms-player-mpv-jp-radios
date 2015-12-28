@@ -86,6 +86,7 @@
     (osaka  emms-stream-radiru-stream-list-osaka)
     (t nil)))
 
+;;;###autoload
 (defun emms-stream-radiru-get-stream-list ()
   "Return new stream-list."
   (cons emms-stream-radiru-streamlist-daini
@@ -127,6 +128,7 @@ If save ,run `emms-stream-save-bookmarks-file' after."
 (defvar emms-stream-radiru-url-swf
   "http://www3.nhk.or.jp/netradio/files/swf/rtmpe.swf")
 
+;;;###autoload
 (defun emms-stream-radiru-stream-url-to-rtmpe (stream-url)
   "Return rtmpe from STREAM-URL."
   (replace-regexp-in-string "\\`radiru://" "" stream-url))

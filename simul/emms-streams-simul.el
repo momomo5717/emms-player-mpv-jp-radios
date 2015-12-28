@@ -218,6 +218,7 @@
     (goto-char (point-min))
     (forward-line (1- line))))
 
+;;;###autoload
 (defun emms-stream-simul-get-stream-list ()
   "Return new stream-list."
   (cl-loop
@@ -284,10 +285,12 @@ Object returned by GETTER is collected."
                 :getter
                 (lambda (node) (xml-get-attribute node 'href)))))))
 
+;;;###autoload
 (defun emms-stream-simul-stream-url-to-url (stream-url)
   "Replace simul:\\ of STREAM-URL with empty string."
   (replace-regexp-in-string "\\`s\\(imul\\|aimaru\\)://" "" stream-url))
 
+;;;###autoload
 (defun emms-stream-simul-stream-url-to-asx-ref (stream-url)
   "Return ref of asx from STREAM-URL."
   (emms-stream-simul--asx-to-href

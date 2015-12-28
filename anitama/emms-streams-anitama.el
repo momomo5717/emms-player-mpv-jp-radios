@@ -147,6 +147,7 @@ If CONT is no-nil, it is run with no arguments."
        (error "Failed to get cookies of www.weeeef.com"))
      (when (functionp cont) (funcall cont)))))
 
+;;;###autoload
 (defun emms-stream-anitama-update-cache-async ()
   "Update cache asynchronously."
   (cl-labels
@@ -177,6 +178,7 @@ If CONT is no-nil, it is run with no arguments."
                             emms-stream-anitama--url-BookServlet)
              #'stream-list-async-filter)))))
 
+;;;###autoload
 (defun emms-stream-anitama-get-stream-list ()
   "Return new stream-list from cache."
   (cl-copy-list emms-stream-anitama-stream-list-cache))
@@ -244,6 +246,7 @@ If save,run `emms-stream-save-bookmarks-file' after."
        (nodeId (car (xml-node-children (car (xml-get-children Node 'Id))))))
     nodeId))
 
+;;;###autoload
 (defun emms-stream-anitama-stream-url-to-wget-form (stream-url)
   "Return wget form from STREAM-URL."
   (let* ((id (replace-regexp-in-string "\\`anitama://" "" stream-url))

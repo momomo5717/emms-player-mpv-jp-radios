@@ -277,6 +277,7 @@ string -> stream-list
        (error "Failed to get radiko stream list"))
      (message "Updated radiko stream list cache"))))
 
+;;;###autoload
 (defun emms-stream-radiko-update-cache-async ()
   "Update cache asynchronously."
   (cl-labels
@@ -292,6 +293,7 @@ string -> stream-list
        (emms-stream-radiko--write-keydata-async
         #'fetch-stream-list-async)))))
 
+;;;###autoload
 (defun emms-stream-radiko-get-stream-list ()
   "Return new stream-list from cache."
   (cl-copy-list emms-stream-radiko-stream-list-cache))
@@ -348,6 +350,7 @@ If save,run `emms-stream-save-bookmarks-file' after."
     (if (stringp rtmpe) rtmpe
       (error "Failed to parse stream/%s.xml" channel))))
 
+;;;###autoload
 (defun emms-stream-radiko-stream-url-to-rtmpe (stream-url)
   "Return rtmpe from STREAM-URL."
   (emms-stream-radiko--wget-rtmpe

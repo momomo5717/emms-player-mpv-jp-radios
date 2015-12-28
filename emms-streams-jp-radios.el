@@ -54,6 +54,7 @@
 (require 'emms-streams)
 (require 'cl-lib)
 
+;;;###autoload
 (defun emms-stream-jp-radios-update-cache-async ()
     "Update each stream list or alist asynchronously."
     (interactive)

@@ -147,6 +147,7 @@ If UPDATEP is non-nil, cache of DOW is updated."
                    always (cdr ls))
       (message "Updated hibiki stream list cache"))))
 
+;;;###autoload
 (defun emms-stream-hibiki-update-cache-async ()
   "Update cache asynchronously."
   (setq emms-stream-hibiki--stream-alist-cache
@@ -173,6 +174,7 @@ If UPDATEP is non-nil, cache is updated."
     (goto-char (point-min))
     (forward-line (1- line))))
 
+;;;###autoload
 (defun emms-stream-hibiki-get-stream-list ()
   "Return new stream-list from cache."
   (cl-loop
@@ -241,6 +243,7 @@ If save,run `emms-stream-save-bookmarks-file' after."
       (error "Failed to get playlist_url from %S" url))
     playlist_url))
 
+;;;###autoload
 (defun emms-stream-hibiki-stream-url-to-m3u8 (stream-url)
   "Return m3u8 link from STREAM-URL."
   (emms-stream-hibiki--url-to-playlist_url

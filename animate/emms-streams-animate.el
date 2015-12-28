@@ -126,6 +126,7 @@ If UPDATEP is non-nil, cache is updated."
                        (cons day (emms-stream-animate--html-to-stream-list day html)))))
     emms-stream-animate--stream-alist-cache))
 
+;;;###autoload
 (defun emms-stream-animate-update-cache-async ()
   "Update cache asynchronously."
   (url-retrieve
@@ -163,6 +164,7 @@ If UPDATEP is non-nil, cache is updated."
     (goto-char (point-min))
     (forward-line (1- line))))
 
+;;;###autoload
 (defun emms-stream-animate-get-stream-list ()
   "Return new streamlist from cache."
   (cl-loop
@@ -218,6 +220,7 @@ If save,run `emms-stream-save-bookmarks-file' after."
         :getter
         (lambda (node) (xml-get-attribute node 'href)))))
 
+;;;###autoload
 (defun emms-stream-animate-stream-url-to-asx-ref (stream-url)
   "Retrun Ref of asx form STREAM-URL."
   (emms-stream-animate--asx-to-href

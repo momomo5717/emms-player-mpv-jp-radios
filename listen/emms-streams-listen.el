@@ -298,6 +298,7 @@ id  = number or (number ...)"
     (goto-char (point-min))
     (forward-line (1- line))))
 
+;;;###autoload
 (defun emms-stream-listen-get-stream-list ()
   "Return new stream-list."
   (cl-loop
@@ -343,6 +344,7 @@ If save,run `emms-stream-save-bookmarks-file' after."
 
 ;; For media player
 
+;;;###autoload
 (defun emms-stream-listen-stream-url-to-m3u8 (stream-url)
   "Return m3u8 from STREAM-URL."
   (format "http://mtist.as.smartstream.ne.jp/%s/livestream/playlist.m3u8"

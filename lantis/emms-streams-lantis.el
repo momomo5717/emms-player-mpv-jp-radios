@@ -122,6 +122,7 @@ If UPDATEP is no-nil, cache is updated."
                (emms-stream-lantis--url-to-html emms-stream-lantis--url))))
     emms-stream-lantis--stream-list-cache))
 
+;;;###autoload
 (defun emms-stream-lantis-update-cache-async ()
   "Update cache asynchronously."
   (let ((url-request-extra-headers
@@ -136,6 +137,7 @@ If UPDATEP is no-nil, cache is updated."
               (emms-stream-lantis--url-to-html nil nil (current-buffer))))
        (message "Updated lantis stream list cache")))))
 
+;;;###autoload
 (defun emms-stream-lantis-get-stream-list ()
   "Return new stream-list from cache."
   (cl-copy-list emms-stream-lantis--stream-list-cache))
@@ -166,6 +168,8 @@ If save,run `emms-stream-save-bookmarks-file' after."
       (forward-line (1- line)))))
 
 ;; For media player
+
+;;;###autoload
 (defun emms-stream-lantis-stream-url-to-m3u8 (stream-url)
   "Return m3u8 from STREAM-URL."
   (replace-regexp-in-string "\\`lantis://" "" stream-url))

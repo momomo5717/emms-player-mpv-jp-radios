@@ -126,6 +126,7 @@ If UPDATEP is no-nil, cache is updated."
              (emms-stream-onsen--url-to-html "http://www.onsen.ag")))
     emms-stream-onsen--stream-alist-cache))
 
+;;;###autoload
 (defun emms-stream-onsen-update-cache-async ()
   "Update cache asynchronously."
   (url-retrieve
@@ -158,6 +159,7 @@ If UPDATEP is non-nil, cache is updated."
     (goto-char (point-min))
     (forward-line (1- line))))
 
+;;;###autoload
 (defun emms-stream-onsen-get-stream-list ()
   "Return new stream-list from cache."
   (cl-loop
@@ -206,6 +208,7 @@ If save,run `emms-stream-save-bookmarks-file' after."
           (json-read))
       (kill-buffer buf))))
 
+;;;###autoload
 (defun emms-stream-onsen-stream-url-to-moviePath (stream-url)
   "Return pc link of moviePath from STREAM-URL."
   (let* ((json-obj (emms-stream-onsen--stream-url-to-json-obj stream-url))

@@ -127,6 +127,7 @@ If UPDATEP is no-nil, cache is updated."
                     never (null ls))
        (message "Updated famitsu stream list cache")))))
 
+;;;###autoload
 (defun emms-stream-famitsu-update-cache-async ()
   "Update cache asynchronously."
   (setq emms-stream-famitsu--stream-alist-cache
@@ -135,6 +136,7 @@ If UPDATEP is no-nil, cache is updated."
   (cl-loop for (key . rss-url) in emms-stream-famitsu--podcast-url-alist do
            (emms-stream-famitsu-update-cache-async-1 key rss-url)))
 
+;;;###autoload
 (defun emms-stream-famitsu-get-stream-list ()
   "Return new stream-list from cache."
   (cl-loop
@@ -172,6 +174,7 @@ If save,run `emms-stream-save-bookmarks-file' after."
 
 ;; For media player
 
+;;;###autoload
 (defun emms-stream-famitsu-stream-url-to-mp3 (stream-url)
   "Return mp3 link from STREAM-URL."
   (replace-regexp-in-string "\\`famitsu://" "" stream-url))
