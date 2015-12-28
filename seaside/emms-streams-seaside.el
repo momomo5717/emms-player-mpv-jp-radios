@@ -22,10 +22,16 @@
 ;; (require 'emms-streams-seaside)
 
 ;;; Code:
-(require 'emms-streams)
 (require 'cl-lib)
 (require 'xml)
 (require 'url)
+
+;; Suppress warning messages.
+(defvar emms-stream-buffer-name)
+(defvar emms-stream-list)
+(declare-function emms-stream-redisplay "emms-streams")
+(declare-function emms-line-number-at-pos "emms-streams")
+(declare-function emms-stream-insert-at "emms-streams")
 
 (defvar emms-stream-seaside-stream-list
   '(("あどりぶ : 月曜日更新"
@@ -78,6 +84,7 @@
 
 If save,run `emms-stream-save-bookmarks-file' after."
   (interactive)
+  (unless (featurep 'emms-streams) (require 'emms-streams))
   (let ((buf (get-buffer emms-stream-buffer-name)))
     (unless (buffer-live-p buf)
       (error "%s is not a live buffer" emms-stream-buffer-name))

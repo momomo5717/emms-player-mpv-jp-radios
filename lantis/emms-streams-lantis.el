@@ -23,10 +23,16 @@
 ;; (require 'emms-streams-lantis)
 
 ;;; Code:
-(require 'emms-streams)
 (require 'cl-lib)
 (require 'xml)
 (require 'url)
+
+;; Suppress warning messages.
+(defvar emms-stream-buffer-name)
+(defvar emms-stream-list)
+(declare-function emms-stream-redisplay "emms-streams")
+(declare-function emms-line-number-at-pos "emms-streams")
+(declare-function emms-stream-insert-at "emms-streams")
 
 (defvar emms-stream-lantis--url "http://lantis-net.com/")
 
@@ -146,6 +152,7 @@ If UPDATEP is -1, cache is updated asynchronously.
 
 If save,run `emms-stream-save-bookmarks-file' after."
   (interactive "P")
+  (unless (featurep 'emms-streams) (require 'emms-streams))
   (if (eq updatep -1) (emms-stream-lantis-update-cache-async)
     (let ((buf (get-buffer emms-stream-buffer-name)))
       (unless (buffer-live-p buf)

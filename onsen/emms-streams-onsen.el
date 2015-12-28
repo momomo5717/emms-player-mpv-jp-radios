@@ -23,11 +23,17 @@
 ;; (require 'emms-streams-onsen)
 
 ;;; Code:
-(require 'emms-streams)
 (require 'cl-lib)
 (require 'xml)
 (require 'url)
 (require 'json)
+
+;; Suppress warning messages.
+(defvar emms-stream-buffer-name)
+(defvar emms-stream-list)
+(declare-function emms-stream-redisplay "emms-streams")
+(declare-function emms-line-number-at-pos "emms-streams")
+(declare-function emms-stream-insert-at "emms-streams")
 
 (defvar emms-stream-onsen--stream-alist-cache nil
   "Cache for stream alist.")
@@ -174,6 +180,7 @@ DOW is a number of 0-6 or -1.
 
 If save,run `emms-stream-save-bookmarks-file' after."
   (interactive "P")
+  (unless (featurep 'emms-streams) (require 'emms-streams))
   (if (eq updatep -1) (emms-stream-onsen-update-cache-async)
     (unless (integerp dow)
       (let ((msg (concat "[0] All  [1] Mon  [2] Tue  [3] Wed  [4] Thu\n"

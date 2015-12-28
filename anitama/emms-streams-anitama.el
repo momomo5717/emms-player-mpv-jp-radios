@@ -23,11 +23,17 @@
 ;; (require 'emms-streams-anitama)
 
 ;;; Code:
-(require 'emms-streams)
 (require 'cl-lib)
 (require 'xml)
 (require 'url)
 (require 'url-cookie)
+
+;; Suppress warning messages.
+(defvar emms-stream-buffer-name)
+(defvar emms-stream-list)
+(declare-function emms-stream-redisplay "emms-streams")
+(declare-function emms-line-number-at-pos "emms-streams")
+(declare-function emms-stream-insert-at "emms-streams")
 
 (defvar emms-stream-anitama--cookie-file
   (expand-file-name "weeeef_cookies" temporary-file-directory))
@@ -183,6 +189,7 @@ If UPDATEP is -1, cache is updated asynchronously.
 
 If save,run `emms-stream-save-bookmarks-file' after."
   (interactive "P")
+  (unless (featurep 'emms-streams) (require 'emms-streams))
   (if (eq updatep -1)
       (emms-stream-anitama-update-cache-async)
    (let ((buf (get-buffer emms-stream-buffer-name)))

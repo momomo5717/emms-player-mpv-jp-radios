@@ -23,10 +23,16 @@
 ;; (require 'emms-streams-famitsu)
 
 ;;; Code:
-(require 'emms-streams)
 (require 'cl-lib)
 (require 'xml)
 (require 'url)
+
+;; Suppress warning messages.
+(defvar emms-stream-buffer-name)
+(defvar emms-stream-list)
+(declare-function emms-stream-redisplay "emms-streams")
+(declare-function emms-line-number-at-pos "emms-streams")
+(declare-function emms-stream-insert-at "emms-streams")
 
 (defvar emms-stream-famitsu--podcast-url-alist
   '((asami_ssg . "http://www.famitsu.com/blog/asami_ssg/asami_ssg_pcas.rdf")
@@ -146,6 +152,7 @@ If UPDATEP is -1, cache is updated asynchronously.
 
 If save,run `emms-stream-save-bookmarks-file' after."
   (interactive "P")
+  (unless (featurep 'emms-streams) (require 'emms-streams))
   (if (eq updatep -1) (emms-stream-famitsu-update-cache-async)
     (let ((buf (get-buffer emms-stream-buffer-name)))
       (unless (buffer-live-p buf)

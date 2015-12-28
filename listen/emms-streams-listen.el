@@ -21,11 +21,17 @@
 ;; This provides emms stream list for ListenRadio.
 
 ;;; Code:
-(require 'emms-streams)
 (require 'cl-lib)
 (require 'xml)
 (require 'url)
 (require 'json)
+
+;; Suppress warning messages.
+(defvar emms-stream-buffer-name)
+(defvar emms-stream-list)
+(declare-function emms-stream-redisplay "emms-streams")
+(declare-function emms-line-number-at-pos "emms-streams")
+(declare-function emms-stream-insert-at "emms-streams")
 
 (defun emms-stream-listen--fetch-json-obj (url)
   "Return a json object from URL."
@@ -314,6 +320,7 @@ AREA is a number of 0-8.
 
 If save,run `emms-stream-save-bookmarks-file' after."
   (interactive)
+  (unless (featurep 'emms-streams) (require 'emms-streams))
   (unless (integerp category)
     (let ((msg (concat "[0] All  [1] 音楽ジャンル  [2] 音楽ブランド  [3] シチュエーション\n"
                        "         [4] 気持ち        [5] バラエティ    [6] 全国のラジオ局\n\n"

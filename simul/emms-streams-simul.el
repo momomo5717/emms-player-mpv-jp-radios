@@ -21,10 +21,16 @@
 ;; This provides emms stream list for SimulRadio.
 
 ;;; Code:
-(require 'emms-streams)
 (require 'cl-lib)
 (require 'xml)
 (require 'url)
+
+;; Suppress warning messages.
+(defvar emms-stream-buffer-name)
+(defvar emms-stream-list)
+(declare-function emms-stream-redisplay "emms-streams")
+(declare-function emms-line-number-at-pos "emms-streams")
+(declare-function emms-stream-insert-at "emms-streams")
 
 (defvar emms-stream-simul-hokkaido
   '(("三角山放送局 : 札幌市西区 : 北海道" "simul://http://wm.sankakuyama.co.jp/asx/sankaku_24k.asx" 1 streamlist)
@@ -228,6 +234,7 @@ LOCATION is a number of 0-11.
 
 If save,run `emms-stream-save-bookmarks-file' after."
   (interactive)
+  (unless (featurep 'emms-streams) (require 'emms-streams))
   (unless (integerp location)
     (let ((msg (concat "[0] All  [1] 北海道(Hokkaido)  [2] 東北(Touhoku)  [3] 信州(Shinetsu)\n"
                        "         [4] 関東(Kantou)      [5] 東海(Toukai)   [6] 北陸(Hokuriku)\n"
