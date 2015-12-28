@@ -106,7 +106,7 @@ If FORCEP is non-nil, force to access and write."
                          when (or (eq i 3) (eq i 5)) collect ?/))
       date)))
 
-(defun emms-stream-anitaam--bookservlet-xml-to-stream-list (bookservlet-xml)
+(defun emms-stream-anitama--bookservlet-xml-to-stream-list (bookservlet-xml)
   "Retrun stream list from BOOKSERVLET-XML."
   (let ((Books (xml-get-children bookservlet-xml 'Book)))
     (cl-loop for Book in Books
@@ -130,7 +130,7 @@ If UPDATEP is no-nil, cache is updated."
                                emms-stream-anitama--cookie-file)
                        emms-stream-anitama--url-BookServlet))
          (error "Failed to fetch %s" emms-stream-anitama--url-BookServlet))
-       (emms-stream-anitaam--bookservlet-xml-to-stream-list
+       (emms-stream-anitama--bookservlet-xml-to-stream-list
         (libxml-parse-xml-region (point-min) (point-max)))))))
 
 (defun emms-stream-anitama--write-weeeef-async (&optional cont)
@@ -161,7 +161,7 @@ If CONT is no-nil, it is run with no arguments."
               (search-backward ">" (point-min) t)
               (goto-char (match-end 0))
               (setq emms-stream-anitama-stream-list-cache
-                    (emms-stream-anitaam--bookservlet-xml-to-stream-list
+                    (emms-stream-anitama--bookservlet-xml-to-stream-list
                      (libxml-parse-xml-region (point-min) (point))))
               (unless emms-stream-anitama-stream-list-cache
                 (error "Failed to read anitama xml"))
