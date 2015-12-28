@@ -59,7 +59,7 @@
 (defun emms-player-mpv-seaside--track-name-to-nico-input-form (track-name)
   "Return nico url from TRACK-NAME."
   (unless (executable-find "youtube-dl")
-    (error "Can not play %s" track-name))
+    (error "Can not play %s : youtube-dl not found" track-name))
   (let ((nico-url (emms-stream-seaside-stream-url-to-nico-url track-name)))
     (later-do 'emms-player-mpv-seaside--loading-message)
     nico-url))

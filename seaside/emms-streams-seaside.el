@@ -46,9 +46,6 @@
     ("かおりとあさみのグリラジ!! : 火曜日更新"
      "seaside://http://ch.nicovideo.jp/grimoire-gakuen"
      1 streamlist)
-    ("ごぶごぶちゃん☆～中村繪里子・田村睦心 : 水曜日更新(最終回)"
-     "seaside://http://seaside-c.jp/program/gobu/"
-     1 streamlist)
     ("内田さんと浅倉さん : 水曜日更新"
      "seaside://http://seaside-c.jp/program/uchidaasakura/"
      1 streamlist)
@@ -69,6 +66,9 @@
      1 streamlist)
     ("中村繪里子ら・ら☆ら♪　なかむランド～Love・Laugh☆Live♪～ : 木曜日更新"
      "seaside://http://nakamuland.net/"
+     1 streamlist)
+    ("RADIOアニメロミックス 内山夕実と吉田有里のゆゆらじ : 金曜日更新"
+     "seaside://http://ch.nicovideo.jp/ch312/video"
      1 streamlist)
     ("EMERGENCY the RADIO : 土曜日更新"
      "seaside://http://seaside-c.jp/program/emergency/"
@@ -168,7 +168,8 @@ Object returned by GETTER is collected."
   (concat "\\`"
    (regexp-opt '("seaside://http://seaside-c.jp/program/emergency/"
                  "seaside://http://seaside-c.jp/program/delicatezone/"
-                 "seaside://http://ch.nicovideo.jp/grimoire-gakuen"))))
+                 "seaside://http://ch.nicovideo.jp/grimoire-gakuen"
+                 "seaside://http://ch.nicovideo.jp/ch312/video"))))
 
 (defun emms-stream-seaside-nico-stream-url-p (stream-url)
   "Return t, if STREAM-URL needs nico url."
