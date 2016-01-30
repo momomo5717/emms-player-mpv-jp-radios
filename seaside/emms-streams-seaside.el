@@ -58,6 +58,9 @@
     ("春佳・彩花のSSちゃんねる : 水曜日更新"
      "seaside://http://seaside-c.jp/program/ssc/"
      1 streamlist)
+    ("田村睦心×瀬戸麻沙美の獅子奮迅！体育会系ラジオ！ : 水曜日更新"
+     "seaside://http://seaside-c.jp/program/t-radio/"
+     1 streamlist)
     ("井上麻里奈・下田麻美のIT革命！ : 木曜日更新"
      "seaside://http://it.seaside-c.jp/"
      1 streamlist)
@@ -165,6 +168,7 @@ Object returned by GETTER is collected."
   (concat "\\`"
    (regexp-opt '("seaside://http://seaside-c.jp/program/emergency/"
                  "seaside://http://seaside-c.jp/program/delicatezone/"
+                 "seaside://http://seaside-c.jp/program/t-radio/"
                  "seaside://http://ch.nicovideo.jp/grimoire-gakuen"
                  "seaside://http://ch.nicovideo.jp/ch312/video"))))
 
