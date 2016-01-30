@@ -161,11 +161,11 @@
     =M-x emms-streams-jp-radios= refreshes =*EMMS JP Radios*= buffer
     and switches to it.
 
-    =M-x emms-stream-jp-radios-popup= popes up the window of =*EMMS JP Radios*= buffer.
+    =M-x emms-stream-jp-radios-popup= pops up the window of =*EMMS JP Radios*= buffer.
 
     This file provides the following functions to display the stream name of a streamlist.
 
-    + =emms-stream-jp-radios-track-description=
+    + Function: =emms-stream-jp-radios-track-description= /track/
 
       This function displays the stream name of a streamlist in =*EMMS Playlist*= buffer.
 
@@ -175,7 +175,9 @@
            'emms-stream-jp-radios-track-description))
       #+END_SRC
 
-    + =emms-stream-jp-radios-playlist-current=
+    + Function: =emms-stream-jp-radios-playlist-current=
+
+      This function is used for =emms-mode-line-mode-line-function=.
 
       #+BEGIN_SRC emacs-lisp
         (require 'emms-mode-line)
@@ -183,7 +185,9 @@
          '(emms-mode-line-mode-line-function 'emms-stream-jp-radios-playlist-current))
       #+END_SRC
 
-    + =emms-stream-jp-radios-mode-line-icon-function=
+    + Function: =emms-stream-jp-radios-mode-line-icon-function=
+
+      This function is used for =emms-mode-line-mode-line-function=.
 
       #+BEGIN_SRC emacs-lisp
         (require 'emms-mode-line-icon)
@@ -191,7 +195,9 @@
          '(emms-mode-line-mode-line-function 'emms-stream-jp-radios-mode-line-icon-function))
       #+END_SRC
 
-    + =emms-stream-jp-radios-current-title-function=
+    + Function: =emms-stream-jp-radios-current-title-function=
+
+      This function is used for =emms-mode-line-cycle-current-title-function=.
 
       #+BEGIN_SRC emacs-lisp
         (require 'emms-mode-line-cycle)
