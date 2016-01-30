@@ -110,16 +110,13 @@ TEST and GETTER takes a node of NAME as an argument.
 TEST is a predicate function.
 Object returned by GETTER is collected."
   (cl-labels
-      ((collect-name-node (xml-ls)
-        (let (ls)
-          (cond ((not (consp xml-ls)) ls)
-                ((and (eq name (car-safe xml-ls)) (funcall test xml-ls))
-                 (push (funcall getter xml-ls) ls))
-                (t (dolist (e xml-ls ls)
-                      (cond ((and (eq name (car-safe e)) (funcall test e))
-                             (push (funcall getter e) ls))
-                            ((and (car-safe e) (symbolp (car e)))
-                             (setq ls (nconc (collect-name-node e) ls))))))))))
+      ((collect-name-node (xml-ls &optional ls)
+        (cond ((not (consp xml-ls)) ls)
+              ((and (eq name (car xml-ls)) (funcall test xml-ls))
+               (cons (funcall getter xml-ls) ls))
+              (t (dolist (e xml-ls ls)
+                   (when (and (car-safe e) (symbolp (car e)))
+                     (setq ls (collect-name-node e ls))))))))
     (nreverse (collect-name-node xml-ls))))
 
 (defun emms-stream-seaside--url-to-html (url)
