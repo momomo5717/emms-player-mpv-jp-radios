@@ -42,10 +42,12 @@
    + mpv v0.7 or later ( [[https://github.com/mpv-player/mpv]] )
      + ffmpeg ( the build with –enable-librtmp (for Radiko, らじる★らじる) )
    + emms-player-simple-mpv ( [[https://github.com/momomo5717/emms-player-simple-mpv]] )
-   + wget (for Radiko, アニたまどっとコム)
+   + wget (for Radiko, アニたまどっとコム, animate.tv)
    + swftools (for Radiko)
+   + rtmpdump (for animate.tv)
+   + flasm (for animate.tv)
 
-   Tested on GNU Emacs 24.5.1 (emacs-mac-app @5.11_0), EMMS 4.0, mpv @0.11.0_1
+   Tested on GNU Emacs 24.5.1 (emacs-mac-app @5.15_0), EMMS 4.0, mpv @0.11.0_2
 
 ** Setup
 
@@ -240,4 +242,8 @@
      + [[http://vector.hateblo.jp/entry/2015/01/03/193556]]
    + How to play ListenRadio
      + [[http://actinium.org/devel/tips/listenradio-recording]]
+   + How to play animate.tv
+     + [[http://blog.livedoor.jp/brsscl/archives/224761.html]]
+   + How to decompress swf file
+     + [[http://kyomachi.sblo.jp/article/84875993.html]]
    + helm-emms ( [[https://github.com/emacs-helm/helm-emms]] )

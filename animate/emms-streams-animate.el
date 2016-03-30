@@ -26,6 +26,7 @@
 (require 'cl-lib)
 (require 'xml)
 (require 'url)
+(require 'json)
 
 ;; Suppress warning messages
 (defvar emms-stream-buffer-name)
@@ -67,6 +68,24 @@ Object returned by GETTER is collected."
       (unwind-protect (funcall (if xmlp #'libxml-parse-xml-region
                                  #'libxml-parse-html-region) (point) (point-max))
         (kill-buffer buf)))))
+
+(defun emms-stream-animate--url-to-json (url &optional buf)
+  "Return a json object from URL.
+If BUF is no-nil, it is used."
+  (let ((buf (or buf (url-retrieve-synchronously url))))
+    (with-current-buffer buf
+      (goto-char (point-min))
+      (while (and (not (eobp)) (not (eolp))) (forward-line 1))
+      (unless (eobp) (forward-line 1))
+      (let ((p (point))
+            (p-max (point-max)))
+        (prog1 (with-temp-buffer
+                 (insert-buffer-substring-no-properties buf p p-max)
+                 (decode-coding-region (point-min) (point-max) 'utf-8)
+                 (goto-char (point-min))
+                 (json-read))
+          (when (buffer-live-p buf)
+            (kill-buffer buf)))))))
 
 (defun emms-stream-animate--box-to-stream (box)
   "BOX to streamlist."
@@ -195,34 +214,174 @@ If save,run `emms-stream-save-bookmarks-file' after."
              updatep (nth (1- dow) emms-stream-animate--days))))))
 
 ;; For media player
+(defvar emms-stream-animate--video_info-url
+  "https://www2.uliza.jp/api/get_player_video_info.aspx")
 
-(defun emms-stream-animate--fetch-wmp (url)
-  "Fetch wmp link from URL."
-  (let* ((wmp (car (emms-stream-animate--xml-collect-node
-                    'li (emms-stream-animate--url-to-html url)
-                    :test
-                    (lambda (node) (equal (xml-get-attribute-or-nil node 'class) "wmp clearfix"))
-                    :getter
-                    (lambda (node) (let ((a (car (xml-get-children node 'a))))
-                                 (xml-get-attribute-or-nil a 'href)))))))
-    (unless wmp (error "Failed to get wmp"))
-    (url-expand-file-name wmp url)))
+(defvar emms-stream-animate--swf-file
+  (expand-file-name "animate_player.swf" temporary-file-directory))
 
-(defun emms-stream-animate--asx-to-href (asx)
-  "Return href of ASX."
-  (car (emms-stream-animate--xml-collect-node
-        'ref (emms-stream-animate--url-to-html asx)
-        :test
-        (lambda (node) (xml-get-attribute-or-nil node 'href))
-        :getter
-        (lambda (node) (xml-get-attribute node 'href)))))
+(defvar emms-stream-animate--swf-url nil)
+
+(defvar emms-stream-animate--swf-hash nil)
+
+(defvar emms-stream-animate--swf-size nil)
+
+(defun emms-stream-animate--$wf-file ()
+  "Return $wf file path."
+  (let ((file emms-stream-animate--swf-file))
+   (expand-file-name (concat (file-name-base file) ".$wf")
+                     (file-name-directory file))))
+
+(defun emms-stream-animate--fetch-player-link (url)
+  "Return flash link at URL."
+  (url-expand-file-name
+   (car (emms-stream-animate--xml-collect-node
+         'a (emms-stream-animate--url-to-html url)
+         :test (lambda (node) (let ((link (xml-get-attribute node 'href)))
+                            (string-match "#player\\'" link)))
+         :getter (lambda (node) (xml-get-attribute node 'href))))
+   "http://www.animate.tv"))
+
+(defun emms-stream-animate--get-FlashVars (&optional buf)
+  "Return FlashVars.
+If BUF is nil, the current buffer will be used."
+  (with-current-buffer (or buf (current-buffer))
+    (goto-char (point-min))
+    (if (re-search-forward "^\\s-+\"FlashVars\",\\s-+\"\\([^\"]+\\)\"\\s-+\+?" nil t)
+        (mapcar (lambda (str) (let ((ls (split-string str "=")))
+                            (cons (intern (car ls)) (cadr ls))))
+                (split-string (match-string-no-properties 1) "&"))
+      (error "Failed to get FlashVars"))))
+
+(defun emms-stream-animate--get-swf-url (&optional buf)
+  "Return swf url.
+If BUF is nil, the current buffer will be used."
+  (with-current-buffer (or buf (current-buffer))
+    (goto-char (point-min))
+    (if (re-search-forward "^\\s-*\"name\"\\s-*,\\s-*\"\\([^\"]+\\)\"\\s-*," nil t)
+        (let ((str (match-string-no-properties 1)))
+          (concat str (if (string-match "\.swf\\'" str) "" ".swf")))
+      emms-stream-animate--swf-url)))
+
+(defun emms-stream-animate--wget-swf ()
+  "Wget `emms-stream-animate--swf-file'."
+  (unless (zerop (call-process "wget" nil nil nil
+                               "-O" emms-stream-animate--swf-file
+                               emms-stream-animate--swf-url))
+    (error "wget %s" emms-stream-animate--swf-url)))
+
+(defun emms-stream-animate--flasm-x-swf ()
+  "Decompress `emms-stream-animate--swf-file'."
+  (if (file-exists-p emms-stream-animate--swf-file)
+      (unless (zerop (call-process "flasm" nil nil nil
+                                   "-x" emms-stream-animate--swf-file))
+        (unless (file-exists-p (emms-stream-animate--$wf-file))
+          (error "flasm -x %s" emms-stream-animate--swf-file)))
+    (error "Not found: %s" emms-stream-animate--swf-file)))
+
+(defun emms-stream-animate--get-swf-hash ()
+  "Return hash from `emms-stream-animate--swf-file'."
+  (with-temp-buffer
+    (if (not (zerop (call-process "openssl" nil t nil
+                                  "sha" "-sha256" "-hmac"
+                                  "Genuine Adobe Flash Player 001"
+                                  emms-stream-animate--swf-file)))
+        (error "openssl %s" emms-stream-animate--swf-file)
+      (goto-char (point-min))
+      (if (re-search-forward "^.*=\\s-*\\(\\w+\\)$" nil t)
+          (match-string-no-properties 1)
+        (error "Failed to get swf hash")))))
+
+(defun emms-stream-animate--get-swf-size (&optional fname)
+  "Return size string of `emms-stream-animate--swf-file'."
+  (number-to-string
+   (nth 7 (file-attributes (or fname emms-stream-animate--swf-file)))))
+
+(defun emms-stream-animate--get-video_info-url (flashvars)
+  "Return get_player_video_info url of FLASHVARS for getting a json object."
+  (concat emms-stream-animate--video_info-url
+          "?vid=" (url-hexify-string (cdr (assq 'vid flashvars)))
+          "&eid=" (url-hexify-string (cdr (assq 'eid flashvars)))
+          "&pid=" (url-hexify-string (cdr (assq 'pid flashvars)))
+          "&rnd=" (url-hexify-string (number-to-string (random 10000)))))
+
+(defun emms-stream-animate--set-swf-vars (url)
+  "Set variables for swf via URL."
+  (setq emms-stream-animate--swf-url url)
+  (emms-stream-animate--wget-swf)
+  (emms-stream-animate--flasm-x-swf)
+  (setq emms-stream-animate--swf-hash
+        (emms-stream-animate--get-swf-hash)
+        emms-stream-animate--swf-size
+        (emms-stream-animate--get-swf-size)))
+
+(defun emms-stream-animate--reset-swf-vars-p (swf-url)
+  "Return t if swf vars need to reset."
+  (let ((backup (emms-stream-animate--$wf-file)))
+    (not (and emms-stream-animate--swf-url
+              (equal emms-stream-animate--swf-url swf-url)
+              (file-exists-p emms-stream-animate--swf-file)
+              (file-exists-p backup)
+              (> (string-to-number (emms-stream-animate--get-swf-size))
+                 (string-to-number (emms-stream-animate--get-swf-size backup)))
+              emms-stream-animate--swf-hash
+              emms-stream-animate--swf-size))))
+
+(defun emms-stream-animate--json-to-rtmpdump-form (json-obj flashvars swf-url)
+  "Return rtmpdump format via JSON-OBJ, FLASHVARS and SWF-URL."
+  (cl-labels ((assq-v (key als) (cdr (assq key als))))
+    (let* ((net_conn (assq-v 'NET_CONN json-obj))
+           (key (assq-v 'KEY json-obj))
+           (playlist (car (cl-loop for e across (assq-v 'PLAYLIST json-obj)
+                                   for name = (assq-v 'NAME e)
+                                   when name collect e)))
+           (playpath (assq-v 'NAME playlist))
+           (stime (floor (string-to-number (assq-v 'STIME json-obj))))
+           (len (floor (string-to-number (assq-v 'LEN playlist))))
+           (etime (number-to-string (floor (+ stime len ))))
+           (stime (number-to-string stime))
+           (did (assq-v 'did flashvars))
+           (pid (assq-v 'pid flashvars))
+           (eid (assq-v 'eid flashvars))
+           (vid (assq-v 'vid flashvars))
+           (hash (md5 (concat did pid eid key vid stime etime))))
+      (when (emms-stream-animate--reset-swf-vars-p swf-url)
+        (emms-stream-animate--set-swf-vars swf-url))
+      (concat "rtmpdump -r " net_conn playpath
+              " --swfhash " emms-stream-animate--swf-hash
+              " --swfsize " emms-stream-animate--swf-size
+              " -C O:1"
+              " -C NS:stm:" stime
+              " -C NS:pid:" pid
+              " -C NS:hash:" hash
+              " -C NS:etm:" etime
+              " -C NS:eid:" eid
+              " -C NS:did:" did
+              " -C NS:vid:" vid
+              " -C O:0"
+              " --quiet"))))
 
 ;;;###autoload
-(defun emms-stream-animate-stream-url-to-asx-ref (stream-url)
-  "Retrun Ref of asx form STREAM-URL."
-  (emms-stream-animate--asx-to-href
-   (emms-stream-animate--fetch-wmp
-    (replace-regexp-in-string "\\`animate://" "" stream-url))))
+(defun emms-stream-animate-stream-url-to-rtmpdump-form (stream-url)
+  "Return rtmpdump form of STREAM-URL."
+  (let* ((stream-url (replace-regexp-in-string "\\`animate://" "" stream-url))
+         (player-link (emms-stream-animate--fetch-player-link stream-url))
+         (buf (url-retrieve-synchronously player-link))
+         json-obj flashvars swf-url)
+    (with-temp-buffer
+      (insert-buffer-substring-no-properties buf)
+      (decode-coding-region (point-min) (point-max) 'utf-8)
+      (setq flashvars (emms-stream-animate--get-FlashVars)
+            swf-url (emms-stream-animate--get-swf-url)))
+    (when (buffer-live-p buf) (kill-buffer buf))
+    (setq json-obj (emms-stream-animate--url-to-json
+                    (emms-stream-animate--get-video_info-url flashvars)))
+    (emms-stream-animate--json-to-rtmpdump-form json-obj flashvars swf-url)))
+
+
+(define-obsolete-function-alias 'emms-stream-animate-stream-url-to-asx-ref
+  'emms-stream-animate-stream-url-to-rtmpdump-form
+  "20160329: animate.tv has ended support for WMP.")
 
 (provide 'emms-streams-animate)
 ;;; emms-streams-animate.el ends here

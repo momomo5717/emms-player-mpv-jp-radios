@@ -43,8 +43,10 @@
 ;;
 ;; + mpv v0.7 or later
 ;;   + ffmpeg ( the build with –enable-librtmp (for Radiko, らじる★らじる) )
-;; + wget (for Radiko, アニたまどっとコム)
+;; + wget (for Radiko, アニたまどっとコム, animate.tv)
 ;; + swftools (for Radiko)
+;; + rtmpdump (for animate.tv)
+;; + flasm (for animate.tv)
 
 ;; Setup:
 ;;
