@@ -37,9 +37,6 @@
   '(("あどりぶ : 月曜日更新"
      "seaside://http://seaside-c.jp/program/adlib/"
      1 streamlist)
-    ("ステキ情報バラエティ 発信！もいとろ君 : 月曜日更新"
-     "seaside://http://seaside-c.jp/program/moitorokun/"
-     1 streamlist)
     ("BELOVED MEMORIES : 月曜日更新"
      "seaside://http://seaside-c.jp/program/belovedmemories/"
      1 streamlist)
@@ -67,14 +64,17 @@
     ("洲崎西 : 木曜日更新"
      "seaside://http://seaside-c.jp/program/suzakinishi/"
      1 streamlist)
-    ("中村繪里子ら・ら☆ら♪　なかむランド～Love・Laugh☆Live♪～ : 木曜日更新"
-     "seaside://http://nakamuland.net/"
-     1 streamlist)
     ("RADIOアニメロミックス 内山夕実と吉田有里のゆゆらじ : 金曜日更新"
      "seaside://http://ch.nicovideo.jp/ch312/video"
      1 streamlist)
     ("EMERGENCY the RADIO : 土曜日更新"
      "seaside://http://seaside-c.jp/program/emergency/"
+     1 streamlist)
+    ("ステキ情報バラエティ 発信！もいとろ君 : 最終回"
+     "seaside://http://seaside-c.jp/program/moitorokun/"
+     1 streamlist)
+    ("中村繪里子ら・ら☆ら♪　なかむランド～Love・Laugh☆Live♪～ : 最終回"
+     "seaside://http://nakamuland.net/"
      1 streamlist)))
 
 ;;;###autoload
@@ -170,7 +170,14 @@ Object returned by GETTER is collected."
                  "seaside://http://seaside-c.jp/program/delicatezone/"
                  "seaside://http://seaside-c.jp/program/t-radio/"
                  "seaside://http://ch.nicovideo.jp/grimoire-gakuen"
-                 "seaside://http://ch.nicovideo.jp/ch312/video"))))
+                 "seaside://http://ch.nicovideo.jp/ch312/video"
+                 "seaside://http://seaside-c.jp/program/adlib/"
+                 "seaside://http://seaside-c.jp/program/belovedmemories/"
+                 "seaside://http://seaside-c.jp/program/uchidaasakura/"
+                 "seaside://http://seaside-c.jp/program/remake/"
+                 "seaside://http://seaside-c.jp/program/ssc/"
+                 "seaside://http://it.seaside-c.jp/"
+                 "seaside://http://seaside-c.jp/program/suzakinishi/"))))
 
 (defun emms-stream-seaside-nico-stream-url-p (stream-url)
   "Return t, if STREAM-URL needs nico url."
