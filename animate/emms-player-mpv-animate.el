@@ -31,8 +31,7 @@
 
 (define-emms-simple-player-mpv mpv-animate '(streamlist)
   "\\`animate://"
-  "mpv" "--no-terminal" "--force-window=no" "--audio-display=no"
-  "--cache=150000" "--force-seekable=yes")
+  "mpv" "--no-terminal" "--force-window=no" "--audio-display=no")
 
 (emms-player-simple-mpv-add-to-converters
  'emms-player-mpv-animate "." t
@@ -41,30 +40,15 @@
 (emms-player-set 'emms-player-mpv-animate 'get-media-title
                  'emms-player-mpv-animate--get-media-title)
 
-(emms-player-set 'emms-player-mpv-animate 'mpv-start-process-function
-                 'emms-player-mpv-animate--start-process)
-
 (defun emms-player-mpv-animate--loading-message ()
   "Loading message."
   (message "Loading animate.tv ... "))
 
 (defun emms-player-mpv-animate--track-name-to-input-form (track-name)
-  "Return rtmpdump form from TRACK-NAME."
-  (let ((rtmpdump-form (emms-stream-animate-stream-url-to-rtmpdump-form track-name)))
+  "Return m3u8 from TRACK-NAME."
+  (let ((m3u8 (emms-stream-animate-stream-url-to-m3u8 track-name)))
     (later-do 'emms-player-mpv-animate--loading-message)
-    rtmpdump-form))
-
-(defun emms-player-mpv-animate--shell-command-format (params rtmpdump-form)
-  "Return shell command for mpv."
-  (concat rtmpdump-form " | mpv "
-          (mapconcat #'shell-quote-argument `(,@params "-") " ")))
-
-(defun emms-player-mpv-animate--start-process (_cmdname params rtmpdump-form _track)
-  "Function for mpv-start-process-function."
-  (start-process-shell-command
-   emms-player-simple-process-name
-   nil
-   (emms-player-mpv-animate--shell-command-format params rtmpdump-form)))
+    m3u8))
 
 (defun emms-player-mpv-animate--get-media-title (track)
   "Return media title from TRACK."
