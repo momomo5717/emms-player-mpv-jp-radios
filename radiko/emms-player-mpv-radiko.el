@@ -65,37 +65,5 @@
       (emms-stream-name (emms-track-get track 'metadata))
     (file-name-nondirectory (emms-track-name track))))
 
-
-(define-obsolete-variable-alias 'emms-player-mpv-radiko--playerurl
-  'emms-stream-radiko--playerurl "20151128")
-(define-obsolete-variable-alias 'emms-player-mpv-radiko--playerfile
-  'emms-stream-radiko--playerfile "20151128")
-(define-obsolete-variable-alias 'emms-player-mpv-radiko--keyfile
-  'emms-stream-radiko--keyfile "20151128")
-(define-obsolete-function-alias 'emms-player-mpv-radiko--wget-playerfile
-  'emms-stream-radiko--wget-playerfile "20151128")
-(define-obsolete-function-alias 'emms-player-mpv-radiko--write-keydata
-  'emms-stream-radiko--write-keydata "20151128")
-(define-obsolete-variable-alias 'emms-player-mpv-radiko--auth-fms-base-headers
-  'emms-stream-radiko--auth-fms-base-headers "20151128")
-(define-obsolete-function-alias 'emms-player-mpv-radiko--access-auth1-fms
-  'emms-stream-radiko--access-auth1-fms "20151128")
-(define-obsolete-function-alias 'emms-player-mpv-radiko--get-auth1-value
-  'emms-stream-radiko--get-auth1-value "20151128")
-(define-obsolete-function-alias 'emms-player-mpv-radiko--get-authtoken
-  'emms-stream-radiko--get-authtoken "20151128")
-(define-obsolete-function-alias 'emms-player-mpv-radiko--get-offset
-  'emms-stream-radiko--get-offset "20151128")
-(define-obsolete-function-alias 'emms-player-mpv-radiko--get-length
-  'emms-stream-radiko--get-length "20151128")
-(define-obsolete-function-alias 'emms-player-mpv-radiko--get-partialkey
-  'emms-stream-radiko--get-partialkey "20151128")
-(define-obsolete-function-alias 'emms-player-mpv-radiko--access-auth2-fms
-  'emms-stream-radiko--access-auth2-fms "20151128")
-(define-obsolete-function-alias 'emms-player-mpv-radiko--get-area-id
-  'emms-stream-radiko--get-area-id "20151128")
-(define-obsolete-function-alias 'emms-player-mpv-radiko--wget-stream-url
-  'emms-stream-radiko--wget-rtmpe "20151128")
-
 (provide 'emms-player-mpv-radiko)
 ;;; emms-player-mpv-radiko.el ends here

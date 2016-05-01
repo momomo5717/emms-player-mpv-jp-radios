@@ -73,21 +73,5 @@
       (emms-stream-name (emms-track-get track 'metadata))
     (file-name-nondirectory (emms-track-name track))))
 
-
-(define-obsolete-variable-alias 'emms-player-mpv-anitama--cookie-file
-  'emms-stream-anitama--cookie-file "20151128")
-(define-obsolete-function-alias 'emms-player-mpv-anitama--access-weeeef
-  'emms-stream-anitama--access-weeeef "20151128")
-(define-obsolete-function-alias 'emms-player-mpv-anitama--write-cookies
-  'emms-stream-anitama--write-cookies "20151128")
-(define-obsolete-function-alias 'emms-player-mpv-anitama--have-cookies-p
-  'emms-stream-anitama--have-cookies-p "20151128")
-(define-obsolete-function-alias 'emms-player-mpv-anitama--write-unless-cookies
-  'emms-stream-anitama--write-unless-cookies "20151128")
-(define-obsolete-function-alias 'emms-player-mpv-anitama--fetch-BookXmlGet-nodeId
-  'emms-stream-anitama--fetch-BookXmlGet-nodeId "20151128")
-(define-obsolete-function-alias 'emms-player-mpv-anitama--track-name-to-nodeId
-  'identity "20151128")
-
 (provide 'emms-player-mpv-anitama)
 ;;; emms-player-mpv-anitama.el ends here

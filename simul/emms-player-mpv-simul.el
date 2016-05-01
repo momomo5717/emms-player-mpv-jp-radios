@@ -58,11 +58,5 @@
       (emms-stream-name(emms-track-get track 'metadata))
     (file-name-nondirectory (emms-track-name track))))
 
-
-(define-obsolete-function-alias 'emms-player-mpv-simul--xml-collect-node
-  'emms-stream-simul--xml-collect-node "20151128")
-(define-obsolete-function-alias 'emms-player-mpv-simul--asx-to-href
-  'emms-stream-simul--asx-to-href "20151128")
-
 (provide 'emms-player-mpv-simul)
 ;;; emms-player-mpv-simul.el ends here

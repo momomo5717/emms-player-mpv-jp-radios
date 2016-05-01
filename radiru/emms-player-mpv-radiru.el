@@ -56,9 +56,5 @@
       (emms-stream-name (emms-track-get track 'metadata))
     (file-name-nondirectory (emms-track-name track))))
 
-
-(define-obsolete-variable-alias 'emms-player-mpv-radiru--swf-url
-  'emms-stream-radiru-url-swf "20151128")
-
 (provide 'emms-player-mpv-radiru)
 ;;; emms-player-mpv-radiru.el ends here

@@ -58,8 +58,5 @@
             (emms-stream-name (emms-track-get track 'metadata)) " : "))
     (file-name-nondirectory (emms-track-name track))))
 
-(define-obsolete-function-alias 'emms-player-mpv-onsen--track-name-to-json-obj
-  'emms-stream-onsen--stream-url-to-json-obj "20151128")
-
 (provide 'emms-player-mpv-onsen)
 ;;; emms-player-mpv-onsen.el ends here

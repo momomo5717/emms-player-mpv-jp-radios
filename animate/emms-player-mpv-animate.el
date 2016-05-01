@@ -56,14 +56,5 @@
       (emms-stream-name(emms-track-get track 'metadata))
     (file-name-nondirectory (emms-track-name track))))
 
-(define-obsolete-function-alias 'emms-player-mpv-animate--xml-collect-node
-  'emms-stream-animate--xml-collect-node "20151128")
-(define-obsolete-function-alias 'emms-player-mpv-animate--url-to-html
-  'emms-stream-animate--url-to-html "20151128")
-(define-obsolete-function-alias 'emms-player-mpv-animate--fetch-wmp
-  'emms-stream-animate--fetch-wmp "20151128")
-(define-obsolete-function-alias 'emms-player-mpv-animate--asx-to-href
-  'emms-stream-animate--asx-to-href "20151128")
-
 (provide 'emms-player-mpv-animate)
 ;;; emms-player-mpv-animate.el ends here

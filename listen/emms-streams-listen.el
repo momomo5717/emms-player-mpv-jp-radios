@@ -242,9 +242,5 @@ If save,run `emms-stream-save-bookmarks-file' after."
   (format "http://mtist.as.smartstream.ne.jp/%s/livestream/playlist.m3u8"
           (replace-regexp-in-string "\\`listen://" "" stream-url)))
 
-
-(define-obsolete-variable-alias 'emms-stream-listen--stream-alist
-  'emms-stream-listen--stream-alist-cache "20151228")
-
 (provide 'emms-streams-listen)
 ;;; emms-streams-listen.el ends here
