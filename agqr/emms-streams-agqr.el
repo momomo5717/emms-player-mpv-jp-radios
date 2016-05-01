@@ -1,6 +1,6 @@
 ;;; emms-streams-agqr.el --- emms stream list for 超!A&G+ -*- lexical-binding: t -*-
 
-;; Copyright (C) 2015 momomo5717
+;; Copyright (C) 2015-2016 momomo5717
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by

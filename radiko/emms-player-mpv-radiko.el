@@ -1,6 +1,6 @@
 ;;; emms-player-mpv-radiko.el --- An emms simple mpv player for radiko -*- lexical-binding: t -*-
 
-;; Copyright (C) 2015 momomo5717
+;; Copyright (C) 2015-2016 momomo5717
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
