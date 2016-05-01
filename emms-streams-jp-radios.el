@@ -62,6 +62,7 @@
              for fn = (intern (format "emms-stream-%s-update-cache-async" station))
              when (fboundp fn) do (funcall fn)))
 
+;;;###autoload
 (defun emms-stream-jp-radios-track-description (track)
   "Return TRACK description for `emms-track-description-function'.
 Reference : `emms-track-simple-description'."
@@ -83,6 +84,7 @@ Reference : `emms-track-simple-description'."
             (t (concat (symbol-name type)
                        ": " (emms-track-name track))))))
 
+;;;###autoload
 (defun emms-stream-jp-radios-current-title-function ()
   "This can be used for `emms-mode-line-cycle-current-title-function'."
   (let* ((track (emms-playlist-current-selected-track))
@@ -97,12 +99,14 @@ Reference : `emms-track-simple-description'."
       (t description))))
 
 (defvar emms-mode-line-format)
+;;;###autoload
 (defun emms-stream-jp-radios-playlist-current ()
   "This can be used for `emms-mode-line-mode-line-function'."
   (format emms-mode-line-format (emms-stream-jp-radios-current-title-function)))
 
 (defvar emms-mode-line-icon-before-format)
 (defvar emms-mode-line-icon-image-cache)
+;;;###autoload
 (defun emms-stream-jp-radios-mode-line-icon-function ()
   "This can be used for `emms-mode-line-mode-line-function'.
 This need \(require 'emms-mode-line-icon\) before using it."
@@ -168,6 +172,7 @@ If it is more than 0 or equal to 1, it is used."
 (defvar emms-stream-jp-radios--key-tab nil)
 (defvar emms-stream-jp-radios--poped-up-win nil)
 
+;;;###autoload
 (defun emms-streams-jp-radios ()
   "Switch to a new buffer for `emms-stream-jp-radios-mode'."
   (interactive)
@@ -253,6 +258,7 @@ If POPUP-HEIGHT is non-nil, it is used for the height."
     (define-key emms-stream-jp-radios-mode-map
       [tab] 'emms-stream-jp-radios-quit)))
 
+;;;###autoload
 (defun emms-stream-jp-radios-quit ()
   "Bury `emms-stream-jp-radios-buffer-name' buffer."
   (interactive)
@@ -283,11 +289,13 @@ If POPUP-HEIGHT is non-nil, it is used for the height."
       (setq emms-stream-last-stream line)
       (funcall (intern (format "emms-%s-%s" play-or-add type)) url))))
 
+;;;###autoload
 (defun emms-stream-jp-radios-play ()
   "Play stream at the point."
   (interactive)
   (emms-stream-jp-radios--play-1 "play"))
 
+;;;###autoload
 (defun emms-stream-jp-radios-add ()
   "Add stream at the point to playlist."
   (interactive)
