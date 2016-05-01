@@ -1,6 +1,6 @@
 ;;; emms-player-mpv-simul.el --- An emms simple mpv player for SimulRadio -*- lexical-binding: t -*-
 
-;; Copyright (C) 2015 momomo5717
+;; Copyright (C) 2015-2016 momomo5717
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -57,12 +57,6 @@
   (if (eq (emms-track-type track) 'streamlist)
       (emms-stream-name(emms-track-get track 'metadata))
     (file-name-nondirectory (emms-track-name track))))
-
-
-(define-obsolete-function-alias 'emms-player-mpv-simul--xml-collect-node
-  'emms-stream-simul--xml-collect-node "20151128")
-(define-obsolete-function-alias 'emms-player-mpv-simul--asx-to-href
-  'emms-stream-simul--asx-to-href "20151128")
 
 (provide 'emms-player-mpv-simul)
 ;;; emms-player-mpv-simul.el ends here

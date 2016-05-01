@@ -1,6 +1,6 @@
 ;;; emms-player-mpv-hibiki.el --- An emms simple mpv player for HiBiKi Radio Station -*- lexical-binding: t -*-
 
-;; Copyright (C) 2015 momomo5717
+;; Copyright (C) 2015-2016 momomo5717
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -55,26 +55,6 @@
   (if (eq (emms-track-type track) 'streamlist)
       (emms-stream-name(emms-track-get track 'metadata))
     (file-name-nondirectory (emms-track-name track))))
-
-
-(define-obsolete-variable-alias 'emms-player-mpv-hibiki--url-request-extra-headers
-  'emms-stream-hibiki--url-request-extra-headers "20151128")
-(define-obsolete-function-alias 'emms-player-mpv-hibiki--url-retrieve-synchronously
-  'emms-stream-hibiki--url-retrieve-synchronously "20151128")
-(define-obsolete-function-alias 'emms-player-mpv-hibiki--url-to-json
-  'emms-stream-hibiki--url-to-json "20151128")
-(define-obsolete-variable-alias 'emms-player-mpv-hibiki--base-url-programs
-  'emms-stream-hibiki--base-url-access-programs "20151128")
-(define-obsolete-function-alias 'emms-player-mpv-hibiki--get-programs-url
-  'emms-stream-hibiki--get-access-programs-url "20151128")
-(define-obsolete-variable-alias 'emms-player-mpv-hibiki--base-url-play_check
-  'emms-stream-hibiki--base-url-play_check "20151128")
-(define-obsolete-function-alias 'emms-player-mpv-hibiki--get-play_check-url
-  'emms-stream-hibiki--get-play_check-url "20151128")
-(define-obsolete-function-alias 'emms-player-mpv-hibiki--access_id-to-video_id
-  'emms-stream-hibiki--access_id-to-video_id "20151128")
-(define-obsolete-function-alias 'emms-player-mpv-hibiki--url-to-playlist_url
-  'emms-stream-hibiki--url-to-playlist_url "20151128")
 
 (provide 'emms-player-mpv-hibiki)
 ;;; emms-player-mpv-hibiki.el ends here

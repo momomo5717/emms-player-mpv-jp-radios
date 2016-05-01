@@ -1,6 +1,6 @@
 ;;; emms-streams-listen.el --- emms stream list for ListenRadio -*- lexical-binding: t -*-
 
-;; Copyright (C) 2015 momomo5717
+;; Copyright (C) 2015-2016 momomo5717
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -241,10 +241,6 @@ If save,run `emms-stream-save-bookmarks-file' after."
   "Return m3u8 from STREAM-URL."
   (format "http://mtist.as.smartstream.ne.jp/%s/livestream/playlist.m3u8"
           (replace-regexp-in-string "\\`listen://" "" stream-url)))
-
-
-(define-obsolete-variable-alias 'emms-stream-listen--stream-alist
-  'emms-stream-listen--stream-alist-cache "20151228")
 
 (provide 'emms-streams-listen)
 ;;; emms-streams-listen.el ends here

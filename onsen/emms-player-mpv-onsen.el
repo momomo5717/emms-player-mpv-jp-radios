@@ -1,6 +1,6 @@
 ;;; emms-player-mpv-onsen.el --- An emms simple mpv player for 音泉 -*- lexical-binding: t -*-
 
-;; Copyright (C) 2015 momomo5717
+;; Copyright (C) 2015-2016 momomo5717
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -57,9 +57,6 @@
       (car (split-string
             (emms-stream-name (emms-track-get track 'metadata)) " : "))
     (file-name-nondirectory (emms-track-name track))))
-
-(define-obsolete-function-alias 'emms-player-mpv-onsen--track-name-to-json-obj
-  'emms-stream-onsen--stream-url-to-json-obj "20151128")
 
 (provide 'emms-player-mpv-onsen)
 ;;; emms-player-mpv-onsen.el ends here

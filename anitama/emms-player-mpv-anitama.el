@@ -1,6 +1,6 @@
 ;;; emms-player-mpv-anitama.el --- An emms simple mpv player for アニたまどっとコム -*- lexical-binding: t -*-
 
-;; Copyright (C) 2015 momomo5717
+;; Copyright (C) 2015-2016 momomo5717
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -72,22 +72,6 @@
   (if (eq (emms-track-type track) 'streamlist)
       (emms-stream-name (emms-track-get track 'metadata))
     (file-name-nondirectory (emms-track-name track))))
-
-
-(define-obsolete-variable-alias 'emms-player-mpv-anitama--cookie-file
-  'emms-stream-anitama--cookie-file "20151128")
-(define-obsolete-function-alias 'emms-player-mpv-anitama--access-weeeef
-  'emms-stream-anitama--access-weeeef "20151128")
-(define-obsolete-function-alias 'emms-player-mpv-anitama--write-cookies
-  'emms-stream-anitama--write-cookies "20151128")
-(define-obsolete-function-alias 'emms-player-mpv-anitama--have-cookies-p
-  'emms-stream-anitama--have-cookies-p "20151128")
-(define-obsolete-function-alias 'emms-player-mpv-anitama--write-unless-cookies
-  'emms-stream-anitama--write-unless-cookies "20151128")
-(define-obsolete-function-alias 'emms-player-mpv-anitama--fetch-BookXmlGet-nodeId
-  'emms-stream-anitama--fetch-BookXmlGet-nodeId "20151128")
-(define-obsolete-function-alias 'emms-player-mpv-anitama--track-name-to-nodeId
-  'identity "20151128")
 
 (provide 'emms-player-mpv-anitama)
 ;;; emms-player-mpv-anitama.el ends here

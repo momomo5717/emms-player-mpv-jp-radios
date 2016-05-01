@@ -1,6 +1,6 @@
 ;;; emms-player-mpv-jp-radios.el --- EMMS players and stream lists of Japan radio stations -*- lexical-binding: t -*-
 
-;; Copyright (C) 2015 momomo5717
+;; Copyright (C) 2015-2016 momomo5717
 
 ;; Keywords: emms, mpv, radio
 ;; Package-Requires: ((emacs "24") (cl-lib "0.5") (emms "4.0") (emms-player-simple-mpv "0.1.7"))
@@ -43,10 +43,8 @@
 ;;
 ;; + mpv v0.7 or later
 ;;   + ffmpeg ( the build with –enable-librtmp (for Radiko, らじる★らじる) )
-;; + wget (for Radiko, アニたまどっとコム, animate.tv)
+;; + wget (for Radiko, アニたまどっとコム)
 ;; + swftools (for Radiko)
-;; + rtmpdump (for animate.tv)
-;; + flasm (for animate.tv)
 
 ;; Setup:
 ;;

@@ -1,6 +1,6 @@
 ;;; emms-player-mpv-radiru.el --- An emms simple mpv player for らじる★らじる -*- lexical-binding: t -*-
 
-;; Copyright (C) 2015 momomo5717
+;; Copyright (C) 2015-2016 momomo5717
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -55,10 +55,6 @@
   (if (eq (emms-track-type track) 'streamlist)
       (emms-stream-name (emms-track-get track 'metadata))
     (file-name-nondirectory (emms-track-name track))))
-
-
-(define-obsolete-variable-alias 'emms-player-mpv-radiru--swf-url
-  'emms-stream-radiru-url-swf "20151128")
 
 (provide 'emms-player-mpv-radiru)
 ;;; emms-player-mpv-radiru.el ends here

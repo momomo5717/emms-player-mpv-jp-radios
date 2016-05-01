@@ -1,6 +1,6 @@
 ;;; emms-streams-jp-radios-helm.el --- emms-streams-jp-radios for helm -*- lexical-binding: t; no-byte-compile: t -*-
 
-;; Copyright (C) 2015 momomo5717
+;; Copyright (C) 2015-2016 momomo5717
 
 ;; URL: https://github.com/momomo5717/
 

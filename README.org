@@ -42,10 +42,8 @@
    + mpv v0.7 or later ( [[https://github.com/mpv-player/mpv]] )
      + ffmpeg ( the build with –enable-librtmp (for Radiko, らじる★らじる) )
    + emms-player-simple-mpv ( [[https://github.com/momomo5717/emms-player-simple-mpv]] )
-   + wget (for Radiko, アニたまどっとコム, animate.tv)
+   + wget (for Radiko, アニたまどっとコム)
    + swftools (for Radiko)
-   + rtmpdump (for animate.tv)
-   + flasm (for animate.tv)
 
    Tested on GNU Emacs 24.5.1 (emacs-mac-app @5.15_0), EMMS 4.0, mpv @0.11.0_2
 

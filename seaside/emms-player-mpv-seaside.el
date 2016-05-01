@@ -1,6 +1,6 @@
 ;;; emms-player-mpv-seaside.el --- An emms simple mpv player for Sea Side Communications -*- lexical-binding: t -*-
 
-;; Copyright (C) 2015 momomo5717
+;; Copyright (C) 2015-2016 momomo5717
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -69,16 +69,6 @@
   (if (eq (emms-track-type track) 'streamlist)
       (emms-stream-name(emms-track-get track 'metadata))
     (file-name-nondirectory (emms-track-name track))))
-
-
-(define-obsolete-function-alias 'emms-player-mpv-seaside--xml-collect-node
-  'emms-stream-seaside--xml-collect-node "20151128")
-(define-obsolete-function-alias 'emms-player-mpv-seaside--url-to-html
-  'emms-stream-seaside--url-to-html "20151128")
-(define-obsolete-face-alias 'emms-player-mpv-seaside--wax-to-wma
-  'emms-stream-seaside--html-to-wax "20151128")
-(define-obsolete-function-alias 'emms-player-mpv-seaside--html-to-nico
-  'emms-stream-seaside--html-to-nico "20151128")
 
 (provide 'emms-player-mpv-seaside)
 ;;; emms-player-mpv-seaside.el ends here
