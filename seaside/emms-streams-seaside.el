@@ -34,48 +34,37 @@
 (declare-function emms-stream-insert-at "emms-streams")
 
 (defvar emms-stream-seaside-stream-list
-  '(("あどりぶ : 月曜日更新"
-     "seaside://http://seaside-c.jp/program/adlib/"
-     1 streamlist)
-    ("BELOVED MEMORIES : 月曜日更新"
-     "seaside://http://seaside-c.jp/program/belovedmemories/"
-     1 streamlist)
-    ("かおりとあさみのグリラジ!! : 火曜日更新"
-     "seaside://http://ch.nicovideo.jp/grimoire-gakuen"
-     1 streamlist)
-    ("内田さんと浅倉さん : 水曜日更新"
-     "seaside://http://seaside-c.jp/program/uchidaasakura/"
-     1 streamlist)
-    ("ありがた系迷惑プレゼンショー　はるか・ちなみの「りめいく！」 : 水曜日更新"
-     "seaside://http://seaside-c.jp/program/remake/"
-     1 streamlist)
-    ("西明日香のデリケートゾーン！ : 水曜日更新"
-     "seaside://http://seaside-c.jp/program/delicatezone/"
-     1 streamlist)
-    ("春佳・彩花のSSちゃんねる : 水曜日更新"
-     "seaside://http://seaside-c.jp/program/ssc/"
-     1 streamlist)
-    ("田村睦心×瀬戸麻沙美の獅子奮迅！体育会系ラジオ！ : 水曜日更新"
-     "seaside://http://seaside-c.jp/program/t-radio/"
-     1 streamlist)
-    ("井上麻里奈・下田麻美のIT革命！ : 木曜日更新"
-     "seaside://http://it.seaside-c.jp/"
-     1 streamlist)
-    ("洲崎西 : 木曜日更新"
-     "seaside://http://seaside-c.jp/program/suzakinishi/"
-     1 streamlist)
-    ("RADIOアニメロミックス 内山夕実と吉田有里のゆゆらじ : 金曜日更新"
-     "seaside://http://ch.nicovideo.jp/ch312/video"
-     1 streamlist)
-    ("EMERGENCY the RADIO : 土曜日更新"
-     "seaside://http://seaside-c.jp/program/emergency/"
-     1 streamlist)
-    ("ステキ情報バラエティ 発信！もいとろ君 : 最終回"
-     "seaside://http://seaside-c.jp/program/moitorokun/"
-     1 streamlist)
-    ("中村繪里子ら・ら☆ら♪　なかむランド～Love・Laugh☆Live♪～ : 最終回"
-     "seaside://http://nakamuland.net/"
-     1 streamlist)))
+  (cl-loop
+   for (title url) in
+   '(("内田さんと浅倉さん : 内田彩、浅倉杏美 : 毎週火曜日20：00更新"
+      "http://seaside-c.jp/program/uchidaasakura/")
+     ("西明日香のデリケートゾーン！ : 西明日香 : 毎週火曜日20：30更新"
+      "http://seaside-c.jp/program/delicatezone/")
+     ("はるか・ちなみの「りめいく！」 : 佳村はるか、橋本ちなみ : 毎週火曜日21：30更新"
+      "http://seaside-c.jp/program/remake/")
+     ("井上麻里奈・下田麻美のIT革命！ : 井上麻里奈、下田麻美 : 毎週水曜日20：00更新"
+      "http://it.seaside-c.jp/")
+     ("洲崎西 : 洲崎綾、西明日香 : 毎週水曜日21：30更新"
+      "http://seaside-c.jp/program/suzakinishi/")
+     ("春佳・彩花のSSちゃんねる : 照井春佳、諏訪彩花 : 毎週水曜日22：00更新"
+      "http://seaside-c.jp/program/ssc/")
+     ("田村睦心×瀬戸麻沙美の獅子奮迅！体育会系ラジオ！ : 田村睦心、瀬戸麻沙美 : 毎週水曜日20：30更新"
+      "http://seaside-c.jp/program/t-radio/")
+     ("西田望見・奥野香耶のず～ぱらだいす : 西田望見、奥野香耶 : 毎週水曜日21：00更新"
+      "http://seaside-station.net/program/zoo/")
+     ("安済知佳と朝井彩加のふたりはシンパシー！ : 安済知佳、朝井彩加 : 毎週木曜日22：00以降（生放送終了後）"
+      "http://seaside-station.net/program/futapathy/")
+     ("なんでもヒーロー！ゆっけとまーぼー : 小林裕介、古川慎 : 毎週金曜日21：00更新"
+      "http://seaside-station.net/program/ytom/")
+     ("RADIOアニメロミックス 内山夕実と吉田有里のゆゆらじ : 内山夕実、吉田有里 : 毎月第2・第4金曜日22：00更新"
+      "http://ch.nicovideo.jp/ch312/video")
+     ("BELOVED MEMORIES : 田丸篤志、内田雄馬 : 毎週月曜日20：00更新"
+      "http://seaside-c.jp/program/belovedmemories/")
+     ("あどりぶ : 巽悠衣子、大橋彩香 : 毎週月曜日20：30更新"
+      "http://seaside-c.jp/program/adlib/")
+     ("EMERGENCY the RADIO : NEW YOUNG（小野坂昌也）CRAZY YU（小林ゆう）DANCING YUKARI（後藤友香里） : 毎週月曜日21：30更新"
+      "http://seaside-c.jp/program/emergency/"))
+   collect (list title (concat "seaside://" url) 1 'streamlist)))
 
 ;;;###autoload
 (defun emms-stream-seaside-get-stream-list ()
@@ -151,40 +140,53 @@ Object returned by GETTER is collected."
     (if wax wax (error "Not found WAX"))))
 
 (defun emms-stream-seaside--html-to-nico (html)
-  "Return nico url from HTML with TRACK-URL."
+  "Return nico url from HTML."
   (let ((nico-url
-         (car (emms-stream-seaside--xml-collect-node
-               'a html
-               :test
-               (lambda (node) (let ((href (xml-get-attribute-or-nil node 'href)))
-                            (and href
-                                 (string-match-p "\\`http://www.nicovideo.jp/watch/"
-                                                 href))))
-               :getter
-               (lambda (node) (xml-get-attribute-or-nil node 'href))))))
+         (car (or (emms-stream-seaside--xml-collect-node
+                   'iframe html
+                   :test
+                   (lambda (node) (let ((src (xml-get-attribute-or-nil node 'src)))
+                                (and src
+                                     (string-match "\\`http://ext.nicovideo.jp/thumb/\\(.+\\)\\'"
+                                                   src))))
+                   :getter
+                   (lambda (node) (concat "http://www.nicovideo.jp/watch/"
+                                      (match-string 1 (xml-get-attribute node 'src)))))
+                  (emms-stream-seaside--xml-collect-node
+                   'a html
+                   :test
+                   (lambda (node) (let ((href (xml-get-attribute-or-nil node 'href)))
+                                (and href
+                                     (string-match-p "\\`http://www.nicovideo.jp/watch/"
+                                                     href))))
+                   :getter
+                   (lambda (node) (xml-get-attribute-or-nil node 'href)))))))
     (if nico-url nico-url (error "Not found nico url"))))
 
 (defvar emms-stream-seaside-nico-stream-regex
   (concat "\\`"
-   (regexp-opt '("seaside://http://seaside-c.jp/program/emergency/"
+   (regexp-opt '("seaside://http://seaside-c.jp/program/uchidaasakura/"
                  "seaside://http://seaside-c.jp/program/delicatezone/"
-                 "seaside://http://seaside-c.jp/program/t-radio/"
-                 "seaside://http://ch.nicovideo.jp/grimoire-gakuen"
-                 "seaside://http://ch.nicovideo.jp/ch312/video"
-                 "seaside://http://seaside-c.jp/program/adlib/"
-                 "seaside://http://seaside-c.jp/program/belovedmemories/"
-                 "seaside://http://seaside-c.jp/program/uchidaasakura/"
                  "seaside://http://seaside-c.jp/program/remake/"
-                 "seaside://http://seaside-c.jp/program/ssc/"
                  "seaside://http://it.seaside-c.jp/"
-                 "seaside://http://seaside-c.jp/program/suzakinishi/"))))
+                 "seaside://http://seaside-c.jp/program/suzakinishi/"
+                 "seaside://http://seaside-c.jp/program/ssc/"
+                 "seaside://http://seaside-c.jp/program/t-radio/"
+                 "seaside://http://seaside-station.net/program/zoo/"
+                 "seaside://http://seaside-station.net/program/futapathy/"
+                 "seaside://http://seaside-station.net/program/ytom/"
+                 "seaside://http://seaside-c.jp/program/belovedmemories/"
+                 "seaside://http://seaside-c.jp/program/adlib/"
+                 "seaside://http://seaside-c.jp/program/emergency/"
+                 "seaside://http://ch.nicovideo.jp/ch312/video"
+                 "seaside://http://ch.nicovideo.jp/grimoire-gakuen"))))
 
 (defun emms-stream-seaside-nico-stream-url-p (stream-url)
   "Return t, if STREAM-URL needs nico url."
   (string-match emms-stream-seaside-nico-stream-regex stream-url))
 
 (defun emms-stream-seaside--stream-url-to-url (stream-url)
-  "Replace seaside:// with of STREAM-URL empty string."
+  "Replace seaside:// of STREAM-URL with empty string."
   (replace-regexp-in-string "\\`seaside://" "" stream-url))
 
 ;;;###autoload
