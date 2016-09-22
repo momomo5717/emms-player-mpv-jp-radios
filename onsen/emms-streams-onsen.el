@@ -26,6 +26,7 @@
 (require 'cl-lib)
 (require 'xml)
 (require 'url)
+(require 'url-queue)
 (require 'json)
 
 ;; Suppress warning messages.
@@ -34,6 +35,8 @@
 (declare-function emms-stream-redisplay "emms-streams")
 (declare-function emms-line-number-at-pos "emms-streams")
 (declare-function emms-stream-insert-at "emms-streams")
+
+(defvar emms-stream-onsen--url-top "http://www.onsen.ag")
 
 (defvar emms-stream-onsen--stream-alist-cache nil
   "Cache for stream alist.")
@@ -120,21 +123,22 @@ If UPDATEP is no-nil, cache is updated."
   (if (or updatep (null emms-stream-onsen--stream-alist-cache))
       (setq emms-stream-onsen--stream-alist-cache
             (emms-stream-onsen--top-html-to-stream-alist
-             (emms-stream-onsen--url-to-html "http://www.onsen.ag")))
+             (emms-stream-onsen--url-to-html emms-stream-onsen--url-top)))
     emms-stream-onsen--stream-alist-cache))
 
 ;;;###autoload
 (defun emms-stream-onsen-update-cache-async ()
   "Update cache asynchronously."
-  (url-retrieve
-   "http://www.onsen.ag"
+  (url-queue-retrieve
+   emms-stream-onsen--url-top
    (lambda (status &rest _)
-     (when (memq :error status)
-       (error "Failed to get onsen stream list : %s" (cdr status)))
-     (setq emms-stream-onsen--stream-alist-cache
-           (emms-stream-onsen--top-html-to-stream-alist
-            (emms-stream-onsen--url-to-html nil nil (current-buffer))))
-     (message "Updated onsen stream list cache"))))
+     (if (plist-get status :error)
+         (message "Failed to get onsen stream list : %s"
+                  (plist-get status :error))
+       (setq emms-stream-onsen--stream-alist-cache
+             (emms-stream-onsen--top-html-to-stream-alist
+              (emms-stream-onsen--url-to-html nil nil (current-buffer))))
+       (message "Updated onsen stream list cache")))))
 
 (defun emms-stream-onsen--add-bookmark-dows (days &optional updatep)
   "Helper function for `emms-stream-onsen-add-bookmark', etc.
@@ -197,13 +201,16 @@ If save,run `emms-stream-save-bookmarks-file' after."
   "Return json obj from STREAM-URL."
   (let* ((id (file-name-nondirectory stream-url))
          (buf (url-retrieve-synchronously
-               (format "http://www.onsen.ag/data/api/getMovieInfo/%s" id))))
+               (url-expand-file-name
+                (format "data/api/getMovieInfo/%s" id)
+                emms-stream-onsen--url-top))))
     (prog1
         (with-current-buffer buf
           (goto-char (point-min))
           (search-forward "callback(")
           (json-read))
-      (kill-buffer buf))))
+      (when (buffer-live-p buf)
+        (kill-buffer buf)))))
 
 ;;;###autoload
 (defun emms-stream-onsen-stream-url-to-moviePath (stream-url)

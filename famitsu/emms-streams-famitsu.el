@@ -26,6 +26,7 @@
 (require 'cl-lib)
 (require 'xml)
 (require 'url)
+(require 'url-queue)
 
 ;; Suppress warning messages.
 (defvar emms-stream-buffer-name)
@@ -110,22 +111,22 @@ If UPDATEP is no-nil, cache is updated."
              emms-stream-famitsu-podcast-collect-last-n))
     emms-stream-famitsu--stream-alist-cache))
 
-
 (defun emms-stream-famitsu-update-cache-async-1 (key rss-url)
   "Set stream-list of KEY from RSS-URL."
-  (url-retrieve
+  (url-queue-retrieve
    rss-url
    (lambda (status &rest _)
-     (when (memq :error status)
-       (error "Failed to get famitsu stream list : %s" (cdr status)))
-     (setcdr (assq key emms-stream-famitsu--stream-alist-cache)
-             (emms-stream-famitsu--rss-to-stream-list
-              (emms-stream-famitsu--url-to-html nil t (current-buffer))
-              emms-stream-famitsu-podcast-collect-last-n))
-     (when (cl-loop for (_ . ls)
-                    in emms-stream-famitsu--stream-alist-cache
-                    never (null ls))
-       (message "Updated famitsu stream list cache")))))
+     (if  (plist-get status :error)
+         (message "Failed to get famitsu stream list : %s"
+                  (plist-get status :error))
+       (setcdr (assq key emms-stream-famitsu--stream-alist-cache)
+               (emms-stream-famitsu--rss-to-stream-list
+                (emms-stream-famitsu--url-to-html nil t (current-buffer))
+                emms-stream-famitsu-podcast-collect-last-n))
+       (when (cl-loop for (_ . ls)
+                      in emms-stream-famitsu--stream-alist-cache
+                      never (null ls))
+         (message "Updated famitsu stream list cache"))))))
 
 ;;;###autoload
 (defun emms-stream-famitsu-update-cache-async ()

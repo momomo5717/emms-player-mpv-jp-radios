@@ -26,6 +26,7 @@
 (require 'cl-lib)
 (require 'xml)
 (require 'url)
+(require 'url-queue)
 (require 'url-cookie)
 
 ;; Suppress warning messages.
@@ -44,7 +45,8 @@
 (defun emms-stream-anitama--access-weeeef ()
   "Access www.weeeef.com to get cookies."
   (let ((buf (url-retrieve-synchronously emms-stream-anitama--url-top)))
-    (kill-buffer buf)))
+    (when (buffer-live-p buf)
+      (kill-buffer buf))))
 
 (defun emms-stream-anitama--write-cookies ()
   "Write cookies to `emms-stream-anitama--cookie-file'."
@@ -136,16 +138,17 @@ If UPDATEP is no-nil, cache is updated."
 (defun emms-stream-anitama--write-weeeef-async (&optional cont)
   "Access and write www.weeeef.com cookies asynchronously.
 If CONT is no-nil, it is run with no arguments."
-  (url-retrieve
+  (url-queue-retrieve
    emms-stream-anitama--url-top
    (lambda (status &rest _)
-     (when (memq :error status)
-       (error "Failed to write www.weeeef.com cookies : %s" (cdr status)))
-     (kill-buffer)
-     (emms-stream-anitama--write-cookies)
-     (unless (emms-stream-anitama--have-cookies-p)
-       (error "Failed to get cookies of www.weeeef.com"))
-     (when (functionp cont) (funcall cont)))))
+     (if (plist-get status :error)
+         (message "Failed to write www.weeeef.com cookies : %s"
+                  (plist-get status :error))
+       (kill-buffer)
+       (emms-stream-anitama--write-cookies)
+       (unless (emms-stream-anitama--have-cookies-p)
+         (error "Failed to get cookies of www.weeeef.com"))
+       (when (functionp cont) (funcall cont))))))
 
 ;;;###autoload
 (defun emms-stream-anitama-update-cache-async ()
