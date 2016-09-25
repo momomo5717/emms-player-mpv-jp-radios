@@ -16,7 +16,8 @@
 
    + emms-streams-jp-radios.el
    + emms-streams-jp-radios-anything.el
-   + emms-streams-jp-radios-helm.el ( [[https://github.com/emacs-helm/helm][helm]] v1.7.9 or later is needed. )
+   + emms-streams-jp-radios-helm.el ( [[https://github.com/emacs-helm/helm][helm]] v1.7.9 or later )
+   + emms-streams-jp-radios-counsel.el ( [[https://github.com/abo-abo/swiper][ivy]] 0.8.0 or later )
 
    [[file:image/image.gif]]
 
@@ -33,6 +34,7 @@
      + [[#emms-streams-jp-radiosel][emms-streams-jp-radios.el]]
      + [[#emms-streams-jp-radios-anythingel][emms-streams-jp-radios-anything.el]]
      + [[#emms-streams-jp-radios-helmel][emms-streams-jp-radios-helm.el]]
+     + [[#emms-streams-jp-radios-counselel][emms-streams-jp-radios-counsel.el]]
    + [[#references][References]]
 
 ** Requirements
@@ -210,27 +212,107 @@
 
     If =anything= is installed, =emms-streams-jp-radios-anything= is available.
 
-    #+BEGIN_SRC emacs-lisp
-      (require 'emms-streams-jp-radios-anything)
+    #+BEGIN_SRC elisp
+      (autoload 'emms-streams-jp-radios-anything
+        "emms-streams-jp-radios-anything" nil t)
 
-      ;; If `emms-stream-jp-radios-anything-use-emms-stream-list-p' is no-nil,
+      ;; e.g.
+      (defalias 'anything-jp-radios 'emms-streams-jp-radios-anything)
+      ;; If `emms-stream-jp-radios-anything-use-emms-stream-list-p' is non-nil,
       ;; candidates include `emms-stream-list'.
       (custom-set-variables
        '(emms-stream-jp-radios-anything-use-emms-stream-list-p t))
     #+END_SRC
 
+**** Basic action
+
+     | key         | Action                                             |
+     |-------------+----------------------------------------------------|
+     | =Enter=     | Default action: Play the current stream            |
+     | =C-u Enter= | Add the current stream                             |
+     | =C-z=       | Default persistent action: Play the current stream |
+     | =C-u C-z=   | Persistent action: Add the current stream          |
+
+**** Other actions
+
+     + Action (with prefix)
+       + Play(Add) the current stream
+       + (Clear =emms-playlist-buffer=, ) Add streams and Play if =emms-player-playing-p= is =nil=
+       + Update streams asynchronously
+
 *** emms-streams-jp-radios-helm.el
 
     If =helm= is installed, =emms-streams-jp-radios-helm= is available.
 
-    #+BEGIN_SRC emacs-lisp
-      (require 'emms-streams-jp-radios-helm)
+    #+BEGIN_SRC elisp
+      (autoload 'emms-streams-jp-radios-helm
+        "emms-streams-jp-radios-helm" nil t)
 
-      ;; If `emms-stream-jp-radios-helm-use-emms-stream-list-p' is no-nil,
+      ;; e.g.
+      (defalias 'helm-jp-radios 'emms-streams-jp-radios-helm)
+      ;; If `emms-stream-jp-radios-helm-use-emms-stream-list-p' is non-nil,
       ;; candidates include `emms-stream-list'.
       (custom-set-variables
        '(emms-stream-jp-radios-helm-use-emms-stream-list-p t))
     #+END_SRC
+
+**** Actions
+
+       | key              | Action                                                      |
+       |------------------+-------------------------------------------------------------|
+       | =Enter/<f1>=     | Default action: Play the current stream                     |
+       | =C-u Enter/<f1>= | Add the current stream                                      |
+       | =C-j=            | Default persistent action: Play the current stream          |
+       | =C-u C-j=        | Persistent action: Add the current stream                   |
+       | =<f2>=           | Add streams(s) and Play if =emms-player-playing-p= is =nil= |
+       | =C-u <f2>=       | Clear =emms-playlist-buffer=, Add stream(s) and Play        |
+       |                  | if =emms-player-playing-p= is =nil=                         |
+       | =<f3>=           | Update streams asynchronously                               |
+
+
+*** emms-streams-jp-radios-counsel.el
+
+    If =ivy= is installed, =emms-streams-jp-radios-counsel= is available.
+
+    #+BEGIN_SRC elisp
+      (autoload 'emms-streams-jp-radios-counsel
+        "emms-streams-jp-radios-counsel" nil t)
+
+      ;; e.g.
+      (defalias 'counsel-jp-radios 'emms-streams-jp-radios-counsel)
+      (push '(emms-streams-jp-radios-counsel . ivy--regex-ignore-order)
+            ivy-re-builders-alist)
+      (custom-set-variables
+       ;; If `emms-stream-jp-radios-counsel-use-emms-stream-list-p' is non-nil,
+       ;; candidates include `emms-stream-list'.
+       '(emms-stream-jp-radios-counsel-use-emms-stream-list-p t)
+       '(emms-stream-jp-radios-counsel-ivy-height 21))
+    #+END_SRC
+
+**** Default =emms-streams-jp-radios-counsel-map=
+
+   | Key       | Action                         |
+   |-----------+--------------------------------|
+   | =C-SPC=   | (Un)mark the current candidate |
+   | =M-a=     | Mark visible candidates        |
+   | =C-u M-a= | Unmark visible candidates      |
+   | =M-U=     | Unmark all candidates          |
+
+**** Actions
+
+   | Key | Action                                               |
+   |-----+------------------------------------------------------|
+   | =o= | Default action: Play the current stream              |
+   | =a= | Add stream(s) and Play                               |
+   | =A= | Add stream(s)                                        |
+   | =c= | Clear =emms-playlist-buffer=, Add stream(s) and Play |
+   | =C= | Clear =emms-playlist-buffer= and Add stream(s)       |
+   | =u= | Update streams asynchronously                        |
+
+   Key =a= and =c= depend on =emms-stream-jp-radios-counsel-always-play-p=.
+
+   If =emms-stream-jp-radios-counsel-always-play-p= is non-nil,
+   a new stream will be started regardless of =emms-player-playing-p=.
 
 ** References
 
