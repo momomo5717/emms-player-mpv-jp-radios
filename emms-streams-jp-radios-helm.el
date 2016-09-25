@@ -2,7 +2,7 @@
 
 ;; Copyright (C) 2015-2016 momomo5717
 
-;; URL: https://github.com/momomo5717/
+;; URL: https://github.com/momomo5717/emms-player-mpv-jp-radios
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
 
 ;;; Commentary:
 
-;; This package provides a helm command for stream lists
+;; This file provides a helm command for stream lists
 ;; which are defined or installed by each emms streams package.
 ;;
 ;; If `helm' v1.7.9 or later is installed,
@@ -28,13 +28,27 @@
 ;;
 ;; Setup:
 ;;
-;; (require 'emms-streams-jp-radios-helm)
+;; (autoload 'emms-streams-jp-radios-helm
+;;   "emms-streams-jp-radios-helm" nil t)
+;;
+;; ;; e.g.
+;; (defalias 'helm-jp-radios 'emms-streams-jp-radios-helm)
+;; (custom-set-variables
+;;  '(emms-stream-jp-radios-helm-use-emms-stream-list-p t))
 ;;
 ;; Usage:
 ;;
-;; Some stream lists need to update cache.
-;; M-x `emms-streams-jp-radios-helm' <f3> or TAB (Actions)
-;; provides updating cache asynchronously.
+;;  | key            | Action                                                      |
+;;  |----------------+-------------------------------------------------------------|
+;;  | Enter/<f1>     | Default action: Play the current stream                     |
+;;  | C-u Enter/<f1> | Add the current stream                                      |
+;;  | C-j            | Default persistent action: Play the current stream          |
+;;  | C-u C-j        | Persistent action: Add the current stream                   |
+;;  | <f2>           | Add streams(s) and Play if `emms-player-playing-p' is nil   |
+;;  | C-u <f2>       | Clear `emms-playlist-buffer', Add stream(s) and Play        |
+;;  |                | if `emms-player-playing-p' is nil                           |
+;;  | <f3>           | Update streams asynchronously                               |
+;;
 ;;
 ;; If you need a helm command for specific stream lists,
 ;; `emms-stream-jp-radios-helm-source' can be used as bellow.
@@ -51,7 +65,7 @@
 ;;   (helm :sources 'emms-stream-onsen-helm-source-list
 ;;         :buffer "*Helm EMMS Streams 音泉*"))
 ;;
-;; Note: This package is not compiled to be installed from MELPA.
+;; Note: This file is not compiled to be installed from MELPA.
 
 ;;; Code:
 (require 'emms-player-mpv-jp-radios)

@@ -2,7 +2,7 @@
 
 ;; Copyright (C) 2015-2016 momomo5717
 
-;; URL: https://github.com/momomo5717/
+;; URL: https://github.com/momomo5717/emms-player-mpv-jp-radios
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
 
 ;;; Commentary:
 
-;; This package provides a anything command for stream lists
+;; This file provides a anything command for stream lists
 ;; which are defined or installed by each emms streams package.
 ;;
 ;; If `anything' is installed,
@@ -28,13 +28,32 @@
 ;;
 ;; Setup:
 ;;
-;; (require 'emms-streams-jp-radios-anything)
+;; (autoload 'emms-streams-jp-radios-anything
+;;   "emms-streams-jp-radios-anything" nil t)
+;;
+;; ;; e.g.
+;; (defalias 'anything-jp-radios 'emms-streams-jp-radios-anything)
+;; (custom-set-variables
+;;  '(emms-stream-jp-radios-anything-use-emms-stream-list-p t))
 ;;
 ;; Usage:
 ;;
-;; Some stream lists need to update cache.
-;; M-x `emms-streams-jp-radios-anything' TAB (Actions)
-;; provides updating cache asynchronously.
+;; * Basic action
+;;
+;;   | key       | Action                                              |
+;;   |-----------+-----------------------------------------------------|
+;;   | Enter     | Default action: Play the current stream             |
+;;   | C-u Enter | Add the current stream                              |
+;;   | C-z       | Default persistent action: Play the current stream  |
+;;   | C-u C-z   | Persistent action: Add the current stream           |
+;;
+;; * Other actions
+;;
+;;   + Action (with prefix)
+;;     + Play(Add) the current stream
+;;     + (Clear `emms-playlist-buffer', ) Add streams and Play if `emms-player-playing-p' is nil
+;;     + Update streams asynchronously
+;;
 ;;
 ;; If you need an `anything' command for specific stream lists,
 ;; `emms-stream-onsen-anything' can be defined as bellow.
@@ -55,7 +74,7 @@
 ;;   (anything :sources '(emms-stream-onsen-anything-c-source)
 ;;             :buffer "*Anything EMMS Streams 音泉*"))
 ;;
-;; Note: This package is not compiled to be installed from MELPA.
+;; Note: This file is not compiled to be installed from MELPA.
 ;;
 ;; An error might occure when some candidates are marked and `anything-select-action' is used.
 ;; The following workaround would work.
