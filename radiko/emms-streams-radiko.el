@@ -33,9 +33,10 @@
 (declare-function emms-stream-redisplay "emms-streams")
 (declare-function emms-line-number-at-pos "emms-streams")
 (declare-function emms-stream-insert-at "emms-streams")
+(defvar url-http-end-of-headers)
 
 (defvar emms-stream-radiko--playerurl
-  "http://radiko.jp/player/swf/player_4.1.0.00.swf")
+  "http://radiko.jp/apps/js/flash/myplayer-release.swf")
 
 (defvar emms-stream-radiko--playerfile
   (expand-file-name "radiko_player.swf" temporary-file-directory))
@@ -49,65 +50,74 @@
 (defvar emms-stream-radiko--url-auth2
   "https://radiko.jp/v2/api/auth2_fms")
 
+(defvar emms-stream-radiko--wget-cmd (executable-find "wget"))
+
+(defun emms-stream-radiko--wget-playerfile-args ()
+  "Return a list of args for wget."
+  (list "-q" "-O" emms-stream-radiko--playerfile
+        emms-stream-radiko--playerurl))
+
+(defvar emms-stream-radiko--swfextract-cmd (executable-find "swfextract"))
+
+(defun emms-stream-radiko--swfextract-args ()
+  "Return a list of args for swfextract."
+  (list "-b" "12" emms-stream-radiko--playerfile
+        "-o" emms-stream-radiko--keyfile))
+
 (defun emms-stream-radiko--wget-playerfile ()
   "Wget player.swf to `emms-stream-radiko--playerfile'."
   (unless (file-exists-p emms-stream-radiko--playerfile)
-    (unless (zerop (call-process-shell-command
-                    (format "wget -q -O %s %s"
-                            emms-stream-radiko--playerfile
-                            emms-stream-radiko--playerurl)))
-      (error "Failed to wget the player.swf"))))
+    (unless (zerop (apply #'call-process emms-stream-radiko--wget-cmd
+                          nil nil nil (emms-stream-radiko--wget-playerfile-args)))
+      (error "Failed to wget emms-stream-radiko--playerurl"))))
 
 (defun emms-stream-radiko--write-keydata ()
   "Write keydata from emms-radiko-keyfile."
   (unless (file-exists-p emms-stream-radiko--keyfile)
-    (unless (zerop (call-process-shell-command
-                    (format "swfextract -b 14 %s -o %s"
-                            emms-stream-radiko--playerfile
-                            emms-stream-radiko--keyfile)))
-      (error "Failed to write the keydata"))))
+    (unless (zerop (apply #'call-process emms-stream-radiko--swfextract-cmd
+                          nil nil nil (emms-stream-radiko--swfextract-args)))
+      (error "Failed to write to emms-stream-radiko--keyfile"))))
 
 (defvar emms-stream-radiko--auth-fms-base-headers
   '(("pragma" . "no-cache")
-    ("X-Radiko-App" . "pc_1")
-    ("X-Radiko-App-Version" . "2.0.1")
+    ("X-Radiko-App" . "pc_ts")
+    ("X-Radiko-App-Version" . "4.0.0")
     ("X-Radiko-User" . "test-stream")
     ("X-Radiko-Device" . "pc"))
   "Base headers for auth fms.")
 
+(defun emms-stream-radiko--access-auth1-fms-1 (buf)
+  "Collect X-Radiko-* on BUF.
+Return alist like \(\(\"X-Radiko-AppType\" . \"pc\") ...)."
+  (let ((als nil))
+    (with-current-buffer buf
+      (goto-char (point-min))
+      (while (re-search-forward "^\\(X-Radiko-\\w+\\):\\s-+\\([^\n\r]+\\)" nil t)
+        (push (cons (match-string 1) (match-string 2)) als)))
+    als))
+
 (defun emms-stream-radiko--access-auth1-fms ()
-  "Return auth1_fms."
+  "Return X-Radiko-* alist."
   (let* ((url-request-method "POST")
          (url-request-data "\\r\\n")
          (url-request-extra-headers
           emms-stream-radiko--auth-fms-base-headers)
          (buf (url-retrieve-synchronously
                emms-stream-radiko--url-auth1 t)))
-    (with-current-buffer buf
-      (prog1 (buffer-substring-no-properties
-              (point-min) (point-max))
-        (kill-buffer buf)))))
-
-(defun emms-stream-radiko--get-auth1-value (key auth1)
-  "Return value of KEY from AUTH1."
-  (if (string-match (format "%s: " key) auth1)
-      (let ((pos (match-end 0)))
-        (if (string-match "\n\\|\r\n" auth1 pos)
-            (substring auth1 pos (match-beginning 0))
-          (error "Failed to get %s value" key)))
-    (error "Failed to get %s value" key)))
+    (prog1 (emms-stream-radiko--access-auth1-fms-1 buf)
+      (when (buffer-live-p buf) (kill-buffer buf)))))
 
 (defun emms-stream-radiko--get-authtoken (auth1)
   "Return X-Radiko-Authtoken value from  AUTH1."
-  (emms-stream-radiko--get-auth1-value "X-Radiko-AuthToken" auth1))
+  (assoc-default "X-Radiko-AuthToken" auth1))
 
 (defun emms-stream-radiko--get-offset (auth1)
   "Return x-radiko-keyoffset value from  AUTH1."
-  (emms-stream-radiko--get-auth1-value "X-Radiko-KeyOffset" auth1))
+  (assoc-default "X-Radiko-KeyOffset" auth1))
 
 (defun emms-stream-radiko--get-length (auth1)
   "Return x-radiko-keylength value from  AUTH1."
-  (emms-stream-radiko--get-auth1-value "X-Radiko-KeyLength" auth1))
+  (assoc-default "X-Radiko-KeyLength" auth1))
 
 (defun emms-stream-radiko--get-partialkey (keyfile auth1)
   "Return partialkey from KEYFILE, AUTH1."
@@ -117,6 +127,14 @@
                  keyfile
                  (emms-stream-radiko--get-offset auth1)
                  (emms-stream-radiko--get-length auth1))))))
+
+(defun emms-stream-radiko--access-auth2-fms-1 (buf)
+  "Return area string on BUF."
+  (with-current-buffer buf
+    (goto-char url-http-end-of-headers)
+    (if (re-search-forward "^\\w+,[^\n\r]+" nil t)
+        (decode-coding-string (match-string 0) 'utf-8)
+      (error "Failed to get emms-stream-radiko--url-auth2"))))
 
 (defun emms-stream-radiko--access-auth2-fms (auth1)
   "Return auth2_fms from AUTH1."
@@ -131,15 +149,13 @@
             ,@emms-stream-radiko--auth-fms-base-headers))
          (buf (url-retrieve-synchronously
                emms-stream-radiko--url-auth2 t)))
-    (with-current-buffer buf
-      (prog1 (buffer-substring-no-properties
-              (point-min) (point-max))
-        (kill-buffer buf)))))
+    (prog1 (emms-stream-radiko--access-auth2-fms-1 buf)
+      (when (buffer-live-p buf) (kill-buffer buf)))))
 
 (defun emms-stream-radiko--get-area-id (auth2)
   "Retrun area-id from AUTH2."
-  (if (string-match "^JP[0-9]+[,]" auth2)
-      (substring auth2 (match-beginning 0) (1- (match-end 0)))
+  (if (string-match "^JP[0-9]+" auth2)
+      (match-string 0 auth2)
     (error "Failed to get area-id")))
 
 ;; For stream-list
@@ -173,7 +189,8 @@ string -> stream-list
                finally do (kill-buffer buf)))))
 
 (defun emms-stream-radiko-fetch-current-area-stream-list (&optional updatep)
-  "Return stream-list of the current area."
+  "Return stream-list of the current area.
+If UPDATEP is no-nil, `emms-stream-radiko-stream-list-cache' will be updated."
   (if (and (not updatep) (consp emms-stream-radiko-stream-list-cache))
       emms-stream-radiko-stream-list-cache
     (setq emms-stream-radiko-stream-list-cache
@@ -197,11 +214,8 @@ string -> stream-list
                 (error "Failed to get %s" emms-stream-radiko--playerfile))
               (when (functionp cont) (funcall cont))))))
       (set-process-sentinel
-       (start-process "radiko-wget-playerfile-async"
-                      nil
-                      "wget" "-q" "-O"
-                      emms-stream-radiko--playerfile
-                      emms-stream-radiko--playerurl)
+       (apply #'start-process "radiko-wget-playerfile-async" nil
+              emms-stream-radiko--wget-cmd (emms-stream-radiko--wget-playerfile-args))
        #'wget-playerfile-async-filter))))
 
 (defun emms-stream-radiko--write-keydata-async (&optional cont)
@@ -216,16 +230,12 @@ string -> stream-list
                 (error "Failed to write %s" emms-stream-radiko--keyfile))
               (when (functionp cont) (funcall cont))))))
      (set-process-sentinel
-      (start-process "radiko-write-keydata-async"
-                     nil
-                     "swfextract" "-b" "14"
-                     emms-stream-radiko--playerfile
-                     "-o"
-                     emms-stream-radiko--keyfile)
+      (apply #'start-process "radiko-write-keydata-async" nil
+             emms-stream-radiko--swfextract-cmd (emms-stream-radiko--swfextract-args))
       #'write-keydate-async-filter))))
 
 (defun emms-stream-radiko--access-auth1-fms-async (&optional cont)
-  "Send auth1 to CONT."
+  "Send X-Radiko-* alist to CONT."
   (let ((url-request-method "POST")
         (url-request-data "\\r\\n")
         (url-request-extra-headers
@@ -236,9 +246,7 @@ string -> stream-list
      (lambda (status &rest _)
        (when (memq :error status)
          (error "Failed to get auth1_fms : %s" (cdr status)))
-       (setq auth1
-             (buffer-substring-no-properties
-              (point-min) (point-max)))
+       (setq auth1 (emms-stream-radiko--access-auth1-fms-1 (current-buffer)))
        (kill-buffer)
        (when (functionp cont) (funcall cont auth1))))))
 
@@ -259,8 +267,7 @@ string -> stream-list
      (lambda (status &rest _)
        (when (memq :error status)
          (error "Failed to get auth1_fms : %s" (cdr status)))
-       (setq auth2 (buffer-substring-no-properties
-                    (point-min) (point-max)))
+       (setq auth2 (emms-stream-radiko--access-auth2-fms-1 (current-buffer)))
        (kill-buffer)
        (funcall cont auth2)))))
 
