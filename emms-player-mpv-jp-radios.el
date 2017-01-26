@@ -1,6 +1,6 @@
 ;;; emms-player-mpv-jp-radios.el --- EMMS players and stream lists of Japan radio stations -*- lexical-binding: t -*-
 
-;; Copyright (C) 2015-2016 momomo5717
+;; Copyright (C) 2015-2017 momomo5717
 
 ;; Keywords: emms, mpv, radio
 ;; Package-Requires: ((emacs "24") (cl-lib "0.5") (emms "4.0") (emms-player-simple-mpv "0.1.7"))

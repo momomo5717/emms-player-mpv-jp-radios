@@ -1,6 +1,6 @@
 ;;; emms-streams-jp-radios.el --- emms-streams for jp radio stations -*- lexical-binding: t -*-
 
-;; Copyright (C) 2015-2016 momomo5717
+;; Copyright (C) 2015-2017 momomo5717
 
 ;; URL: https://github.com/momomo5717/
 

@@ -1,6 +1,6 @@
 ;;; emms-streams-jp-radios-anything.el --- emms-streams-jp-radios for anything -*- lexical-binding: t; no-byte-compile: t -*-
 
-;; Copyright (C) 2015-2016 momomo5717
+;; Copyright (C) 2015-2017 momomo5717
 
 ;; URL: https://github.com/momomo5717/emms-player-mpv-jp-radios
 
