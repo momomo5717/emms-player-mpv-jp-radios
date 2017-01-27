@@ -31,7 +31,7 @@
 
 (define-emms-simple-player-mpv mpv-seaside '(streamlist)
   "\\`seaside://"
-  "mpv" "--no-terminal" "--force-window=no" "--audio-display=no" "--ytdl")
+  "mpv" "--no-terminal" "--force-window=no" "--audio-display=no")
 
 (emms-player-simple-mpv-add-to-converters
  'emms-player-mpv-seaside "." t
@@ -44,6 +44,9 @@
 
 (emms-player-set 'emms-player-mpv-seaside 'get-media-title
                  'emms-player-mpv-seaside--get-media-title)
+
+(emms-player-set 'emms-player-mpv-seaside 'mpv-start-process-function
+                 'emms-player-mpv-seaside--start-process)
 
 (defun emms-player-mpv-seaside--loading-message ()
   "Loading message."
@@ -58,11 +61,21 @@
 
 (defun emms-player-mpv-seaside--track-name-to-nico-input-form (track-name)
   "Return nico url from TRACK-NAME."
-  (unless (executable-find "youtube-dl")
-    (error "Can not play %s : youtube-dl not found" track-name))
-  (let ((nico-url (emms-stream-seaside-stream-url-to-nico-url track-name)))
+  (let ((nico-url (emms-stream-seaside-stream-url-to-nicovideo-url track-name)))
     (later-do 'emms-player-mpv-seaside--loading-message)
     nico-url))
+
+(defun emms-player-mpv-seaside--start-process (cmdname params input-form _track)
+  "Function for mpv-start-process-function."
+  (let ((cookies-params
+         (when (string-match-p "nicovideo" input-form)
+           (list "--cookies" (format "--cookies-file=%s"
+                                     emms-stream-seaside--nico-cookies-file)))))
+    (apply #'start-process
+           emms-player-simple-process-name
+           nil
+           cmdname
+           `(,@cookies-params ,@params ,input-form))))
 
 (defun emms-player-mpv-seaside--get-media-title (track)
   "Return media title from TRACK."
