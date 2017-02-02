@@ -337,6 +337,8 @@ CAND will be played."
     (define-key map (kbd "M-U") 'emms-stream-jp-radios-counsel--unmark-all)
     map))
 
+(defvar emms-streams-jp-radios--counsel-history nil)
+
 (defun emms-streams-jp-radios-counsel--collection (&rest _)
   "Collection function for `emms-streams-jp-radios-counsel'."
   (let ((emms-stream-jp-radios-counsel-collect-function-alist
@@ -360,7 +362,8 @@ CAND will be played."
     (ivy-read "stream: " 'emms-streams-jp-radios-counsel--collection
               :action 'emms-stream-jp-radios-counsel-action
               :caller 'emms-streams-jp-radios-counsel
-              :keymap emms-streams-jp-radios-counsel-map)))
+              :keymap emms-streams-jp-radios-counsel-map
+              :history 'emms-streams-jp-radios--counsel-history)))
 (byte-compile 'emms-streams-jp-radios-counsel)
 
 (ivy-set-actions
