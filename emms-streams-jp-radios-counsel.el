@@ -214,7 +214,7 @@ If BEG/END is non-nil, it will be used."
   "Toggle marked cnadidate."
   (interactive)
   (let* ((get-tp-id #'emms-stream-jp-radios-counsel--get-tp-id)
-         (id (funcall get-tp-id (if (fboundp #'ivy-state-current)
+         (id (funcall get-tp-id (if (fboundp 'ivy-state-current)
                                     (ivy-state-current ivy-last)
                                   (bound-and-true-p ivy--current))))
          (cand (cl-find id ivy--all-candidates :key get-tp-id)))
