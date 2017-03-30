@@ -87,19 +87,19 @@
   "Base headers for auth fms.")
 
 (defun emms-stream-radiko--access-auth1-fms-1 (buf)
-  "Collect X-Radiko-* on BUF.
-Return alist like \(\(\"X-Radiko-AppType\" . \"pc\") ...)."
-  (let ((als nil))
+  "Collect x-radiko-* with case ignored on BUF.
+Return alist like \(\(\"x-radiko-apptype\" . \"pc\") ...)."
+  (let ((case-fold-search t)
+        (als nil))
     (with-current-buffer buf
       (goto-char (point-min))
-      (while (re-search-forward "^\\(X-Radiko-\\w+\\):\\s-+\\([^\n\r]+\\)" nil t)
-        (push (cons (match-string 1) (match-string 2)) als)))
+      (while (re-search-forward "^\\(x-radiko-\\w+\\):\\s-+\\([^\n\r]+\\)" nil t)
+        (push (cons (downcase (match-string 1)) (match-string 2)) als)))
     als))
 
 (defun emms-stream-radiko--access-auth1-fms ()
-  "Return X-Radiko-* alist."
+  "Return x-radiko-* alist."
   (let* ((url-request-method "POST")
-         (url-request-data "\\r\\n")
          (url-request-extra-headers
           emms-stream-radiko--auth-fms-base-headers)
          (buf (url-retrieve-synchronously
@@ -108,16 +108,16 @@ Return alist like \(\(\"X-Radiko-AppType\" . \"pc\") ...)."
       (when (buffer-live-p buf) (kill-buffer buf)))))
 
 (defun emms-stream-radiko--get-authtoken (auth1)
-  "Return X-Radiko-Authtoken value from  AUTH1."
-  (assoc-default "X-Radiko-AuthToken" auth1))
+  "Return x-radiko-authtoken value from  AUTH1."
+  (assoc-default "x-radiko-authtoken" auth1))
 
 (defun emms-stream-radiko--get-offset (auth1)
   "Return x-radiko-keyoffset value from  AUTH1."
-  (assoc-default "X-Radiko-KeyOffset" auth1))
+  (assoc-default "x-radiko-keyoffset" auth1))
 
 (defun emms-stream-radiko--get-length (auth1)
   "Return x-radiko-keylength value from  AUTH1."
-  (assoc-default "X-Radiko-KeyLength" auth1))
+  (assoc-default "x-radiko-keylength" auth1))
 
 (defun emms-stream-radiko--get-partialkey (keyfile auth1)
   "Return partialkey from KEYFILE, AUTH1."
@@ -139,7 +139,6 @@ Return alist like \(\(\"X-Radiko-AppType\" . \"pc\") ...)."
 (defun emms-stream-radiko--access-auth2-fms (auth1)
   "Return auth2_fms from AUTH1."
   (let* ((url-request-method "POST")
-         (url-request-data "\\r\\n")
          (url-request-extra-headers
           `(("X-Radiko-Authtoken" .
              ,(emms-stream-radiko--get-authtoken auth1))
@@ -237,7 +236,6 @@ If UPDATEP is no-nil, `emms-stream-radiko-stream-list-cache' will be updated."
 (defun emms-stream-radiko--access-auth1-fms-async (&optional cont)
   "Send X-Radiko-* alist to CONT."
   (let ((url-request-method "POST")
-        (url-request-data "\\r\\n")
         (url-request-extra-headers
          emms-stream-radiko--auth-fms-base-headers)
         (auth1 ""))
@@ -253,7 +251,6 @@ If UPDATEP is no-nil, `emms-stream-radiko-stream-list-cache' will be updated."
 (defun emms-stream-radiko--access-auth2-fms-async (auth1 cont)
   "Send auth2 of AUTH1 to CONT."
   (let ((url-request-method "POST")
-        (url-request-data "\\r\\n")
         (url-request-extra-headers
          `(("X-Radiko-Authtoken" .
             ,(emms-stream-radiko--get-authtoken auth1))
@@ -266,7 +263,7 @@ If UPDATEP is no-nil, `emms-stream-radiko-stream-list-cache' will be updated."
      emms-stream-radiko--url-auth2
      (lambda (status &rest _)
        (when (memq :error status)
-         (error "Failed to get auth1_fms : %s" (cdr status)))
+         (error "Failed to get auth2_fms : %s" (cdr status)))
        (setq auth2 (emms-stream-radiko--access-auth2-fms-1 (current-buffer)))
        (kill-buffer)
        (funcall cont auth2)))))
