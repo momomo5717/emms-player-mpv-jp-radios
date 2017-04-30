@@ -48,7 +48,7 @@
   "Return m3u8 link from TRACK-NAME."
   (let ((m3u8 (emms-stream-hibiki-stream-url-to-m3u8 track-name)))
     (later-do 'emms-player-mpv-hibiki--loading-message)
-    m3u8))
+    (concat "ffmpeg://" m3u8)))
 
 (defun emms-player-mpv-hibiki--get-media-title (track)
   "Return media title from TRACK."
