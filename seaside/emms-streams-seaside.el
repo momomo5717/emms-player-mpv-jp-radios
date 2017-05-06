@@ -61,6 +61,8 @@
       "http://ch.nicovideo.jp/ch312/video")
      ("BELOVED MEMORIES : 田丸篤志、内田雄馬 : 毎週月曜日20：00更新"
       "http://seaside-c.jp/program/belovedmemories/")
+     ("フレッシュたかまつ : 高田憂希、松田颯水 : 毎週月曜日21：30更新"
+      "http://seaside-station.net/program/fresh/")
      ("あどりぶ : 巽悠衣子、大橋彩香 : 毎週月曜日20：30更新"
       "http://seaside-c.jp/program/adlib/")
      ("EMERGENCY the RADIO : NEW YOUNG（小野坂昌也）CRAZY YU（小林ゆう）DANCING YUKARI（後藤友香里） : 毎週月曜日21：30更新"
@@ -181,7 +183,8 @@ Object returned by GETTER is collected."
           "http://seaside-c.jp/program/emergency/"
           "http://ch.nicovideo.jp/ch312/video"
           "http://ch.nicovideo.jp/grimoire-gakuen"
-          "http://ch.nicovideo.jp/tatsumiyuiko")))
+          "http://ch.nicovideo.jp/tatsumiyuiko"
+          "http://seaside-station.net/program/fresh/")))
 
 (defun emms-stream-seaside-nico-stream-url-p (stream-url)
   "Return t, if STREAM-URL needs nico url."
