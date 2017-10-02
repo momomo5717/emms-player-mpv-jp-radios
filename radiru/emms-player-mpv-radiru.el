@@ -45,11 +45,9 @@
   (message "Loading らじる★らじる ... It takes a few seconds."))
 
 (defun emms-player-mpv-radiru--track-name-to-input-form (track-name)
-  "Retrun \"rtmpe://radiru-url live=1 swfUrl=swf-url swfVfy=1\" from TRACK-NAME."
+  "Retrun m3u8 from TRACK-NAME."
   (later-do #'emms-player-mpv-radiru--loading-message)
-  (format "%s live=1 swfUrl=%s swfVfy=1"
-          (emms-stream-radiru-stream-url-to-rtmpe track-name)
-          emms-stream-radiru-url-swf))
+  (emms-stream-radiru-stream-url-to-m3u8 track-name))
 
 (defun emms-player-mpv-radiru--get-media-title (track)
   (if (eq (emms-track-type track) 'streamlist)
