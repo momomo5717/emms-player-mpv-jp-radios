@@ -31,7 +31,7 @@
 
 (define-emms-simple-player-mpv mpv-simul '(streamlist)
   "\\`s\\(imul\\|aimaru\\)://"
-  "mpv" "--no-terminal" "--force-window=no" "--audio-display=no")
+  "mpv" "--no-terminal" "--force-window=no" "--audio-display=no" "--no-ytdl")
 
 (emms-player-simple-mpv-add-to-converters
  'emms-player-mpv-simul "." t
@@ -48,7 +48,7 @@
   "Return url from TRACK-NAME."
   (let ((url (if (string-match-p "[.]asx$" track-name)
                  (emms-stream-simul-stream-url-to-asx-ref track-name)
-               (emms-stream-simul-stream-url-to-url track-name))))
+               (emms-stream-simul-stream-url-to-specific-form track-name))))
     (later-do 'emms-player-mpv-simul--loading-message)
     url))
 
