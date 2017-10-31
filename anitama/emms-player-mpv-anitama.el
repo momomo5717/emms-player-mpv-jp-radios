@@ -31,12 +31,11 @@
 
 (define-emms-simple-player-mpv mpv-anitama '(streamlist)
   "\\`anitama://"
-  "mpv" "--no-terminal" "--force-window=no" "--audio-display=no"
-  "--cache=150000" "--force-seekable=yes")
+  "mpv" "--no-terminal" "--force-window=no" "--audio-display=no" "--no-ytdl")
 
 (emms-player-simple-mpv-add-to-converters
  'emms-player-mpv-anitama "\\`anitama://" t
- 'emms-player-mpv-anitama--track-name-to-wget-form)
+ 'emms-player-mpv-anitama--track-name-to-nicovideo-form)
 
 (emms-player-set 'emms-player-mpv-anitama 'get-media-title
                  'emms-player-mpv-anitama--get-media-title)
@@ -48,24 +47,24 @@
   "Loading message."
   (message "Loading アニたまどっとコム ... "))
 
-(defun emms-player-mpv-anitama--track-name-to-wget-form (track-name)
-  "Return wget-form from TRACK-NAME."
-  (let ((wget-form (emms-stream-anitama-stream-url-to-wget-form track-name)))
+(defun emms-player-mpv-anitama--track-name-to-nicovideo-form (track-name)
+  "Return nicovideo-url from TRACK-NAME."
+  (let ((nicovideo-url (emms-stream-anitama-stream-url-to-nicovideo-url track-name)))
     (later-do 'emms-player-mpv-anitama--loading-message)
-    wget-form))
+    nicovideo-url))
 
-(defun emms-player-mpv-anitama--shell-command-format (params wget-form)
-  "Shell command  for PARAMS, NODEID."
-  (emms-stream-anitama--write-unless-cookies)
-  (concat wget-form " | mpv "
-          (mapconcat #'shell-quote-argument `(,@params "-") " ")))
+(defvar emms-stream-seaside--nico-cookies-file) ;temporary update
 
-(defun emms-player-mpv-anitama--start-process (_cmdname params wget-form _track)
+(defun emms-player-mpv-anitama--start-process (cmdname params input-form _track)
   "Function for mpv-start-process-function."
-  (start-process-shell-command
-   emms-player-simple-process-name
-   nil
-   (emms-player-mpv-anitama--shell-command-format params wget-form)))
+  (let ((cookies-params
+          (list "--cookies" (format "--cookies-file=%s"
+                                    emms-stream-seaside--nico-cookies-file))))
+    (apply #'start-process
+           emms-player-simple-process-name
+           nil
+           cmdname
+           `(,@cookies-params ,@params ,input-form))))
 
 (defun emms-player-mpv-anitama--get-media-title (track)
   "Return media title from TRACK."

@@ -36,150 +36,120 @@
 (declare-function emms-line-number-at-pos "emms-streams")
 (declare-function emms-stream-insert-at "emms-streams")
 
-(defvar emms-stream-anitama--cookie-file
-  (expand-file-name "weeeef_cookies" temporary-file-directory))
+(cl-defun emms-stream-anitama--xml-collect-node
+    (name xml-ls &key (test 'identity) (getter 'identity))
+  "Collect nodes of NAME from XML-LS.
+TEST and GETTER takes a node of NAME as an argument.
+TEST is a predicate function.
+Object returned by GETTER is collected."
+  (cl-labels
+      ((collect-name-node (xml-ls &optional ls)
+        (cond ((not (consp xml-ls)) ls)
+              ((and (eq name (car xml-ls)) (funcall test xml-ls))
+               (cons (funcall getter xml-ls) ls))
+              (t (dolist (e xml-ls ls)
+                   (when (and (car-safe e) (symbolp (car e)))
+                     (setq ls (collect-name-node e ls))))))))
+    (nreverse (collect-name-node xml-ls))))
 
-(defvar emms-stream-anitama--url-top
-  "http://www.weeeef.com/weeeefww1/Transition?command=top&group=G0000049")
-
-(defun emms-stream-anitama--access-weeeef ()
-  "Access www.weeeef.com to get cookies."
-  (let ((buf (url-retrieve-synchronously emms-stream-anitama--url-top)))
-    (when (buffer-live-p buf)
-      (kill-buffer buf))))
-
-(defun emms-stream-anitama--write-cookies ()
-  "Write cookies to `emms-stream-anitama--cookie-file'."
-  (let* ((weeeef-cookie (cl-find "www.weeeef.com" url-cookie-storage
-                                 :key #'car :test #'equal))
-         (domain (car weeeef-cookie))
-         (file emms-stream-anitama--cookie-file))
-    (unless weeeef-cookie (error "Not found cookies of www.weeeef.com"))
+(defun emms-stream-anitama--url-to-html (url &optional xmlp buf)
+  "Return html from URL.
+If XMLP is non-nil, `libxml-parse-xml-region' will be used.
+If BUF is non-nil, it will be used instead of URL."
+  (let ((buf (or buf (url-retrieve-synchronously url))))
     (with-temp-buffer
-      (dolist (cookie (cdr weeeef-cookie))
-        (insert
-         (mapconcat
-          #'identity
-          (list domain "FALSE" (url-cookie-localpart cookie) "FALSE" "0"
-                (url-cookie-name  cookie) (url-cookie-value  cookie))
-          (string 9)) ;; mapconcat with TAB
-         "\n"))
-      (write-region (point-min) (point-max) file nil 'nomessage))))
-
-(defun emms-stream-anitama--have-cookies-p ()
-  "Return non-nil, if `url-cookie-storage' has cookies."
-  (> (length (cdr (cl-find "www.weeeef.com" url-cookie-storage
-                           :key #'car :test #'equal)))
-     1))
-
-(defun emms-stream-anitama--write-unless-cookies (&optional forcep)
-  "Access and write if `url-cookie-storage' doesn't have cookies.
-Access and write if `emms-stream-anitama--cookie-file' doesn't exist
-or the time of last acces is more than 1800 sec.
-If FORCEP is non-nil, force to access and write."
-  (unless (and (emms-stream-anitama--have-cookies-p)
-               (file-exists-p emms-stream-anitama--cookie-file)
-               (< (- (float-time (current-time))
-                     (float-time (nth 5 (file-attributes
-                                         emms-stream-anitama--cookie-file))))
-                  1800)
-               (not forcep))
-    (emms-stream-anitama--access-weeeef)
-    (unless (emms-stream-anitama--have-cookies-p)
-      (error "Failed to get cookies of www.weeeef.com"))
-    (emms-stream-anitama--write-cookies)))
+      (insert-buffer-substring-no-properties buf)
+      (decode-coding-region (point-min) (point-max) 'utf-8)
+      (goto-char (point-min))
+      (while (and (not (eobp)) (not (eolp))) (forward-line 1))
+      (unless (eobp) (forward-line 1))
+      (unwind-protect (funcall (if xmlp #'libxml-parse-xml-region
+                                 #'libxml-parse-html-region) (point) (point-max))
+        (when (buffer-live-p buf) (kill-buffer buf))))))
 
 ;; For stream-list
 
 (defvar emms-stream-anitama-stream-list-cache nil)
 
-(defvar emms-stream-anitama--url-BookServlet
-  "http://www.weeeef.com/weeeefww1/BookServlet")
+(defvar emms-stream-anitama--url-video
+  "http://ch.nicovideo.jp/anitama-ch/video?sort=f&order=d")
 
-(defun emms-stream-anitama--Book-to-KikanFrom-date (Book)
-  "Return date from BOOK."
-  (let* ((node Book)
-         (date (dolist (name '(NodeData Node KikanFrom)
-                             (car (xml-node-children node)))
-                 (setq node (car (xml-get-children node name))))))
-    (if (and (stringp date) (eq (length date) 8))
-        (concat (cl-loop for c across date for i from 0
-                         collect c
-                         when (or (eq i 3) (eq i 5)) collect ?/))
-      date)))
+(defun emms-stream-anitama--item-to-url-title (item)
+  "Return list of url and title from ITEM."
+  (car (emms-stream-anitama--xml-collect-node
+        'h6 item
+        :test (lambda (node) (equal (xml-get-attribute node 'class) "title"))
+        :getter (lambda (node)
+                  (let ((a (car (xml-get-children node 'a))))
+                    (list (xml-get-attribute a 'href)
+                          (xml-get-attribute a 'title)))))))
 
-(defun emms-stream-anitama--bookservlet-xml-to-stream-list (bookservlet-xml)
-  "Retrun stream list from BOOKSERVLET-XML."
-  (let ((Books (xml-get-children bookservlet-xml 'Book)))
-    (cl-loop for Book in Books
-             for id    = (xml-get-attribute Book 'id)
-             for label = (xml-get-attribute Book 'label)
-             for date  = (emms-stream-anitama--Book-to-KikanFrom-date Book)
-             collect (list (format "%s : %s" label date)
-                           (format "anitama://%s" id) 1 'streamlist))))
+(defun emms-stream-anitama--description-to-personality (node)
+  "Substring a personality from NODE's description."
+  (let ((str (car (xml-node-children node))))
+    (if (and (stringp str) (string-match "：\\(.+\\)アニたま" str))
+        (replace-regexp-in-string "　$" "" (match-string 1 str))
+      "")))
+
+(defun emms-stream-anitama--item-to-personality (item)
+  "Return personality from ITEM."
+  (car (emms-stream-anitama--xml-collect-node
+        'p item
+        :test (lambda (node) (equal (xml-get-attribute node 'class) "description"))
+        :getter #'emms-stream-anitama--description-to-personality)))
+
+(defun emms-stream-anitama--item-to-date (item)
+  "Return DATE from ITEM."
+  (car (emms-stream-anitama--xml-collect-node
+        'var item
+        :test (lambda (node) (xml-get-attribute-or-nil node 'title))
+        :getter (lambda (node) (xml-get-attribute node 'title)))))
+
+(defun emms-stream-anitama--item-to-streamlist (item)
+  "Return streamlist from ITEM."
+  (let* ((url-title (emms-stream-anitama--item-to-url-title item))
+         (url (cl-first url-title))
+         (title (cl-second url-title))
+         (personality (emms-stream-anitama--item-to-personality item))
+         (date (car (split-string (emms-stream-anitama--item-to-date item)))))
+    (list (concat title " : " personality " : " (car (split-string date)))
+          (concat "anitama://" url) 1 'streamlist)))
+
+(defun emms-stream-anitama--html-to-stream-list (html)
+  "Return stream list from HTML."
+  (cl-loop with one-week = 604800
+           with ctime = (current-time)
+           for item
+           in (emms-stream-anitama--xml-collect-node
+               'li html
+               :test (lambda (node) (equal (xml-get-attribute node 'class) "item")))
+           for time = (date-to-time (replace-regexp-in-string
+                                     "/" "-"
+                                     (emms-stream-anitama--item-to-date item)))
+           when (< (float-time (time-subtract ctime time)) one-week)
+           collect (emms-stream-anitama--item-to-streamlist item)))
 
 (defun emms-stream-anitama-fetch-stream-list (&optional updatep)
   "Retrun anitama stream list.
 If UPDATEP is no-nil, cache is updated."
   (if (and (not updatep) (consp emms-stream-anitama-stream-list-cache))
       emms-stream-anitama-stream-list-cache
-    (emms-stream-anitama--write-unless-cookies t)
     (setq emms-stream-anitama-stream-list-cache
-     (with-temp-buffer
-       (unless (zerop (call-process
-                       "wget"  nil t nil "-q" "-O" "-"
-                       (format "--load-cookies=%s"
-                               emms-stream-anitama--cookie-file)
-                       emms-stream-anitama--url-BookServlet))
-         (error "Failed to fetch %s" emms-stream-anitama--url-BookServlet))
-       (emms-stream-anitama--bookservlet-xml-to-stream-list
-        (libxml-parse-xml-region (point-min) (point-max)))))))
-
-(defun emms-stream-anitama--write-weeeef-async (&optional cont)
-  "Access and write www.weeeef.com cookies asynchronously.
-If CONT is no-nil, it is run with no arguments."
-  (url-queue-retrieve
-   emms-stream-anitama--url-top
-   (lambda (status &rest _)
-     (if (plist-get status :error)
-         (message "Failed to write www.weeeef.com cookies : %s"
-                  (plist-get status :error))
-       (kill-buffer)
-       (emms-stream-anitama--write-cookies)
-       (unless (emms-stream-anitama--have-cookies-p)
-         (error "Failed to get cookies of www.weeeef.com"))
-       (when (functionp cont) (funcall cont))))))
+          (emms-stream-anitama--html-to-stream-list
+           (emms-stream-anitama--url-to-html emms-stream-anitama--url-video)))))
 
 ;;;###autoload
 (defun emms-stream-anitama-update-cache-async ()
   "Update cache asynchronously."
-  (cl-labels
-      ((stream-list-async-filter (proc _)
-        (let ((buf (process-buffer proc))
-              (ps (process-status proc)))
-          (when (eq ps 'signal)
-            (error "Failed to fetch anitama stream list"))
-          (when (eq ps 'exit)
-            (with-current-buffer buf
-              (goto-char (point-max))
-              (search-backward ">" (point-min) t)
-              (goto-char (match-end 0))
-              (setq emms-stream-anitama-stream-list-cache
-                    (emms-stream-anitama--bookservlet-xml-to-stream-list
-                     (libxml-parse-xml-region (point-min) (point))))
-              (unless emms-stream-anitama-stream-list-cache
-                (error "Failed to read anitama xml"))
-              (kill-buffer)
-              (message "Updated anitama stream list cache"))))))
-    (emms-stream-anitama--write-weeeef-async
-     (lambda () (set-process-sentinel
-             (start-process "anitama-fetch-stream-list-async"
-                            (make-temp-name "*anitama-fetch-stream-list-async*")
-                            "wget" "-q" "-O" "-"
-                            (format "--load-cookies=%s"
-                                    emms-stream-anitama--cookie-file)
-                            emms-stream-anitama--url-BookServlet)
-             #'stream-list-async-filter)))))
+  (url-queue-retrieve
+     emms-stream-anitama--url-video
+     (lambda (status &rest _)
+       (when (memq :error status)
+         (error "Failed to get anitama stream list : %s" (cdr status)))
+       (setq emms-stream-anitama-stream-list-cache
+             (emms-stream-anitama--html-to-stream-list
+              (emms-stream-anitama--url-to-html nil nil (current-buffer))))
+       (message "Updated anitama stream list cache"))))
 
 ;;;###autoload
 (defun emms-stream-anitama-get-stream-list ()
@@ -214,54 +184,25 @@ If save,run `emms-stream-save-bookmarks-file' after."
 
 ;; For media player
 
-(defvar emms-stream-anitama-url-BookXmlGet
-  "http://www.weeeef.com/weeeefww1/BookXmlGet")
+;;;###autoload
+(defun emms-stream-anitama--stream-url-to-url (stream-url)
+  "Replace anitama:// of STREAM-URL with empty string."
+  (replace-regexp-in-string "\\`anitama://" "" stream-url))
 
-(defun emms-stream-anitama-get-BookXmlGet-id-url (id)
-  "Add Book ID to BookXmlGet."
-  (format "%s?BookId=%s"
-          emms-stream-anitama-url-BookXmlGet id))
-
-(defvar emms-stream-anitama-url-OriginalGet
-  "http://www.weeeef.com/weeeefww1/OriginalGet")
-
-(defun emms-stream-anitama--fetch-BookXmlGet-nodeId (id)
-  "Return nodeId from ID."
-  (emms-stream-anitama--write-unless-cookies)
-  (let*
-      ((BookXmlGet-xml
-        (with-temp-buffer
-          (unless
-              (zerop
-               (call-process
-                "wget"  nil t nil "-q" "-O" "-"
-                (format "--load-cookies=%s" emms-stream-anitama--cookie-file)
-                (emms-stream-anitama-get-BookXmlGet-id-url id)))
-            (error "Failed to fetch %s" emms-stream-anitama-url-BookXmlGet))
-          (libxml-parse-xml-region (point-min) (point-max))))
-       (Node (cl-loop
-              with Node = (car (xml-get-children BookXmlGet-xml 'Node))
-              with nextNode = (car (xml-get-children Node 'Node))
-              while nextNode do
-              (setq Node nextNode)
-              (setq nextNode (car (xml-get-children Node 'Node)))
-              finally return Node))
-       (nodeId (car (xml-node-children (car (xml-get-children Node 'Id))))))
-    nodeId))
+(declare-function emms-stream-seaside--fetch-nicovideo-url "emms-streams-seaside")
+(declare-function emms-stream-seaside--write-nico-cookies "emms-streams-seaside")
 
 ;;;###autoload
-(defun emms-stream-anitama-stream-url-to-wget-form (stream-url)
-  "Return wget form from STREAM-URL."
-  (let* ((id (replace-regexp-in-string "\\`anitama://" "" stream-url))
-         (nodeId (emms-stream-anitama--fetch-BookXmlGet-nodeId id)))
-    (unless nodeId (error "Failed to fetch nodeId"))
-    (mapconcat
-     #'shell-quote-argument
-     (list "wget" "-O" "-" "-q"
-           (format "--load-cookie=%s" emms-stream-anitama--cookie-file)
-           (format "--post-data=nodeId=%s&type=S" nodeId)
-           emms-stream-anitama-url-OriginalGet)
-     " ")))
+(defun emms-stream-anitama-stream-url-to-nicovideo-url (stream-url)
+  "Return curl format for STREAM-URL.
+Update `emms-stream-seaside--nico-cookies-file'."
+  ;; temporary update
+  (unless (fboundp 'emms-stream-seaside--fetch-nicovideo-url)
+    (require 'emms-streams-seaside))
+  (let ((video-url (emms-stream-seaside--fetch-nicovideo-url
+                    (emms-stream-anitama--stream-url-to-url stream-url))))
+    (emms-stream-seaside--write-nico-cookies)
+    video-url))
 
 (provide 'emms-streams-anitama)
 ;;; emms-streams-anitama.el ends here
