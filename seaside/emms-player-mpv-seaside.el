@@ -31,7 +31,7 @@
 
 (define-emms-simple-player-mpv mpv-seaside '(streamlist)
   "\\`seaside://"
-  "mpv" "--no-terminal" "--force-window=no" "--audio-display=no")
+  "mpv" "--no-terminal" "--force-window=no" "--audio-display=no" "--no-ytdl")
 
 (emms-player-simple-mpv-add-to-converters
  'emms-player-mpv-seaside "." t
