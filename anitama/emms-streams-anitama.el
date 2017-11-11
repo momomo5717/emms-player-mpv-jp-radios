@@ -28,6 +28,7 @@
 (require 'url)
 (require 'url-queue)
 (require 'url-cookie)
+(require 'emms-streams-nico-util)
 
 ;; Suppress warning messages.
 (defvar emms-stream-buffer-name)
@@ -189,20 +190,13 @@ If save,run `emms-stream-save-bookmarks-file' after."
   "Replace anitama:// of STREAM-URL with empty string."
   (replace-regexp-in-string "\\`anitama://" "" stream-url))
 
-(declare-function emms-stream-seaside--fetch-nicovideo-url "emms-streams-seaside")
-(declare-function emms-stream-seaside--write-nico-cookies "emms-streams-seaside")
-
 ;;;###autoload
 (defun emms-stream-anitama-stream-url-to-nicovideo-url (stream-url)
-  "Return curl format for STREAM-URL.
-Update `emms-stream-seaside--nico-cookies-file'."
-  ;; temporary update
-  (unless (fboundp 'emms-stream-seaside--fetch-nicovideo-url)
-    (require 'emms-streams-seaside))
-  (let ((video-url (emms-stream-seaside--fetch-nicovideo-url
-                    (emms-stream-anitama--stream-url-to-url stream-url))))
-    (emms-stream-seaside--write-nico-cookies)
-    video-url))
+  "Return nicovideo url for STREAM-URL."
+  (if emms-stream-nico-use-old-api
+      (emms-stream-nico-old-nico-url-to-nicovideo-url
+       (emms-stream-anitama--stream-url-to-url stream-url))
+    (emms-stream-nico-url-to-nicovideo stream-url)))
 
 (provide 'emms-streams-anitama)
 ;;; emms-streams-anitama.el ends here

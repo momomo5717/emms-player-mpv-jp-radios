@@ -26,6 +26,7 @@
 (require 'xml)
 (require 'url)
 (require 'url-cookie)
+(require 'emms-streams-nico-util)
 
 ;; Suppress warning messages.
 (defvar emms-stream-buffer-name)
@@ -226,94 +227,53 @@ Object returned by GETTER is collected."
      (emms-stream-seaside--url-to-html
       (emms-stream-seaside--stream-url-to-url stream-url)))))
 
-(defvar emms-stream-seaside--nico-domain ".nicovideo.jp")
+(define-obsolete-variable-alias 'emms-stream-seaside--nico-domain
+  'emms-stream-nico-old--domain
+  "20171112")
 
-(defvar emms-stream-seaside--nico-cookies-file
-  (expand-file-name (make-temp-name "nicovideo_cookies") temporary-file-directory))
+(define-obsolete-variable-alias 'emms-stream-seaside--nico-cookies-file
+  'emms-stream-nico-old--cookies-file
+  "20171112")
 
-(defun emms-stream-seaside--write-nico-cookies ()
-  "Write cookies to `emms-stream-seaside--nico-cookies-file'."
-  (let* ((domain emms-stream-seaside--nico-domain)
-         (cookies (assoc-default domain url-cookie-storage))
-         (file emms-stream-seaside--nico-cookies-file))
-    (with-temp-buffer
-      (dolist (cookie cookies)
-        (insert (mapconcat
-                 #'identity
-                 (list domain "TRUE" (url-cookie-localpart cookie)
-                       (if (url-cookie-secure cookie) "TRUE" "FALSE")
-                       (number-to-string
-                        (floor (float-time (date-to-time (url-cookie-expires cookie)))))
-                       (url-cookie-name cookie) (url-cookie-value cookie) "\n")
-                 "\t")))
-      (write-region (point-min) (point-max) file nil 'nomessage))))
+(define-obsolete-function-alias 'emms-stream-seaside--write-nico-cookies
+  'emms-stream-nico-old--write-nico-cookies
+  "20171112")
 
-(defvar emms-stream-seaside--nico-url-user-agent
-  (format "User-Agent: %s\n"
-          "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/55.0.2883.95 Safari/537.36")
-  "User-Agent for nicovideo.
-This will be ussed for `emms-stream-seaside--nico-url-http-user-agent-string'.")
+(define-obsolete-variable-alias 'emms-stream-seaside--nico-url-user-agent
+  'emms-stream-nico-url-user-agent
+  "20171112")
 
-(defun emms-stream-seaside--nico-url-http-user-agent-string ()
-  "`url-http-user-agent-string' for nicovideo."
-  emms-stream-seaside--nico-url-user-agent)
+(define-obsolete-function-alias 'emms-stream-seaside--nico-url-http-user-agent-string
+  'emms-stream-nico-url-http-user-agent-string
+  "20171112")
 
-(defun emms-stream-seaside--nico-url-retrieve-synchronously
-    (url &optional silent inhibit-cookies)
-  "`url-retrieve-synchronously' with `emms-stream-seaside--nico-url-http-user-agent-string'."
-  ;; Memo: Emacs 24.x doesn't have `url-user-agent'.
-  (cl-letf (((symbol-function 'url-http-user-agent-string)
-             #'emms-stream-seaside--nico-url-http-user-agent-string))
-    (apply #'url-retrieve-synchronously url silent inhibit-cookies)))
+(make-obsolete 'emms-stream-seaside--nico-url-retrieve-synchronously
+               'emms-stream-nico-with-user-agent
+               "20171112")
 
-(defun emms-stream-seaside--search-thumbKey (buf)
-  "Return thumbPlayKey on BUF."
-  (with-current-buffer buf
-    (goto-char (point-min))
-    (if (re-search-forward "'thumbPlayKey':\\s-*'\\([^']*\\)'" nil t)
-        (match-string 1)
-      (error "Failed to search thumbPlayKey"))))
+(define-obsolete-function-alias 'emms-stream-seaside--search-thumbKey
+  'emms-stream-nico-old--search-thumbKey
+  "20171112")
 
-(defun emms-stream-seaside--fetch-nico-thumbPlayKey (nico-url)
-  "Return thumbPlayKey from NICO-URL."
-  (let* ((thumb_watch-url (url-expand-file-name
-                           (url-file-nondirectory nico-url)
-                           "http://ext.nicovideo.jp/thumb_watch/"))
-         (url-request-extra-headers `(("Referer" .  ,nico-url)))
-         (buf (emms-stream-seaside--nico-url-retrieve-synchronously thumb_watch-url)))
-    (prog1 (emms-stream-seaside--search-thumbKey buf)
-      (when (buffer-live-p buf) (kill-buffer buf)))))
+(define-obsolete-function-alias 'emms-stream-seaside--fetch-nico-thumbPlayKey
+  'emms-stream-nico-old--fetch-nico-thumbPlayKey
+  "20171112")
 
-(defun emms-stream-seaside--search-nicovideo-url (buf)
-  "Return nicovideo url on BUF."
-  (with-current-buffer buf
-    (goto-char (point-min))
-    (if (re-search-forward "thread_id" nil t)
-        (car (assoc-default "url"
-                            (url-parse-query-string
-                             (buffer-substring (line-beginning-position)
-                                               (line-end-position)))))
-      (error "Failed to search nicovideo url"))))
+(define-obsolete-function-alias 'emms-stream-seaside--search-nicovideo-url
+  'emms-stream-nico-old--search-nicovideo-url
+  "20171112")
 
-(defun emms-stream-seaside--fetch-nicovideo-url (nico-url)
-  "Return nicovideo url from NICO-URL."
-  (let* ((thumb_watch-url
-          (format "http://ext.nicovideo.jp/thumb_watch?%s"
-                  (url-build-query-string
-                   `(("k" ,(emms-stream-seaside--fetch-nico-thumbPlayKey nico-url))
-                     ("v" ,(url-file-nondirectory nico-url))))))
-         (buf (emms-stream-seaside--nico-url-retrieve-synchronously thumb_watch-url)))
-    (prog1 (emms-stream-seaside--search-nicovideo-url buf)
-      (when (buffer-live-p buf) (kill-buffer buf)))))
+(define-obsolete-function-alias 'emms-stream-seaside--fetch-nicovideo-url
+  'emms-stream-nico-old--fetch-nicovideo-url
+  "20171112")
 
 ;;;###autoload
 (defun emms-stream-seaside-stream-url-to-nicovideo-url (stream-url)
-  "Return curl format for STREAM-URL.
-Update `emms-stream-seaside--nico-cookies-file'."
-  (let ((video-url (emms-stream-seaside--fetch-nicovideo-url
-                    (emms-stream-seaside-stream-url-to-nico-url stream-url))))
-    (emms-stream-seaside--write-nico-cookies)
-    video-url))
+  "Return nicovideo url for STREAM-URL."
+  (funcall (if emms-stream-nico-use-old-api
+               #'emms-stream-nico-old-nico-url-to-nicovideo-url
+             #'emms-stream-nico-url-to-nicovideo)
+           (emms-stream-seaside-stream-url-to-nico-url stream-url)))
 
 (provide 'emms-streams-seaside)
 ;;; emms-streams-seaside.el ends here

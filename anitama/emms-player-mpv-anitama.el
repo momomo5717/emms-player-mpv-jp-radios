@@ -48,18 +48,22 @@
   (message "Loading アニたまどっとコム ... "))
 
 (defun emms-player-mpv-anitama--track-name-to-nicovideo-form (track-name)
-  "Return nicovideo-url from TRACK-NAME."
+  "Return nicovideo url from TRACK-NAME."
   (let ((nicovideo-url (emms-stream-anitama-stream-url-to-nicovideo-url track-name)))
+    (unless emms-stream-nico-use-old-api
+      (emms-stream-nico-session-hb-start-timer))
     (later-do 'emms-player-mpv-anitama--loading-message)
     nicovideo-url))
 
-(defvar emms-stream-seaside--nico-cookies-file) ;temporary update
+(add-hook 'emms-player-finished-hook 'emms-stream-nico-session-hb-cancel-timer)
+(add-hook 'emms-player-stopped-hook 'emms-stream-nico-session-hb-cancel-timer)
 
 (defun emms-player-mpv-anitama--start-process (cmdname params input-form _track)
   "Function for mpv-start-process-function."
   (let ((cookies-params
-          (list "--cookies" (format "--cookies-file=%s"
-                                    emms-stream-seaside--nico-cookies-file))))
+         (when emms-stream-nico-use-old-api
+           (list "--cookies" (format "--cookies-file=%s"
+                                     emms-stream-nico-old--cookies-file)))))
     (apply #'start-process
            emms-player-simple-process-name
            nil

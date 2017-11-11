@@ -60,17 +60,23 @@
     wma))
 
 (defun emms-player-mpv-seaside--track-name-to-nico-input-form (track-name)
-  "Return nico url from TRACK-NAME."
-  (let ((nico-url (emms-stream-seaside-stream-url-to-nicovideo-url track-name)))
+  "Return nicovideo url from TRACK-NAME."
+  (let ((video-url (emms-stream-seaside-stream-url-to-nicovideo-url track-name)))
+    (unless emms-stream-nico-use-old-api
+      (emms-stream-nico-session-hb-start-timer))
     (later-do 'emms-player-mpv-seaside--loading-message)
-    nico-url))
+    video-url))
+
+(add-hook 'emms-player-finished-hook 'emms-stream-nico-session-hb-cancel-timer)
+(add-hook 'emms-player-stopped-hook 'emms-stream-nico-session-hb-cancel-timer)
 
 (defun emms-player-mpv-seaside--start-process (cmdname params input-form _track)
   "Function for mpv-start-process-function."
   (let ((cookies-params
-         (when (string-match-p "nicovideo" input-form)
+         (when (and emms-stream-nico-use-old-api
+                    (string-match-p "nicovideo" input-form))
            (list "--cookies" (format "--cookies-file=%s"
-                                     emms-stream-seaside--nico-cookies-file)))))
+                                     emms-stream-nico-old--cookies-file)))))
     (apply #'start-process
            emms-player-simple-process-name
            nil
