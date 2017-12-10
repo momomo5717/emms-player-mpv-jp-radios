@@ -34,12 +34,7 @@
   "mpv" "--no-terminal" "--force-window=no" "--audio-display=no" "--no-ytdl")
 
 (emms-player-simple-mpv-add-to-converters
- 'emms-player-mpv-seaside "." t
- 'emms-player-mpv-seaside--track-name-to-wma-input-form)
-
-(emms-player-simple-mpv-add-to-converters
- 'emms-player-mpv-seaside
- emms-stream-seaside-nico-stream-regex t
+ 'emms-player-mpv-seaside "\\`seaside://" t
  'emms-player-mpv-seaside--track-name-to-nico-input-form)
 
 (emms-player-set 'emms-player-mpv-seaside 'get-media-title
@@ -51,13 +46,6 @@
 (defun emms-player-mpv-seaside--loading-message ()
   "Loading message."
   (message "Loading Sea Side Communications ... "))
-
-(defun emms-player-mpv-seaside--track-name-to-wma-input-form (track-name)
-  "Return wma from TRACK-NAME."
-  (let ((wma (emms-stream-seaside-wax-to-wma
-              (emms-stream-seaside-stream-url-to-wax track-name))))
-    (later-do 'emms-player-mpv-seaside--loading-message)
-    wma))
 
 (defun emms-player-mpv-seaside--track-name-to-nico-input-form (track-name)
   "Return nicovideo url from TRACK-NAME."
