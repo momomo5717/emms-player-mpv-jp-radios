@@ -29,7 +29,7 @@
 ;;; Code:
 (require 'emms-streams-jp-radios-util)
 
-(defvar emms-stream-nico-use-old-api t)
+(defvar emms-stream-nico-use-old-api nil)
 
 (defvar emms-stream-nico-url-user-agent
   (format "User-Agent: %s\r\n"
