@@ -145,12 +145,12 @@ If UPDATEP is no-nil, cache is updated."
   (url-queue-retrieve
      emms-stream-anitama--url-video
      (lambda (status &rest _)
-       (when (memq :error status)
-         (error "Failed to get anitama stream list : %s" (cdr status)))
-       (setq emms-stream-anitama-stream-list-cache
-             (emms-stream-anitama--html-to-stream-list
-              (emms-stream-anitama--url-to-html nil nil (current-buffer))))
-       (message "Updated anitama stream list cache"))))
+       (if (memq :error status)
+           (message "Failed to get anitama stream list : %s" (cdr status))
+         (setq emms-stream-anitama-stream-list-cache
+               (emms-stream-anitama--html-to-stream-list
+                (emms-stream-anitama--url-to-html nil nil (current-buffer))))
+         (message "Updated anitama stream list cache")))))
 
 ;;;###autoload
 (defun emms-stream-anitama-get-stream-list ()

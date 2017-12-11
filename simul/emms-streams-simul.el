@@ -178,7 +178,7 @@ If UPDATEP is non-nil, cache is updated."
    emms-stream-simul--url-top
    (lambda (status &rest _)
      (if (plist-get status :error)
-         (error "Failed to update simul stream lists : %s" (cdr status))
+         (message "Failed to update simul stream lists : %s" (cdr status))
        (emms-stream-simul--set-streams-name
         (emms-stream-simul--parse-html-buf (current-buffer)))
        (message "Updated simul stream lists cache")))))
