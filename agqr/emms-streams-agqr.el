@@ -34,7 +34,7 @@
 (declare-function emms-stream-insert-at "emms-streams")
 
 (defvar emms-stream-agqr-stream-list
-  '(("超!A&G+" "agqr://rtmp://fms-base2.mitene.ad.jp/agqr/aandg22" 1 streamlist))
+  '(("超!A&G+" "agqr://rtmp://fms-base2.mitene.ad.jp/agqr/aandg2" 1 streamlist))
   "超!A&G+ stream list.")
 
 ;;;###autoload
